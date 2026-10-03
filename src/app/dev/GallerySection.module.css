@@ -1,0 +1,23 @@
+.section {
+  margin-top: 40px;
+  scroll-margin-top: 16px;
+}
+
+.heading {
+  font-family: var(--fD);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  line-height: 1.1;
+}
+
+.description {
+  margin-top: 4px;
+  color: var(--ts);
+}
+
+.body {
+  display: grid;
+  gap: 20px;
+  margin-top: 14px;
+}
