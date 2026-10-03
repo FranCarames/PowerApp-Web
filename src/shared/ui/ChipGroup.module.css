@@ -1,0 +1,25 @@
+/*
+ * Fila de chips con desplazamiento horizontal. Respecto del prototipo, el padding crece
+ * 2 px de cada lado y los márgenes negativos lo compensan: el contenedor tiene overflow
+ * y, sin ese aire, recortaría el anillo de foco de los chips de los bordes.
+ */
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 4px 8px;
+  margin: -2px -4px 8px;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+.center {
+  justify-content: center;
+}

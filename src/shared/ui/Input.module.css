@@ -1,0 +1,38 @@
+/* .input del prototipo. Lo comparten Input, Select y Textarea. */
+.input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 13px 14px;
+  font-size: 15px;
+  color: var(--tp);
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.input:focus {
+  border-color: var(--acc);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.input::placeholder {
+  color: var(--tm);
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Error: el prototipo no lo define; usa el rojo del sistema con el mismo anillo de foco. */
+.invalid {
+  border-color: var(--err);
+}
+
+.invalid:focus {
+  border-color: var(--err);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}

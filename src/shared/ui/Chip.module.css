@@ -1,0 +1,22 @@
+.chip {
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--el);
+  color: var(--ts);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.on {
+  background: var(--priS);
+  color: var(--pri);
+  border-color: var(--pri);
+}
+
+.acc.on {
+  background: var(--accS);
+  color: var(--acc);
+  border-color: var(--acc);
+}
