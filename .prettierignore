@@ -1,0 +1,12 @@
+dist
+package-lock.json
+.claude
+
+# Contrato de la API: el JSON se baja con `npm run api:fetch` y los tipos se generan
+src/api/openapi.json
+src/api/schema.d.ts
+
+# Documentación del proyecto: que `npm run format` no la reescriba
+CLAUDE.md
+PLAN.md
+README.md
