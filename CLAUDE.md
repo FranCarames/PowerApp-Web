@@ -10,14 +10,20 @@ El backend lo desarrolla Fran por separado. **Este repo nunca modifica el backen
 
 ## Fuentes de verdad
 
+La documentación del proyecto vive en el repo **[PowerApp-Docs](https://github.com/FranCarames/PowerApp-Docs)** y **no se copia a este repo**. Leela desde su clon local. Si no lo tenés disponible en la sesión, usá GitHub: los archivos crudos están en `https://raw.githubusercontent.com/FranCarames/PowerApp-Docs/main/<ruta>` (los espacios de las rutas van como `%20`).
+
 | Qué | Dónde | Regla |
 |---|---|---|
-| Contrato de la API | `docs/api/openapi.json` | Es la única fuente de los tipos de la API. Nunca escribas tipos de la API a mano. |
-| Casos de uso | `docs/use-cases/` | Cada pantalla implementa casos de uso concretos (CU-U-xx, CU-E-xx, CU-A-xx). Respetá también los caminos alternativos. |
-| Diseño | `docs/prototype/powerapp-prototype-web.html` | Referencia visual: layout, tokens, componentes y textos. Su lógica y sus datos son de ejemplo; los datos reales salen de la API. |
-| Plan | `PLAN.md` | Orden de las tareas, alcance de cada una y estado. |
+| Casos de uso | PowerApp-Docs: `Use Cases/` (índice en `Use Cases/README.md`) | Cada pantalla implementa casos de uso concretos (CU-U-xx, CU-E-xx, CU-A-xx). Respetá también los caminos alternativos. |
+| Diseño | PowerApp-Docs: `UI Front/powerapp-prototype-web.html` | Referencia visual: layout, tokens, componentes y textos. Su lógica y sus datos son de ejemplo; los datos reales salen de la API. |
+| Modelo de datos | PowerApp-Docs: `Doc/PowerApp - Modelo DB.svg` (y `.pdf`) | Ante un conflicto con las entidades del backend, manda este modelo. |
+| Decisiones de diseño por cambio | PowerApp-Docs: `Doc/specs/` y `Doc/plans/` | Explican el porqué de reglas del contrato (circuitos, rutinas, planificaciones, series realizadas). Consultalos antes de interpretar un caso dudoso. |
+| Contrato de la API | Swagger del backend (`https://powerapp-backend.onrender.com/docs`), bajado a `src/api/openapi.json` con `npm run api:fetch` | Es la única fuente de los tipos de la API. Nunca escribas tipos de la API a mano. |
+| Plan | `PLAN.md`, en este repo | Orden de las tareas, alcance de cada una y estado. |
 
-Si el prototipo contradice a un caso de uso o al contrato, mandan el caso de uso y el contrato. Avisá la diferencia en el resumen de la tarea.
+- **No modifiques PowerApp-Docs desde las tareas del front.** Si encontrás un error o un hueco en la documentación, avisalo en el resumen de la tarea.
+- **`Status/` de PowerApp-Docs es una copia** que se sincroniza a mano desde el backend y puede estar desactualizada. No la uses para decidir qué endpoints funcionan: para eso está el Swagger.
+- Si el prototipo contradice a un caso de uso o al contrato, mandan el caso de uso y el contrato. Avisá la diferencia en el resumen de la tarea.
 
 ## Stack
 
@@ -28,7 +34,7 @@ No agregues dependencias fuera de esta lista sin aprobación de Fran.
 | Lenguaje | TypeScript en modo estricto |
 | Interfaz | React |
 | Build | Vite |
-| Tipos de la API | `openapi-typescript`, generados desde `docs/api/openapi.json` |
+| Tipos de la API | `openapi-typescript`, generados desde `src/api/openapi.json` |
 | Mocks | MSW (Mock Service Worker) |
 | Cliente HTTP | `fetch` nativo con un wrapper propio en `src/api/client.ts` |
 | Datos del servidor | TanStack Query |
@@ -50,8 +56,8 @@ No uses Tailwind, Redux, Zustand, axios ni librerías de componentes de UI.
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint |
 | `npm run format` | Prettier |
-| `npm run api:fetch` | Descarga el JSON del Swagger del backend local a `docs/api/openapi.json`. La URL sale de `API_DOCS_URL` (por defecto `http://localhost:3000/docs-json`; ajustala si tu server usa otro puerto o ruta). |
-| `npm run api:gen` | Genera `src/api/schema.d.ts` desde `docs/api/openapi.json` |
+| `npm run api:fetch` | Descarga el JSON del Swagger del backend local a `src/api/openapi.json`. La URL sale de `API_DOCS_URL` (por defecto `http://localhost:3000/docs-json`; ajustala si tu server usa otro puerto o ruta). |
+| `npm run api:gen` | Genera `src/api/schema.d.ts` desde `src/api/openapi.json` |
 
 Antes de dar una tarea por terminada, `typecheck`, `lint` y `build` tienen que pasar sin errores.
 
@@ -69,7 +75,7 @@ En desarrollo, Vite hace proxy de `/api` a `http://localhost:3000`. Así se evit
 ```
 src/
   app/            router, providers, AppShell (tab bar y sidebar)
-  api/            client.ts, schema.d.ts (generado), pending.ts, queryKeys.ts
+  api/            client.ts, openapi.json (bajado del Swagger), schema.d.ts (generado), pending.ts, queryKeys.ts
   mocks/          browser.ts, registry.ts, handlers/<dominio>.ts, fixtures/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
@@ -82,10 +88,6 @@ src/
     icons/        íconos SVG del prototipo como componentes
     lib/          formato de números, fechas y moneda; helpers
     styles/       tokens.css, global.css
-docs/
-  api/openapi.json
-  use-cases/
-  prototype/powerapp-prototype-web.html
 ```
 
 Cada feature organiza su código en `pages/`, `components/` y `hooks/`. Los hooks envuelven las queries y mutaciones de TanStack Query.
@@ -199,7 +201,7 @@ Las rutas de alta usan `nuevo` como id, por ejemplo `/c/circuitos/nuevo`.
 ## Flujo de trabajo por tarea
 
 1. Fran indica la tarea del plan, por ejemplo "hacé la T26".
-2. Leé en `PLAN.md` el alcance y el criterio de "listo" de la tarea, los casos de uso que referencia y la sección del prototipo que corresponde.
+2. Leé en `PLAN.md` el alcance y el criterio de "listo" de la tarea. Después leé en PowerApp-Docs los casos de uso que referencia y la sección del prototipo que corresponde.
 3. Creá la rama `feature/T26-mis-rms` desde `develop`.
 4. Implementá solo el alcance de la tarea. Si falta algo del contrato, usá tipos pendientes y mocks, y avisalo. No toques el backend.
 5. Corré `typecheck`, `lint` y `build`.

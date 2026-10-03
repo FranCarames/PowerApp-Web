@@ -1,6 +1,6 @@
 # PowerApp Web: plan de implementación
 
-Versión 1 · 3 de octubre de 2026. Las reglas técnicas y de dominio están en `CLAUDE.md`.
+Versión 1.1 · 3 de octubre de 2026. Las reglas técnicas y de dominio están en `CLAUDE.md`. Los casos de uso, el prototipo y el modelo de datos viven en el repo [PowerApp-Docs](https://github.com/FranCarames/PowerApp-Docs), que es la fuente de verdad de la documentación.
 
 ## 1. Objetivo y alcance
 
@@ -55,8 +55,8 @@ Para cada uno se indica qué necesita el front. El contrato lo diseña Fran. Has
 |---|---|---|---|---|
 | B1 | Rutinas del usuario por semana | CU-U-08 | Dado el usuario y una semana (número o fecha): datos del plan vigente (nombre, inicio, fin, semana actual y total), las rutinas de esa semana en orden con su estado (pendiente o hecha) y el id para abrir cada una. Tiene que cubrir el caso sin plan con rutina puntual y el caso sin asignaciones. | T38 |
 | B2 | Detalle de rutina del usuario con estado de ejecución | CU-U-09, CU-U-10 | La estructura de `GET /routine/{id}`, más el estado de cada serie (realizada o no) y la nota del usuario por ejercicio, en el contexto de su asignación. | T39, T40 |
-| B3 | Marcar y desmarcar serie | CU-U-12 | Identificar una serie individual dentro de un bloque: `set_count: 3` son 3 series marcables. Devuelve el estado nuevo. | T40 |
-| B4 | Nota del usuario en un ejercicio | CU-U-13 | Crear, editar y borrar el `user_note` de un ejercicio de su rutina. | T40 |
+| B3 | Marcar y desmarcar serie | CU-U-12 | Identificar una serie individual dentro de un bloque: `set_count: 3` son 3 series marcables. Devuelve el estado nuevo. Hay un spec aprobado en PowerApp-Docs (`Doc/specs/2026-08-10-routine-exercise-set-finished-design.md`), pero marca por `exercise_set_id`, que hoy es un bloque, así que no resuelve las series individuales. | T40 |
+| B4 | Nota del usuario en un ejercicio | CU-U-13 | Crear, editar y borrar el `user_note` de un ejercicio de su rutina. El mismo spec de B3 guarda la nota por serie y solo si está marcada, mientras que CU-U-13 la pide por ejercicio: hay que alinearlos. | T40 |
 | B5 | Rutina puntual | CU-E-19, CU-E-20, CU-U-08 | Asignar una rutina a un alumno, quitarla y listar las de un alumno, tanto para el Entrenador como para el home. Error si ya está asignada. | T42, T38 |
 | B6 | Historial de entrenamientos | CU-E-06, CU-E-07 | Rutinas ejecutadas por un alumno, con fecha. Filtro por ejercicio con peso, reps y fecha. | T43 |
 | B7 | Asignar y editar la planificación de un alumno | CU-E-13, CU-E-14 | Body de `POST /planification/user/assign` y `/user/edit/{id}`: alumno, planificación, fechas y nota. Cómo se informa un solapamiento con un plan vigente y cómo se confirma igual. Qué id recibe `DELETE /planification/user/{id}` y si hace la baja lógica que pide CU-E-14. | T41 |
@@ -158,7 +158,8 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
 - [ ] **T01 · Repo y scaffolding (1,5 h)**
   - Crear el repo `powerapp-web` (nombre a confirmar) con las ramas `main` y `develop`.
   - Vite + React + TypeScript estricto, ESLint y Prettier, la estructura de carpetas y los scripts de `CLAUDE.md`.
-  - Copiar a `docs/` el `openapi.json`, la carpeta de casos de uso y el prototipo web. Agregar `CLAUDE.md` y este `PLAN.md` en la raíz.
+  - Guardar el JSON del Swagger en `src/api/openapi.json`. La documentación no se copia: se lee de PowerApp-Docs.
+  - Agregar `CLAUDE.md` y este `PLAN.md` en la raíz.
   - Listo cuando: `npm run dev` levanta una página vacía, y `typecheck`, `lint` y `build` pasan.
 - [ ] **T02 · Estilos globales (1 h)**
   - `tokens.css` copiado exacto del prototipo.
