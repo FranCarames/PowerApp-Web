@@ -1,0 +1,152 @@
+/* Página de prueba de T02. Los valores salen del prototipo (.title, .eyebrow, .sec h4, .card). */
+
+.page {
+  width: 100%;
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 20px 20px 64px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tm);
+}
+
+.title {
+  margin-top: 2px;
+  font-family: var(--fD);
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  line-height: 1.02;
+}
+
+.intro {
+  margin-top: 8px;
+  color: var(--ts);
+}
+
+.section {
+  margin-top: 24px;
+}
+
+.heading {
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--acc);
+}
+
+.stack {
+  display: grid;
+  gap: 10px;
+}
+
+.card {
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.cardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-bottom: 6px;
+}
+
+.token {
+  font-family: var(--fM);
+  font-size: 12px;
+  color: var(--acc);
+}
+
+.use {
+  font-size: 12px;
+  color: var(--tm);
+}
+
+.sampleRow {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+}
+
+.sampleLabel {
+  flex-shrink: 0;
+  width: 36px;
+  font-family: var(--fM);
+  font-size: 11px;
+  color: var(--tm);
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.chip {
+  height: 48px;
+  margin-bottom: 4px;
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+}
+
+.name {
+  font-family: var(--fM);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.value {
+  font-family: var(--fM);
+  font-size: 11px;
+  color: var(--ts);
+  overflow-wrap: anywhere;
+}
+
+.focusRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.demoButton {
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ts);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.demoLink {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--acc);
+}
+
+@media (min-width: 960px) {
+  .title {
+    font-size: 46px;
+  }
+}

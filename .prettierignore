@@ -6,6 +6,9 @@ package-lock.json
 src/api/openapi.json
 src/api/schema.d.ts
 
+# Tokens de diseño: copia literal del prototipo, para poder compararla con el original
+src/shared/styles/tokens.css
+
 # Documentación del proyecto: que `npm run format` no la reescriba
 CLAUDE.md
 PLAN.md
