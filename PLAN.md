@@ -166,7 +166,7 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - `global.css` con reset, foco visible, reduced motion y safe areas.
   - Google Fonts con preconnect, `viewport-fit=cover` y `theme-color`.
   - Listo cuando: una página de prueba muestra las tipografías y los colores igual que el prototipo.
-- [ ] **T03 · Componentes base (3 h)**
+- [x] **T03 · Componentes base (3 h)**
   - Componentes:
     - Button (variantes pri, sec, ghost, danger y sm).
     - Field con Input, PasswordInput (mostrar y ocultar), Select y Textarea, todos con estado de error.
