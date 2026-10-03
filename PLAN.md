@@ -161,7 +161,7 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - Guardar el JSON del Swagger en `src/api/openapi.json`. La documentación no se copia: se lee de PowerApp-Docs.
   - Agregar `CLAUDE.md` y este `PLAN.md` en la raíz.
   - Listo cuando: `npm run dev` levanta una página vacía, y `typecheck`, `lint` y `build` pasan.
-- [ ] **T02 · Estilos globales (1 h)**
+- [x] **T02 · Estilos globales (1 h)**
   - `tokens.css` copiado exacto del prototipo.
   - `global.css` con reset, foco visible, reduced motion y safe areas.
   - Google Fonts con preconnect, `viewport-fit=cover` y `theme-color`.
