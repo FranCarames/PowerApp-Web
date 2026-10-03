@@ -1,0 +1,24 @@
+.seg {
+  display: flex;
+  background: var(--el);
+  border-radius: 12px;
+  padding: 3px;
+  gap: 2px;
+  margin-bottom: 16px;
+}
+
+.seg button {
+  flex: 1;
+  padding: 9px 6px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ts);
+  text-align: center;
+}
+
+.seg button.on {
+  background: var(--card);
+  color: var(--tp);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}

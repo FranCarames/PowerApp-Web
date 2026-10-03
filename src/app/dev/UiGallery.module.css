@@ -1,0 +1,62 @@
+/* El espacio de abajo evita que el botón flotante tape el final de la página. */
+.page {
+  width: 100%;
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 20px 20px 160px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tm);
+}
+
+.title {
+  margin-top: 2px;
+  font-family: var(--fD);
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  line-height: 1.02;
+}
+
+.intro {
+  margin-top: 8px;
+  color: var(--ts);
+}
+
+.intro code {
+  font-family: var(--fM);
+  font-size: 13px;
+  color: var(--acc);
+}
+
+.index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.indexLink {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ts);
+  text-decoration: none;
+  background: var(--el);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.indexLink:hover {
+  color: var(--tp);
+  border-color: var(--border2);
+}
+
+@media (min-width: 960px) {
+  .title {
+    font-size: 46px;
+  }
+}
