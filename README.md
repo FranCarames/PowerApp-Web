@@ -4,7 +4,7 @@ Front web de **PowerApp**, una app de gestión de gimnasio con tres roles: **Usu
 
 Es mobile-first: se usa sobre todo desde el celular en el gimnasio, y en escritorio se adapta.
 
-> **Estado:** en arranque. Todavía no hay código de aplicación; el scaffolding es la tarea T01 de [`PLAN.md`](PLAN.md). Entrega final: **20/11/2026**.
+> **Estado:** en desarrollo. El scaffolding (T01) está hecho; el resto de las tareas y su estado están en [`PLAN.md`](PLAN.md). Entrega final: **20/11/2026**.
 
 ## Qué hace cada rol
 
@@ -23,7 +23,7 @@ Los tres roles comparten Mi cuenta (datos personales, cambio de contraseña y ce
 | Lenguaje | TypeScript en modo estricto |
 | Interfaz | React |
 | Build | Vite |
-| Tipos de la API | `openapi-typescript`, generados desde `docs/api/openapi.json` |
+| Tipos de la API | `openapi-typescript`, generados desde `src/api/openapi.json` |
 | Mocks | MSW (Mock Service Worker) |
 | Cliente HTTP | `fetch` nativo con un wrapper propio (`src/api/client.ts`) |
 | Datos del servidor | TanStack Query |
@@ -36,8 +36,6 @@ Los tres roles comparten Mi cuenta (datos personales, cambio de contraseña y ce
 No se usan Tailwind, Redux, Zustand, axios ni librerías de componentes de UI. Cualquier dependencia fuera de esta lista se aprueba antes de agregarla.
 
 ## Primeros pasos
-
-> Esta sección aplica una vez que esté hecha la T01 (Repo y scaffolding).
 
 1. Instalá las dependencias:
 
@@ -65,8 +63,8 @@ No se usan Tailwind, Redux, Zustand, axios ni librerías de componentes de UI. C
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint |
 | `npm run format` | Prettier |
-| `npm run api:fetch` | Descarga el JSON del Swagger del backend local a `docs/api/openapi.json`. La URL sale de `API_DOCS_URL` (por defecto `http://localhost:3000/docs-json`). |
-| `npm run api:gen` | Genera `src/api/schema.d.ts` desde `docs/api/openapi.json` |
+| `npm run api:fetch` | Descarga el JSON del Swagger del backend local a `src/api/openapi.json`. La URL sale de `API_DOCS_URL` (por defecto `http://localhost:3000/docs-json`) o del primer argumento: `npm run api:fetch -- <url>`. |
+| `npm run api:gen` | Genera `src/api/schema.d.ts` desde `src/api/openapi.json` |
 
 Antes de dar una tarea por terminada, `typecheck`, `lint` y `build` tienen que pasar sin errores.
 
@@ -92,7 +90,7 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están det
 ```
 src/
   app/            router, providers, AppShell (tab bar y sidebar)
-  api/            client.ts, schema.d.ts (generado), pending.ts, queryKeys.ts
+  api/            client.ts, openapi.json (bajado del Swagger), schema.d.ts (generado), pending.ts, queryKeys.ts
   mocks/          browser.ts, registry.ts, handlers/<dominio>.ts, fixtures/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
@@ -105,10 +103,7 @@ src/
     icons/        íconos SVG del prototipo como componentes
     lib/          formato de números, fechas y moneda; helpers
     styles/       tokens.css, global.css
-docs/
-  api/openapi.json
-  use-cases/
-  prototype/powerapp-prototype-web.html
+scripts/          fetch-openapi.mjs (lo que corre npm run api:fetch)
 ```
 
 Cada feature organiza su código en `pages/`, `components/` y `hooks/`.
@@ -119,9 +114,11 @@ Cada feature organiza su código en `pages/`, `components/` y `hooks/`.
 |---|---|
 | Lineamientos técnicos y reglas de dominio | [`CLAUDE.md`](CLAUDE.md) |
 | Plan de implementación, tareas y estado | [`PLAN.md`](PLAN.md) |
-| Contrato de la API (única fuente de los tipos) | `docs/api/openapi.json` |
-| Casos de uso (CU-U-xx, CU-E-xx, CU-A-xx) | `docs/use-cases/` |
-| Prototipo visual (layout, tokens, componentes y textos) | `docs/prototype/powerapp-prototype-web.html` |
+| Contrato de la API (única fuente de los tipos) | `src/api/openapi.json`, bajado del Swagger del backend |
+| Casos de uso (CU-U-xx, CU-E-xx, CU-A-xx) | [PowerApp-Docs](https://github.com/FranCarames/PowerApp-Docs): `Use Cases/` |
+| Prototipo visual (layout, tokens, componentes y textos) | [PowerApp-Docs](https://github.com/FranCarames/PowerApp-Docs): `UI Front/powerapp-prototype-web.html` |
+
+La documentación no se copia a este repo: se lee de PowerApp-Docs.
 
 Si el prototipo contradice a un caso de uso o al contrato, mandan el caso de uso y el contrato.
 

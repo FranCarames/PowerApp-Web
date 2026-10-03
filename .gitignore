@@ -1,0 +1,19 @@
+# Dependencias y build
+node_modules
+dist
+dist-ssr
+*.local
+
+# Variables de entorno (el .env.example sí se versiona)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Editores y sistema operativo
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store

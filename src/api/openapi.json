@@ -1,0 +1,5477 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/users/all": {
+      "get": {
+        "operationId": "UsersController_getAllUsers",
+        "parameters": [
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por rol: user, coach o admin",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "user",
+                "coach",
+                "admin"
+              ]
+            }
+          },
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "description": "Busca coincidencias parciales (sin distinguir mayúsculas) en nombre, apellido y email",
+            "schema": {
+              "example": "juan",
+              "type": "string"
+            }
+          },
+          {
+            "name": "active",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por estado de la cuenta (activa / dada de baja)",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Número de página (arranca en 1)",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Cantidad de resultados por página",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedUsersResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users/get/{id}": {
+      "get": {
+        "operationId": "UsersController_getUserId",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users/register": {
+      "post": {
+        "operationId": "UsersController_createUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "headers": {
+              "Authorization": {
+                "description": "Bearer JWT token",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users/login": {
+      "post": {
+        "operationId": "UsersController_loginUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "headers": {
+              "Authorization": {
+                "description": "Bearer JWT token",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users/logout": {
+      "post": {
+        "operationId": "UsersController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users/recover-password": {
+      "post": {
+        "operationId": "UsersController_recoverPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoverPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users/set-active/{id}": {
+      "post": {
+        "operationId": "UsersController_setUserActive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetUserActiveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users/change-password": {
+      "post": {
+        "operationId": "UsersController_changePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contraseña actualizada"
+          },
+          "401": {
+            "description": "La contraseña actual es incorrecta"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/users/edit": {
+      "post": {
+        "operationId": "UsersController_editUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El email ya está en uso por otro usuario"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/membership/all": {
+      "get": {
+        "operationId": "MembershipController_getAllMemberships",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Membership"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Membership"
+        ]
+      }
+    },
+    "/api/v1/membership/get/{id}": {
+      "get": {
+        "operationId": "MembershipController_getMembershipById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Membership"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Membership"
+        ]
+      }
+    },
+    "/api/v1/membership/create": {
+      "post": {
+        "operationId": "MembershipController_createMembership",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMembershipDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Membership"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Membership"
+        ]
+      }
+    },
+    "/api/v1/membership/edit/{id}": {
+      "post": {
+        "operationId": "MembershipController_editMembership",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditMembershipDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Membership"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Membership"
+        ]
+      }
+    },
+    "/api/v1/membership/set-active/{id}": {
+      "post": {
+        "operationId": "MembershipController_setMembershipActive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetMembershipActiveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Membership"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Membership"
+        ]
+      }
+    },
+    "/api/v1/membership/status/summary": {
+      "get": {
+        "operationId": "MembershipController_getMembershipStatusSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipStatusSummaryDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Membership"
+        ]
+      }
+    },
+    "/api/v1/membership/status/users": {
+      "get": {
+        "operationId": "MembershipController_getStudentsByMembershipStatus",
+        "parameters": [
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "description": "Estado de membresía por el que se filtra",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "expiring_soon",
+                "expired",
+                "no_payments"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alumnos cuyo estado de membresía coincide con el filtro"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Membership"
+        ]
+      }
+    },
+    "/api/v1/membership/type/users": {
+      "get": {
+        "operationId": "MembershipController_getStudentsByMembershipType",
+        "parameters": [
+          {
+            "name": "membership_id",
+            "required": false,
+            "in": "query",
+            "description": "Tipo de membresía por el que se filtra. Si se omite, devuelve todos los tipos agrupados.",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alumnos por tipo de membresía; sin membership_id devuelve todos los tipos agrupados"
+          },
+          "404": {
+            "description": "Membresía no encontrada"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Membership"
+        ]
+      }
+    },
+    "/api/v1/membership/payment/user/{id}": {
+      "get": {
+        "operationId": "MembershipController_getUserMembershipPayments",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MembershipPayment"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Membership"
+        ]
+      }
+    },
+    "/api/v1/membership/payment/register": {
+      "post": {
+        "operationId": "MembershipController_registerMembershipPayment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterMembershipPaymentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipPayment"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Membership"
+        ]
+      }
+    },
+    "/api/v1/coach/all": {
+      "get": {
+        "operationId": "CoachController_getAllCoaches",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Coach"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Coach"
+        ]
+      }
+    },
+    "/api/v1/coach/get/{id}": {
+      "get": {
+        "operationId": "CoachController_getUserId",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coach"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Coach"
+        ]
+      }
+    },
+    "/api/v1/coach/promote_user": {
+      "post": {
+        "operationId": "CoachController_promoteUserToCoach",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteCoachDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Coach"
+        ]
+      }
+    },
+    "/api/v1/coach/delete_coach/{id}": {
+      "post": {
+        "operationId": "CoachController_deleteCoach",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    {
+                      "properties": {
+                        "coach": {
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/Coach"
+                            },
+                            {
+                              "properties": {
+                                "active": {
+                                  "type": "boolean",
+                                  "example": false
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Coach"
+        ]
+      }
+    },
+    "/api/v1/muscles/all": {
+      "get": {
+        "operationId": "MusclesController_getAllMuscles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Muscle"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Muscles"
+        ]
+      }
+    },
+    "/api/v1/muscles/get/{id}": {
+      "get": {
+        "operationId": "MusclesController_getMuscleById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Muscle"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Muscles"
+        ]
+      }
+    },
+    "/api/v1/muscles/create": {
+      "post": {
+        "operationId": "MusclesController_createMuscle",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMuscleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Muscle"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Muscles"
+        ]
+      }
+    },
+    "/api/v1/muscles/edit/{id}": {
+      "post": {
+        "operationId": "MusclesController_editMuscle",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditMuscleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Muscle"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Muscles"
+        ]
+      }
+    },
+    "/api/v1/muscles/{id}": {
+      "delete": {
+        "operationId": "MusclesController_deleteMuscle",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Muscles"
+        ]
+      }
+    },
+    "/api/v1/muscles/mg/all": {
+      "get": {
+        "operationId": "MusclesController_getAllMuscleGroups",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MuscleGroup"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Muscles"
+        ]
+      }
+    },
+    "/api/v1/muscles/mg/get/{id}": {
+      "get": {
+        "operationId": "MusclesController_getMuscleGroupId",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MuscleGroup"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Muscles"
+        ]
+      }
+    },
+    "/api/v1/muscles/mg/create": {
+      "post": {
+        "operationId": "MusclesController_createMuscleGroup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMuscleGroupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MuscleGroup"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Muscles"
+        ]
+      }
+    },
+    "/api/v1/muscles/mg/edit/{id}": {
+      "post": {
+        "operationId": "MusclesController_editMuscleGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditMuscleGroupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MuscleGroup"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Muscles"
+        ]
+      }
+    },
+    "/api/v1/muscles/mg/{id}": {
+      "delete": {
+        "operationId": "MusclesController_deleteMuscleGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Muscles"
+        ]
+      }
+    },
+    "/api/v1/exercise/all": {
+      "get": {
+        "operationId": "ExerciseController_getAllExercises",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Exercise"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Exercise"
+        ]
+      }
+    },
+    "/api/v1/exercise/create": {
+      "post": {
+        "operationId": "ExerciseController_createExercise",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExerciseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Exercise"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Exercise"
+        ]
+      }
+    },
+    "/api/v1/exercise/edit/{id}": {
+      "post": {
+        "operationId": "ExerciseController_editExercise",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditExerciseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Exercise"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Exercise"
+        ]
+      }
+    },
+    "/api/v1/exercise/{id}": {
+      "delete": {
+        "operationId": "ExerciseController_deleteExercise",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Exercise"
+        ]
+      },
+      "get": {
+        "operationId": "ExerciseController_getExerciseById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Exercise"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ejercicio no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Exercise"
+        ]
+      }
+    },
+    "/api/v1/exercise/ExMuscles/all": {
+      "get": {
+        "operationId": "ExerciseController_getAllExercisedMuscles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExercisedMuscle"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Exercise"
+        ]
+      }
+    },
+    "/api/v1/planification/all": {
+      "get": {
+        "operationId": "PlanificationController_getAllPlanifications",
+        "parameters": [
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "description": "Busca coincidencias parciales (sin distinguir mayúsculas) en nombre y descripción",
+            "schema": {
+              "example": "fuerza",
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por tipo de planificación (coincidencia exacta, sin distinguir mayúsculas)",
+            "schema": {
+              "example": "fuerza",
+              "type": "string"
+            }
+          },
+          {
+            "name": "include_inactive",
+            "required": false,
+            "in": "query",
+            "description": "true para incluir también las planificaciones dadas de baja",
+            "schema": {
+              "default": false,
+              "example": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlanificationListItemResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/all-plus": {
+      "get": {
+        "operationId": "PlanificationController_getAllPlanificationsPlus",
+        "parameters": [
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "description": "Busca coincidencias parciales (sin distinguir mayúsculas) en nombre y descripción",
+            "schema": {
+              "example": "fuerza",
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por tipo de planificación (coincidencia exacta, sin distinguir mayúsculas)",
+            "schema": {
+              "example": "fuerza",
+              "type": "string"
+            }
+          },
+          {
+            "name": "include_inactive",
+            "required": false,
+            "in": "query",
+            "description": "true para incluir también las planificaciones dadas de baja",
+            "schema": {
+              "default": false,
+              "example": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlanificationDetailResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/{id}": {
+      "get": {
+        "operationId": "PlanificationController_getPlanificationById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanificationDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/create": {
+      "post": {
+        "operationId": "PlanificationController_createPlanification",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlanificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanificationDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/edit/{id}": {
+      "post": {
+        "operationId": "PlanificationController_editPlanification",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditPlanificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanificationDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/set-active/{id}": {
+      "post": {
+        "operationId": "PlanificationController_setPlanificationActive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPlanificationActiveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Planification"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/routine/assign": {
+      "post": {
+        "operationId": "PlanificationController_assignRoutineToPlanification",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRoutineToPlanificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanificationDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/routine/assign-bulk": {
+      "post": {
+        "operationId": "PlanificationController_assignRoutinesToPlanification",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRoutinesToPlanificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanificationDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/routine/set-active/{id}": {
+      "post": {
+        "operationId": "PlanificationController_setRoutineAsignationActive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetRoutineAsignationActiveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutineAsignation"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/routine/set-active-bulk": {
+      "post": {
+        "operationId": "PlanificationController_setRoutineAsignationsActive",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetRoutineAsignationsActiveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoutineAsignation"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/user/assign": {
+      "post": {
+        "operationId": "PlanificationController_assignPlanificationToUser",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPlanification"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/user/{id}": {
+      "get": {
+        "operationId": "PlanificationController_getUserPlanifications",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserPlanification"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      },
+      "delete": {
+        "operationId": "PlanificationController_deleteUserPlanification",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/user/{id}/active": {
+      "get": {
+        "operationId": "PlanificationController_getActiveUserPlanification",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPlanification"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/user/edit/{id}": {
+      "post": {
+        "operationId": "PlanificationController_editUserPlanification",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPlanification"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/routine/all": {
+      "get": {
+        "operationId": "RoutineController_getAllRoutines",
+        "parameters": [
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "description": "Busca coincidencias parciales (sin distinguir mayúsculas) en nombre y nota del entrenador",
+            "schema": {
+              "example": "pecho",
+              "type": "string"
+            }
+          },
+          {
+            "name": "include_inactive",
+            "required": false,
+            "in": "query",
+            "description": "true para incluir también las rutinas dadas de baja",
+            "schema": {
+              "default": false,
+              "example": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoutineListItemResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Routine"
+        ]
+      }
+    },
+    "/api/v1/routine/all-plus": {
+      "get": {
+        "operationId": "RoutineController_getAllRoutinesPlus",
+        "parameters": [
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "description": "Busca coincidencias parciales (sin distinguir mayúsculas) en nombre y nota del entrenador",
+            "schema": {
+              "example": "pecho",
+              "type": "string"
+            }
+          },
+          {
+            "name": "include_inactive",
+            "required": false,
+            "in": "query",
+            "description": "true para incluir también las rutinas dadas de baja",
+            "schema": {
+              "default": false,
+              "example": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoutineListItemPlusResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Routine"
+        ]
+      }
+    },
+    "/api/v1/routine/{id}": {
+      "get": {
+        "operationId": "RoutineController_getRoutineById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutineDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Routine"
+        ]
+      }
+    },
+    "/api/v1/routine/create": {
+      "post": {
+        "operationId": "RoutineController_createRoutine",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoutineDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutineDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Routine"
+        ]
+      }
+    },
+    "/api/v1/routine/edit/{id}": {
+      "post": {
+        "operationId": "RoutineController_editRoutine",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditRoutineDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutineDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Routine"
+        ]
+      }
+    },
+    "/api/v1/routine/set-active/{id}": {
+      "post": {
+        "operationId": "RoutineController_setRoutineActive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetRoutineActiveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Routine"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Routine"
+        ]
+      }
+    },
+    "/api/v1/routine/circuit/create": {
+      "post": {
+        "operationId": "RoutineController_createCircuit",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCircuitDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CircuitDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Routine"
+        ]
+      }
+    },
+    "/api/v1/routine/circuit/edit/{id}": {
+      "post": {
+        "operationId": "RoutineController_editCircuit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditCircuitDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CircuitDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Routine"
+        ]
+      }
+    },
+    "/api/v1/routine/circuit/all": {
+      "get": {
+        "operationId": "RoutineController_getAllCircuits",
+        "parameters": [
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "description": "Busca coincidencias parciales (sin distinguir mayúsculas) en nombre y descripción",
+            "schema": {
+              "example": "calor",
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por tipo de circuito (coincidencia exacta, sin distinguir mayúsculas)",
+            "schema": {
+              "example": "cardio",
+              "type": "string"
+            }
+          },
+          {
+            "name": "include_inactive",
+            "required": false,
+            "in": "query",
+            "description": "true para incluir también los circuitos dados de baja",
+            "schema": {
+              "default": false,
+              "example": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CircuitListItemResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Routine"
+        ]
+      }
+    },
+    "/api/v1/routine/circuit/all-plus": {
+      "get": {
+        "operationId": "RoutineController_getAllCircuitsPlus",
+        "parameters": [
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "description": "Busca coincidencias parciales (sin distinguir mayúsculas) en nombre y descripción",
+            "schema": {
+              "example": "calor",
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por tipo de circuito (coincidencia exacta, sin distinguir mayúsculas)",
+            "schema": {
+              "example": "cardio",
+              "type": "string"
+            }
+          },
+          {
+            "name": "include_inactive",
+            "required": false,
+            "in": "query",
+            "description": "true para incluir también los circuitos dados de baja",
+            "schema": {
+              "default": false,
+              "example": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CircuitListItemPlusResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Routine"
+        ]
+      }
+    },
+    "/api/v1/routine/circuit/{id}": {
+      "get": {
+        "operationId": "RoutineController_getCircuitById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CircuitDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Routine"
+        ]
+      }
+    },
+    "/api/v1/routine/circuit/set-active/{id}": {
+      "post": {
+        "operationId": "RoutineController_setCircuitActive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCircuitActiveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Circuit"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Routine"
+        ]
+      }
+    },
+    "/api/v1/user_rm/all": {
+      "get": {
+        "operationId": "UserRmController_getAllUserRms",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserRM"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "User RM"
+        ]
+      }
+    },
+    "/api/v1/user_rm/{id}": {
+      "get": {
+        "operationId": "UserRmController_getUserRmById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRM"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "User RM"
+        ]
+      },
+      "delete": {
+        "operationId": "UserRmController_deleteUserRm",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "User RM"
+        ]
+      }
+    },
+    "/api/v1/user_rm/user/{id}": {
+      "get": {
+        "operationId": "UserRmController_getAllUserRmsByUserId",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserRM"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "User RM"
+        ]
+      }
+    },
+    "/api/v1/user_rm/user/{idUser}/exercise/{idExercise}": {
+      "get": {
+        "operationId": "UserRmController_getUserRmsByUserAndExercise",
+        "parameters": [
+          {
+            "name": "idUser",
+            "required": true,
+            "in": "path",
+            "description": "Id del usuario dueño de los RMs",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          },
+          {
+            "name": "idExercise",
+            "required": true,
+            "in": "path",
+            "description": "Id del ejercicio por el que se filtra",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserRM"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Un alumno sólo puede consultar sus propios RMs"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "User RM"
+        ]
+      }
+    },
+    "/api/v1/user_rm/exercise/{id}": {
+      "get": {
+        "operationId": "UserRmController_getAllUserRmsByExerciseId",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserRM"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "User RM"
+        ]
+      }
+    },
+    "/api/v1/user_rm/potential": {
+      "post": {
+        "operationId": "UserRmController_calculatePotentialRms",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculatePotentialRmDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PotentialRmResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ejercicio no encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "User RM"
+        ]
+      }
+    },
+    "/api/v1/user_rm/create": {
+      "post": {
+        "operationId": "UserRmController_createUserRm",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRmDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRM"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "User RM"
+        ]
+      }
+    },
+    "/api/v1/user_rm/edit/{id}": {
+      "post": {
+        "operationId": "UserRmController_editUserRm",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "uuid-1234",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditUserRmDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRM"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "User RM"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "PowerApp API",
+    "description": "API de PowerApp",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "Coach": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "coach_email": {
+            "type": "string",
+            "example": "coach@example.com",
+            "maxLength": 50
+          },
+          "cuil": {
+            "type": "string",
+            "example": "20-12345678-9",
+            "maxLength": 20
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "coach_email",
+          "cuil",
+          "active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "Juan",
+            "maxLength": 50
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Pérez",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "example": "juan@example.com",
+            "maxLength": 50
+          },
+          "email_verified": {
+            "type": "boolean",
+            "example": false
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "coach",
+              "admin"
+            ],
+            "default": "user"
+          },
+          "profile_picture": {
+            "type": "string",
+            "example": "https://...",
+            "maxLength": 150
+          },
+          "phone_prefix": {
+            "type": "string",
+            "example": "+54",
+            "maxLength": 10
+          },
+          "phone_number": {
+            "type": "string",
+            "example": "1123456789",
+            "maxLength": 20
+          },
+          "phone_verified": {
+            "type": "boolean",
+            "example": false
+          },
+          "active": {
+            "type": "boolean",
+            "example": true,
+            "description": "Cuenta activa (no relacionado con si la membresía está vigente)"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "coach": {
+            "$ref": "#/components/schemas/Coach"
+          }
+        },
+        "required": [
+          "id",
+          "first_name",
+          "last_name",
+          "email",
+          "email_verified",
+          "role",
+          "phone_verified",
+          "active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "PaginatedUsersResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 42,
+            "description": "Total de usuarios que matchean el filtro (sin paginar)"
+          },
+          "page": {
+            "type": "number",
+            "example": 1,
+            "description": "Página actual"
+          },
+          "limit": {
+            "type": "number",
+            "example": 20,
+            "description": "Resultados por página"
+          },
+          "totalPages": {
+            "type": "number",
+            "example": 3,
+            "description": "Cantidad total de páginas"
+          }
+        },
+        "required": [
+          "data",
+          "total",
+          "page",
+          "limit",
+          "totalPages"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "example": "Juan",
+            "maxLength": 50
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Pérez",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "example": "juan@example.com",
+            "maxLength": 50
+          },
+          "password": {
+            "type": "string",
+            "example": "secret123",
+            "minLength": 6,
+            "maxLength": 50
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "coach",
+              "admin"
+            ],
+            "default": "user"
+          },
+          "phone_prefix": {
+            "type": "string",
+            "example": "+54",
+            "maxLength": 10
+          },
+          "phone_number": {
+            "type": "string",
+            "example": "1123456789",
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "first_name",
+          "last_name",
+          "email",
+          "password",
+          "phone_prefix",
+          "phone_number"
+        ]
+      },
+      "LoginUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "juan@example.com",
+            "maxLength": 50
+          },
+          "password": {
+            "type": "string",
+            "example": "secret123",
+            "minLength": 6,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "RecoverPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "juan@example.com",
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "SetUserActiveDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "example": false,
+            "description": "true para reactivar la cuenta, false para cerrarla (baja lógica)"
+          }
+        },
+        "required": [
+          "active"
+        ]
+      },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "current_password": {
+            "type": "string",
+            "example": "secret123",
+            "maxLength": 50,
+            "description": "Contraseña actual, o la temporal si la sesión vino de una recuperación"
+          },
+          "new_password": {
+            "type": "string",
+            "example": "nuevaSecret456",
+            "minLength": 6,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "current_password",
+          "new_password"
+        ]
+      },
+      "EditUserDto": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "example": "Juan",
+            "maxLength": 50
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Pérez",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "example": "juan@example.com",
+            "maxLength": 50
+          },
+          "phone_prefix": {
+            "type": "string",
+            "example": "+54",
+            "maxLength": 10
+          },
+          "phone_number": {
+            "type": "string",
+            "example": "1123456789",
+            "maxLength": 20
+          },
+          "profile_picture": {
+            "type": "string",
+            "example": "https://cdn.powerapp.com/avatars/juan.png",
+            "maxLength": 150
+          }
+        }
+      },
+      "Membership": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Plan Mensual",
+            "maxLength": 50
+          },
+          "duration": {
+            "type": "number",
+            "example": 30
+          },
+          "price": {
+            "type": "number",
+            "example": 9999.99
+          },
+          "active": {
+            "type": "boolean",
+            "example": true,
+            "description": "Baja lógica: true = disponible, false = dada de baja"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "duration",
+          "price",
+          "active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateMembershipDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Plan Mensual",
+            "maxLength": 50
+          },
+          "duration": {
+            "type": "number",
+            "example": 30,
+            "description": "Duración en días"
+          },
+          "price": {
+            "type": "number",
+            "example": 9999.99
+          }
+        },
+        "required": [
+          "name",
+          "duration",
+          "price"
+        ]
+      },
+      "EditMembershipDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Plan Mensual",
+            "maxLength": 50
+          },
+          "duration": {
+            "type": "number",
+            "example": 30,
+            "description": "Duración en días"
+          },
+          "price": {
+            "type": "number",
+            "example": 9999.99
+          }
+        },
+        "required": [
+          "name",
+          "duration",
+          "price"
+        ]
+      },
+      "SetMembershipActiveDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "example": false,
+            "description": "true para reactivar la membresía, false para darla de baja (baja lógica)"
+          }
+        },
+        "required": [
+          "active"
+        ]
+      },
+      "MembershipStatusCountsDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "number",
+            "example": 12
+          },
+          "expiring_soon": {
+            "type": "number",
+            "example": 3
+          },
+          "expired": {
+            "type": "number",
+            "example": 5
+          },
+          "no_payments": {
+            "type": "number",
+            "example": 2,
+            "description": "Alumnos sin ningún pago registrado"
+          }
+        },
+        "required": [
+          "active",
+          "expiring_soon",
+          "expired",
+          "no_payments"
+        ]
+      },
+      "MembershipStatusSummaryDto": {
+        "type": "object",
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/MembershipStatusCountsDto"
+          },
+          "total_students": {
+            "type": "number",
+            "example": 22
+          },
+          "expiring_soon_days": {
+            "type": "number",
+            "example": 7,
+            "description": "Ventana de aviso configurada (MEMBERSHIP_EXPIRING_SOON_DAYS)"
+          }
+        },
+        "required": [
+          "counts",
+          "total_students",
+          "expiring_soon_days"
+        ]
+      },
+      "MembershipPayment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "user_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "membership_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Plan Mensual",
+            "maxLength": 50
+          },
+          "duration": {
+            "type": "number",
+            "example": 30
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "price": {
+            "type": "number",
+            "example": 9999.99
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expired_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "membership_id",
+          "name",
+          "duration",
+          "active",
+          "price",
+          "created_at",
+          "updated_at",
+          "expired_at"
+        ]
+      },
+      "RegisterMembershipPaymentDto": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "ID del usuario"
+          },
+          "membership_id": {
+            "type": "string",
+            "example": "uuid-5678",
+            "description": "ID de la membresía"
+          }
+        },
+        "required": [
+          "user_id",
+          "membership_id"
+        ]
+      },
+      "PromoteCoachDto": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "ID del usuario a promover"
+          },
+          "coach_email": {
+            "type": "string",
+            "example": "coach@example.com",
+            "maxLength": 50
+          },
+          "cuil": {
+            "type": "string",
+            "example": "20123456789",
+            "description": "CUIL sin guiones, 11 caracteres"
+          }
+        },
+        "required": [
+          "user_id",
+          "coach_email",
+          "cuil"
+        ]
+      },
+      "Muscle": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "muscle_group_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Pectoral mayor",
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "example": "Músculo principal del pecho"
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://...",
+            "maxLength": 150
+          },
+          "preview_image": {
+            "type": "string",
+            "example": "https://...",
+            "maxLength": 150
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "muscle_group_id",
+          "name",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateMuscleDto": {
+        "type": "object",
+        "properties": {
+          "muscle_group_id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "ID del grupo muscular"
+          },
+          "name": {
+            "type": "string",
+            "example": "Pectoral mayor",
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "example": "Músculo principal del pecho"
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://..."
+          },
+          "preview_image": {
+            "type": "string",
+            "example": "https://..."
+          }
+        },
+        "required": [
+          "muscle_group_id",
+          "name"
+        ]
+      },
+      "EditMuscleDto": {
+        "type": "object",
+        "properties": {
+          "muscle_group_id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "ID del grupo muscular"
+          },
+          "name": {
+            "type": "string",
+            "example": "Pectoral mayor",
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "example": "Músculo principal del pecho"
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://..."
+          },
+          "preview_image": {
+            "type": "string",
+            "example": "https://..."
+          }
+        },
+        "required": [
+          "muscle_group_id",
+          "name"
+        ]
+      },
+      "MuscleGroup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Pecho",
+            "maxLength": 50
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://...",
+            "maxLength": 150
+          },
+          "preview_image": {
+            "type": "string",
+            "example": "https://...",
+            "maxLength": 150
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateMuscleGroupDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Pecho",
+            "maxLength": 50
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://..."
+          },
+          "preview_image": {
+            "type": "string",
+            "example": "https://..."
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "EditMuscleGroupDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Pecho",
+            "maxLength": 50
+          },
+          "image_url": {
+            "type": "string",
+            "example": "https://..."
+          },
+          "preview_image": {
+            "type": "string",
+            "example": "https://..."
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "Exercise": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Press de banca",
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "example": "Ejercicio para el pecho...",
+            "maxLength": 2000
+          },
+          "safety_tips": {
+            "type": "string",
+            "example": "Mantener los codos a 45°",
+            "maxLength": 500
+          },
+          "activation_tips": {
+            "type": "string",
+            "example": "Apretar el pecho al subir",
+            "maxLength": 500
+          },
+          "video_url": {
+            "type": "string",
+            "example": "https://...",
+            "maxLength": 150
+          },
+          "preview_image": {
+            "type": "string",
+            "example": "https://...",
+            "maxLength": 150
+          },
+          "bg_image": {
+            "type": "string",
+            "example": "https://...",
+            "maxLength": 150
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateExerciseDto": {
+        "type": "object",
+        "properties": {
+          "exercised_muscles_ids": {
+            "example": [
+              "uuid-1234",
+              "uuid-5678"
+            ],
+            "description": "IDs de los músculos que ejercita",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string",
+            "example": "Press de banca",
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "example": "Ejercicio compuesto para el pecho..."
+          },
+          "safety_tips": {
+            "type": "string",
+            "example": "Mantener los codos a 45°",
+            "maxLength": 500
+          },
+          "activation_tips": {
+            "type": "string",
+            "example": "Apretar el pecho al subir",
+            "maxLength": 500
+          },
+          "video_url": {
+            "type": "string",
+            "example": "https://..."
+          },
+          "preview_image": {
+            "type": "string",
+            "example": "https://..."
+          },
+          "bg_image": {
+            "type": "string",
+            "example": "https://..."
+          }
+        },
+        "required": [
+          "exercised_muscles_ids",
+          "name"
+        ]
+      },
+      "EditExerciseDto": {
+        "type": "object",
+        "properties": {
+          "exercised_muscles_ids": {
+            "example": [
+              "uuid-1234",
+              "uuid-5678"
+            ],
+            "description": "IDs de los músculos que ejercita",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string",
+            "example": "Press de banca",
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "example": "Ejercicio compuesto para el pecho..."
+          },
+          "safety_tips": {
+            "type": "string",
+            "example": "Mantener los codos a 45°",
+            "maxLength": 500
+          },
+          "activation_tips": {
+            "type": "string",
+            "example": "Apretar el pecho al subir",
+            "maxLength": 500
+          },
+          "video_url": {
+            "type": "string",
+            "example": "https://..."
+          },
+          "preview_image": {
+            "type": "string",
+            "example": "https://..."
+          },
+          "bg_image": {
+            "type": "string",
+            "example": "https://..."
+          }
+        },
+        "required": [
+          "exercised_muscles_ids",
+          "name"
+        ]
+      },
+      "ExercisedMuscle": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "exercise_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "muscle_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "exercise_id",
+          "muscle_id",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "PlanificationListItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Plan fuerza 3 días",
+            "description": "Opcional acá y obligatorio en el alta: la columna es nullable y puede haber filas viejas sin nombre"
+          },
+          "description": {
+            "type": "string",
+            "example": "Planificación orientada a fuerza máxima"
+          },
+          "number_of_routines": {
+            "type": "number",
+            "example": 3,
+            "description": "Rutinas declaradas por el entrenador: la intención del plan"
+          },
+          "type": {
+            "type": "string",
+            "example": "fuerza"
+          },
+          "duration": {
+            "type": "string",
+            "example": "12 semanas"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "routine_count": {
+            "type": "number",
+            "example": 2,
+            "description": "Rutinas efectivamente asignadas al plan (Routine_Asignation). Puede diferir de number_of_routines, que es la meta"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "number_of_routines",
+          "active",
+          "routine_count",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "PlanificationRoutineResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Día A - Pecho y tríceps"
+          },
+          "coach_note": {
+            "type": "string",
+            "example": "Enfocarse en la contracción"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true,
+            "description": "Se devuelve a propósito: una rutina dada de baja sigue apareciendo en los planes que la referencian"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "active"
+        ]
+      },
+      "PlanificationAsignationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "Id del Routine_Asignation (el vínculo), NO el de la rutina: es el que va a necesitar CU-E-12 para desasignar"
+          },
+          "order": {
+            "type": "number",
+            "example": 1
+          },
+          "routine": {
+            "$ref": "#/components/schemas/PlanificationRoutineResponseDto"
+          }
+        },
+        "required": [
+          "id",
+          "order",
+          "routine"
+        ]
+      },
+      "PlanificationDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Plan fuerza 3 días",
+            "description": "Opcional acá y obligatorio en el alta: la columna es nullable y puede haber filas viejas sin nombre"
+          },
+          "description": {
+            "type": "string",
+            "example": "Planificación orientada a fuerza máxima"
+          },
+          "number_of_routines": {
+            "type": "number",
+            "example": 3,
+            "description": "Rutinas declaradas por el entrenador: la intención del plan"
+          },
+          "type": {
+            "type": "string",
+            "example": "fuerza"
+          },
+          "duration": {
+            "type": "string",
+            "example": "12 semanas"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "routine_count": {
+            "type": "number",
+            "example": 2,
+            "description": "Rutinas efectivamente asignadas al plan (Routine_Asignation). Puede diferir de number_of_routines, que es la meta"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "routines": {
+            "description": "Rutinas del plan, ordenadas por order. Vacío hasta que exista CU-E-12",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanificationAsignationResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "number_of_routines",
+          "active",
+          "routine_count",
+          "created_at",
+          "updated_at",
+          "routines"
+        ]
+      },
+      "CreatePlanificationDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Plan fuerza 3 días",
+            "maxLength": 50,
+            "description": "Obligatorio acá aunque la columna sea nullable: no se cargan planificaciones sin nombre"
+          },
+          "number_of_routines": {
+            "type": "number",
+            "example": 3,
+            "minimum": 1,
+            "description": "Rutinas que el entrenador declara para el plan. Es la intención del plan, no el conteo real: ese es routine_count, que sale de las rutinas efectivamente asignadas por CU-E-12"
+          },
+          "description": {
+            "type": "string",
+            "example": "Planificación orientada a fuerza máxima",
+            "maxLength": 1000,
+            "description": "La columna es TEXT sin límite; el tope es sanidad de input"
+          },
+          "type": {
+            "type": "string",
+            "example": "fuerza",
+            "maxLength": 30
+          },
+          "duration": {
+            "type": "string",
+            "example": "12 semanas",
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "name",
+          "number_of_routines"
+        ]
+      },
+      "EditPlanificationDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Plan fuerza 3 días",
+            "maxLength": 50,
+            "description": "Obligatorio acá aunque la columna sea nullable: no se cargan planificaciones sin nombre"
+          },
+          "number_of_routines": {
+            "type": "number",
+            "example": 3,
+            "minimum": 1,
+            "description": "Rutinas que el entrenador declara para el plan. Es la intención del plan, no el conteo real: ese es routine_count, que sale de las rutinas efectivamente asignadas por CU-E-12"
+          },
+          "description": {
+            "type": "string",
+            "example": "Planificación orientada a fuerza máxima",
+            "maxLength": 1000,
+            "description": "La columna es TEXT sin límite; el tope es sanidad de input"
+          },
+          "type": {
+            "type": "string",
+            "example": "fuerza",
+            "maxLength": 30
+          },
+          "duration": {
+            "type": "string",
+            "example": "12 semanas",
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "name",
+          "number_of_routines"
+        ]
+      },
+      "SetPlanificationActiveDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "example": false,
+            "description": "false para dar de baja la planificación (baja lógica), true para reactivarla"
+          }
+        },
+        "required": [
+          "active"
+        ]
+      },
+      "Planification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Plan fuerza 3 días",
+            "maxLength": 50
+          },
+          "description": {
+            "type": "object",
+            "example": "Planificación orientada a fuerza máxima"
+          },
+          "number_of_routines": {
+            "type": "number",
+            "example": 3
+          },
+          "type": {
+            "type": "object",
+            "example": "fuerza",
+            "maxLength": 30
+          },
+          "duration": {
+            "type": "object",
+            "example": "12 semanas",
+            "maxLength": 50
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "number_of_routines",
+          "active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "AssignRoutineToPlanificationDto": {
+        "type": "object",
+        "properties": {
+          "planification_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "routine_id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "La misma rutina puede asignarse más de una vez a la misma planificación"
+          },
+          "order": {
+            "type": "number",
+            "example": 1,
+            "minimum": 1,
+            "description": "Posición dentro del plan. Si se omite, la asignación va al final. Si se manda una posición ya ocupada se persiste igual: no se desplaza el resto y el order puede quedar duplicado"
+          }
+        },
+        "required": [
+          "planification_id",
+          "routine_id"
+        ]
+      },
+      "AssignRoutinesToPlanificationDto": {
+        "type": "object",
+        "properties": {
+          "planification_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "routine_ids": {
+            "example": [
+              "uuid-1234",
+              "uuid-5678"
+            ],
+            "description": "Se asignan al final del plan, consecutivas y en el orden del array. Se permiten ids repetidos: crean una asignación cada uno",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "planification_id",
+          "routine_ids"
+        ]
+      },
+      "SetRoutineAsignationActiveDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "example": false,
+            "description": "false da de baja la asignación y le borra el order; true la reactiva"
+          },
+          "order": {
+            "type": "number",
+            "example": 2,
+            "minimum": 1,
+            "description": "Sólo válido con active = true: la posición con la que vuelve. Si se omite, vuelve al final. Mandarlo con active = false es un 400"
+          }
+        },
+        "required": [
+          "active"
+        ]
+      },
+      "RoutineAsignation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "routine_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "planification_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "order": {
+            "type": "object",
+            "example": 1
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "routine_id",
+          "planification_id",
+          "active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "SetRoutineAsignationsActiveDto": {
+        "type": "object",
+        "properties": {
+          "routine_asignation_ids": {
+            "example": [
+              "uuid-1234",
+              "uuid-5678"
+            ],
+            "description": "Los ids pueden pertenecer a planificaciones distintas. No se aceptan repetidos",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "active": {
+            "type": "boolean",
+            "example": false,
+            "description": "Al reactivar en lote, cada asignación vuelve al final de su planificación"
+          }
+        },
+        "required": [
+          "routine_asignation_ids",
+          "active"
+        ]
+      },
+      "UserPlanification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "user_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "coach_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "planification_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "description": {
+            "type": "string",
+            "example": "Plan personalizado para el alumno"
+          },
+          "number_of_routines": {
+            "type": "number",
+            "example": 3
+          },
+          "type": {
+            "type": "string",
+            "example": "fuerza",
+            "maxLength": 30
+          },
+          "coach_note": {
+            "type": "string",
+            "example": "Foco en técnica",
+            "maxLength": 100
+          },
+          "duration": {
+            "type": "string",
+            "example": "8 semanas",
+            "maxLength": 50
+          },
+          "start_date": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-01"
+          },
+          "end_date": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-03-01"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "start_date",
+          "end_date",
+          "active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "RoutineListItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Dia A - Piernas"
+          },
+          "coach_note": {
+            "type": "string",
+            "example": "Enfocarse en la contracción"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "circuit_count": {
+            "type": "number",
+            "example": 3,
+            "description": "Cantidad de circuitos que componen la rutina"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "active",
+          "circuit_count",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "RoutineListItemCircuitRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Entrada en calor - Tren inferior"
+          },
+          "type": {
+            "type": "string",
+            "example": "entrada en calor"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true,
+            "description": "Una rutina puede referenciar un circuito dado de baja"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "active"
+        ]
+      },
+      "RoutineListItemCircuitDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "Id del Routine_Circuit (no el del Circuit)"
+          },
+          "order": {
+            "type": "number",
+            "example": 1,
+            "description": "Posicion 1..N dentro de la rutina. Los vinculos dados de baja no se devuelven, asi que la lista nunca tiene huecos"
+          },
+          "circuit": {
+            "$ref": "#/components/schemas/RoutineListItemCircuitRefDto"
+          }
+        },
+        "required": [
+          "id",
+          "order",
+          "circuit"
+        ]
+      },
+      "RoutineListItemPlusResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Dia A - Piernas"
+          },
+          "coach_note": {
+            "type": "string",
+            "example": "Enfocarse en la contracción"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "circuit_count": {
+            "type": "number",
+            "example": 3,
+            "description": "Cantidad de circuitos que componen la rutina"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "circuits": {
+            "description": "Circuitos de la rutina ordenados por order. Sin ejercicios ni series: para eso está el detalle",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoutineListItemCircuitDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "active",
+          "circuit_count",
+          "created_at",
+          "updated_at",
+          "circuits"
+        ]
+      },
+      "CircuitSetResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "set_order": {
+            "type": "number",
+            "example": 1
+          },
+          "set_count": {
+            "type": "number",
+            "example": 3
+          },
+          "rep_count": {
+            "type": "number",
+            "example": 8
+          },
+          "weight": {
+            "type": "number",
+            "example": 80.5
+          },
+          "rpe": {
+            "type": "number",
+            "example": 7
+          },
+          "rir": {
+            "type": "number",
+            "example": 2
+          },
+          "rm_perc": {
+            "type": "number",
+            "example": 75
+          },
+          "amrap": {
+            "type": "boolean",
+            "example": false
+          },
+          "amrap_time": {
+            "type": "number",
+            "example": 60
+          },
+          "rm": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "id",
+          "set_order",
+          "set_count",
+          "rep_count",
+          "amrap",
+          "rm"
+        ]
+      },
+      "CircuitExerciseResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "Id del Routine_Exercise (no el del Exercise)"
+          },
+          "exercise_order": {
+            "type": "number",
+            "example": 1
+          },
+          "coach_note": {
+            "type": "string",
+            "example": "Bajar lento en 3 segundos"
+          },
+          "exercise": {
+            "type": "object",
+            "description": "Ficha del ejercicio del catálogo"
+          },
+          "sets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CircuitSetResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "exercise_order",
+          "exercise",
+          "sets"
+        ]
+      },
+      "CircuitDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Entrada en calor - Tren superior"
+          },
+          "description": {
+            "type": "string",
+            "example": "Movilidad de hombro y activación de manguito"
+          },
+          "type": {
+            "type": "string",
+            "example": "entrada en calor"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "exercises": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CircuitExerciseResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "active",
+          "created_at",
+          "updated_at",
+          "exercises"
+        ]
+      },
+      "RoutineDetailCircuitDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "Id del Routine_Circuit (no el del Circuit)"
+          },
+          "order": {
+            "type": "number",
+            "example": 1,
+            "description": "Posicion 1..N dentro de la rutina. Los vinculos dados de baja no se devuelven, asi que la lista nunca tiene huecos"
+          },
+          "circuit": {
+            "description": "El circuito completo, con el mismo formato que GET /routine/circuit/:id",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CircuitDetailResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "order",
+          "circuit"
+        ]
+      },
+      "RoutineDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Dia A - Piernas"
+          },
+          "coach_note": {
+            "type": "string",
+            "example": "Enfocarse en la contracción"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "circuits": {
+            "description": "Circuitos de la rutina ordenados por order, cada uno con sus ejercicios y series",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoutineDetailCircuitDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "active",
+          "created_at",
+          "updated_at",
+          "circuits"
+        ]
+      },
+      "CreateRoutineCircuitDto": {
+        "type": "object",
+        "properties": {
+          "circuit_id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "ID del circuito a ensamblar. Puede repetirse dentro de la rutina: el order distingue las apariciones"
+          },
+          "order": {
+            "type": "number",
+            "example": 1,
+            "minimum": 1,
+            "description": "Posición del circuito. El server ordena por este campo y persiste 1..N; se aceptan valores espaciados (10, 20, 30) pero no duplicados"
+          }
+        },
+        "required": [
+          "circuit_id",
+          "order"
+        ]
+      },
+      "CreateRoutineDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Día A - Pecho y tríceps",
+            "maxLength": 50
+          },
+          "coach_note": {
+            "type": "string",
+            "example": "Cuidar el ritmo en las primeras series",
+            "maxLength": 100
+          },
+          "circuits": {
+            "description": "Circuitos de la rutina. Al menos uno, máximo 50. Todos tienen que estar activos",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateRoutineCircuitDto"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "circuits"
+        ]
+      },
+      "EditRoutineCircuitDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "Id del Routine_Circuit (no el del Circuit). Su presencia es lo que distingue un vínculo que sobrevive de uno nuevo: sin id se crea, con id se mantiene, y lo que el server tenía y no vuelve en la lista se da de baja"
+          },
+          "circuit_id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "ID del circuito a ensamblar. Puede repetirse dentro de la rutina: el id del vínculo distingue las apariciones"
+          },
+          "order": {
+            "type": "number",
+            "example": 1,
+            "minimum": 1,
+            "description": "Posición del circuito. El server ordena por este campo y persiste 1..N; se aceptan valores espaciados (10, 20, 30) pero no duplicados"
+          }
+        },
+        "required": [
+          "circuit_id",
+          "order"
+        ]
+      },
+      "EditRoutineDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Día A - Pecho y tríceps",
+            "maxLength": 50
+          },
+          "coach_note": {
+            "type": "string",
+            "example": "Cuidar el ritmo en las primeras series",
+            "maxLength": 100,
+            "description": "Omitirlo borra la nota que la rutina tuviera"
+          },
+          "circuits": {
+            "description": "Lista COMPLETA de circuitos tal como queda la rutina. Al menos uno, máximo 50. Los circuitos dados de baja se pueden conservar (ítem con id) pero no agregar",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EditRoutineCircuitDto"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "circuits"
+        ]
+      },
+      "SetRoutineActiveDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "example": false,
+            "description": "false para dar de baja la rutina (baja lógica), true para reactivarla"
+          }
+        },
+        "required": [
+          "active"
+        ]
+      },
+      "Routine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Día A - Pecho y tríceps",
+            "maxLength": 50
+          },
+          "coach_note": {
+            "type": "object",
+            "example": "Enfocarse en la contracción",
+            "maxLength": 100
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateCircuitSetDto": {
+        "type": "object",
+        "properties": {
+          "set_count": {
+            "type": "number",
+            "example": 3,
+            "minimum": 1,
+            "maximum": 20,
+            "description": "Cantidad de series del bloque. Una fila es un bloque de series iguales: set_count 3 con rep_count 8 es \"3x8\""
+          },
+          "rep_count": {
+            "type": "number",
+            "example": 8,
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "Repeticiones por serie. Con amrap = true se interpreta como reps objetivo; el valor 1 significa \"sin objetivo\""
+          },
+          "weight": {
+            "type": "number",
+            "example": 80.5,
+            "minimum": 0.01,
+            "maximum": 1000
+          },
+          "rpe": {
+            "type": "number",
+            "example": 7,
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Escala RPE. Mutuamente excluyente con rir"
+          },
+          "rir": {
+            "type": "number",
+            "example": 2,
+            "minimum": 0,
+            "maximum": 10,
+            "description": "Repeticiones en reserva. Mutuamente excluyente con rpe"
+          },
+          "rm_perc": {
+            "type": "number",
+            "example": 75,
+            "minimum": 1,
+            "maximum": 125,
+            "description": "Porcentaje del 1RM. Llega a 125 para permitir trabajo supramáximo"
+          },
+          "amrap": {
+            "type": "boolean",
+            "example": false,
+            "default": false,
+            "description": "Serie al fallo. Con amrap_time, AMRAP cronometrado"
+          },
+          "amrap_time": {
+            "type": "number",
+            "example": 60,
+            "minimum": 1,
+            "description": "Duración del AMRAP en segundos. Sólo válido con amrap = true"
+          },
+          "rm": {
+            "type": "boolean",
+            "example": false,
+            "default": false,
+            "description": "Marca el bloque como intento de RM. Exige set_count = 1: dos intentos se mandan como dos series iguales"
+          }
+        },
+        "required": [
+          "set_count",
+          "rep_count"
+        ]
+      },
+      "CreateCircuitExerciseDto": {
+        "type": "object",
+        "properties": {
+          "exercise_id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "ID del ejercicio del catálogo. No puede repetirse dentro del circuito"
+          },
+          "coach_note": {
+            "type": "string",
+            "example": "Bajar lento en 3 segundos",
+            "maxLength": 100
+          },
+          "sets": {
+            "description": "Series prescritas, en orden. Al menos una",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateCircuitSetDto"
+            }
+          }
+        },
+        "required": [
+          "exercise_id",
+          "sets"
+        ]
+      },
+      "CreateCircuitDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Entrada en calor - Tren superior",
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "example": "Movilidad de hombro y activación de manguito",
+            "maxLength": 100
+          },
+          "type": {
+            "type": "string",
+            "example": "entrada en calor",
+            "maxLength": 30
+          },
+          "exercises": {
+            "description": "Ejercicios del circuito, en orden. Al menos uno",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateCircuitExerciseDto"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "exercises"
+        ]
+      },
+      "EditCircuitDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Entrada en calor - Tren superior",
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "example": "Movilidad de hombro y activación de manguito",
+            "maxLength": 100
+          },
+          "type": {
+            "type": "string",
+            "example": "entrada en calor",
+            "maxLength": 30
+          },
+          "exercises": {
+            "description": "Ejercicios del circuito, en orden. Al menos uno",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateCircuitExerciseDto"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "exercises"
+        ]
+      },
+      "CircuitListItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Entrada en calor - Tren superior"
+          },
+          "description": {
+            "type": "string",
+            "example": "Movilidad de hombro y activación de manguito"
+          },
+          "type": {
+            "type": "string",
+            "example": "entrada en calor"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "exercise_count": {
+            "type": "number",
+            "example": 4,
+            "description": "Cantidad de ejercicios que componen el circuito"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "active",
+          "exercise_count",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CircuitListItemExerciseRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Sentadilla con Peso Corporal"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "CircuitListItemExerciseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "Id del Routine_Exercise (no el del Exercise)"
+          },
+          "exercise_order": {
+            "type": "number",
+            "example": 1
+          },
+          "exercise": {
+            "$ref": "#/components/schemas/CircuitListItemExerciseRefDto"
+          }
+        },
+        "required": [
+          "id",
+          "exercise_order",
+          "exercise"
+        ]
+      },
+      "CircuitListItemPlusResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Entrada en calor - Tren inferior"
+          },
+          "description": {
+            "type": "string",
+            "example": "Activación de cadera y movilidad previa a piernas"
+          },
+          "type": {
+            "type": "string",
+            "example": "entrada en calor"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "exercise_count": {
+            "type": "number",
+            "example": 3,
+            "description": "Cantidad de ejercicios que componen el circuito"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "exercises": {
+            "description": "Ejercicios del circuito ordenados por exercise_order. Sin series ni notas: para eso está el detalle",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CircuitListItemExerciseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "active",
+          "exercise_count",
+          "created_at",
+          "updated_at",
+          "exercises"
+        ]
+      },
+      "SetCircuitActiveDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "example": false,
+            "description": "false para dar de baja el circuito (baja lógica), true para reactivarlo"
+          }
+        },
+        "required": [
+          "active"
+        ]
+      },
+      "Circuit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Entrada en calor - Tren superior",
+            "maxLength": 100
+          },
+          "description": {
+            "type": "object",
+            "example": "Movilidad de hombro y activación de manguito",
+            "maxLength": 100
+          },
+          "type": {
+            "type": "string",
+            "example": "entrada en calor",
+            "maxLength": 30
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "UserRM": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "user_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "exercise_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "weight": {
+            "type": "number",
+            "example": 100.5
+          },
+          "reps": {
+            "type": "number",
+            "example": 5
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-15"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "exercise_id",
+          "weight",
+          "reps",
+          "date",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CalculatePotentialRmDto": {
+        "type": "object",
+        "properties": {
+          "exercise_id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "Ejercicio sobre el que se calcula"
+          },
+          "weight": {
+            "type": "number",
+            "example": 100,
+            "description": "Peso levantado, en kg"
+          },
+          "max_reps": {
+            "type": "number",
+            "example": 5,
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Máximo de repeticiones logradas con ese peso"
+          }
+        },
+        "required": [
+          "exercise_id",
+          "weight",
+          "max_reps"
+        ]
+      },
+      "PotentialRmExerciseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Press banca"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "PotentialRmInputDto": {
+        "type": "object",
+        "properties": {
+          "weight": {
+            "type": "number",
+            "example": 100
+          },
+          "max_reps": {
+            "type": "number",
+            "example": 5
+          }
+        },
+        "required": [
+          "weight",
+          "max_reps"
+        ]
+      },
+      "PotentialRmItemDto": {
+        "type": "object",
+        "properties": {
+          "reps": {
+            "type": "number",
+            "example": 3,
+            "description": "Cantidad de repeticiones (el \"n\" de nRM)"
+          },
+          "weight": {
+            "type": "number",
+            "example": 106.06,
+            "description": "Peso estimado para esa cantidad de repeticiones, en kg"
+          }
+        },
+        "required": [
+          "reps",
+          "weight"
+        ]
+      },
+      "PotentialRmResponseDto": {
+        "type": "object",
+        "properties": {
+          "exercise": {
+            "$ref": "#/components/schemas/PotentialRmExerciseDto"
+          },
+          "input": {
+            "$ref": "#/components/schemas/PotentialRmInputDto"
+          },
+          "formula": {
+            "type": "string",
+            "example": "Epley"
+          },
+          "estimated_1rm": {
+            "type": "number",
+            "example": 116.67,
+            "description": "RM estimado por la fórmula directa de Epley"
+          },
+          "potential_rms": {
+            "description": "Tabla de 1RM a 12RM",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PotentialRmItemDto"
+            }
+          }
+        },
+        "required": [
+          "exercise",
+          "input",
+          "formula",
+          "estimated_1rm",
+          "potential_rms"
+        ]
+      },
+      "CreateUserRmDto": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "ID del usuario"
+          },
+          "exercise_id": {
+            "type": "string",
+            "example": "uuid-5678",
+            "description": "ID del ejercicio"
+          },
+          "weight": {
+            "type": "number",
+            "example": 100.5,
+            "description": "Peso en kg"
+          },
+          "reps": {
+            "type": "number",
+            "example": 5,
+            "description": "Cantidad de repeticiones"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-15"
+          }
+        },
+        "required": [
+          "user_id",
+          "exercise_id",
+          "weight",
+          "reps",
+          "date"
+        ]
+      },
+      "EditUserRmDto": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "example": "uuid-1234",
+            "description": "ID del usuario"
+          },
+          "exercise_id": {
+            "type": "string",
+            "example": "uuid-5678",
+            "description": "ID del ejercicio"
+          },
+          "weight": {
+            "type": "number",
+            "example": 100.5,
+            "description": "Peso en kg"
+          },
+          "reps": {
+            "type": "number",
+            "example": 5,
+            "description": "Cantidad de repeticiones"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-15"
+          }
+        },
+        "required": [
+          "user_id",
+          "exercise_id",
+          "weight",
+          "reps",
+          "date"
+        ]
+      }
+    }
+  }
+}

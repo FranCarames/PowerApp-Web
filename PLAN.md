@@ -155,7 +155,7 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
 
 ### Semana 1 (3 al 10/10): fundaciones, Auth y Mi cuenta
 
-- [ ] **T01 · Repo y scaffolding (1,5 h)**
+- [x] **T01 · Repo y scaffolding (1,5 h)**
   - Crear el repo `powerapp-web` (nombre a confirmar) con las ramas `main` y `develop`.
   - Vite + React + TypeScript estricto, ESLint y Prettier, la estructura de carpetas y los scripts de `CLAUDE.md`.
   - Guardar el JSON del Swagger en `src/api/openapi.json`. La documentación no se copia: se lee de PowerApp-Docs.
