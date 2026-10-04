@@ -1,6 +1,7 @@
 import { cx } from '@/shared/lib/cx';
 
 import styles from './Spinner.module.css';
+import { VisuallyHidden } from './VisuallyHidden';
 
 interface SpinnerProps {
   /** Lado en px. */
@@ -29,7 +30,7 @@ export function Spinner({
       role={label ? 'status' : undefined}
       aria-hidden={label ? undefined : true}
     >
-      {label && <span className={styles.srOnly}>{label}</span>}
+      {label && <VisuallyHidden>{label}</VisuallyHidden>}
     </span>
   );
 }

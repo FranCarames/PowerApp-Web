@@ -1,7 +1,10 @@
+import { useState } from 'react';
+
 import {
   Button,
-  Card,
   EmptyState,
+  ErrorState,
+  ListSkeleton,
   Skeleton,
   Spinner,
   useToast,
@@ -9,15 +12,20 @@ import {
 
 import { GalleryDemo } from '../GalleryDemo';
 import { GallerySection } from '../GallerySection';
-import styles from './FeedbackSection.module.css';
 
 export function FeedbackSection() {
   const toast = useToast();
+  const [retrying, setRetrying] = useState(false);
+
+  function retry() {
+    setRetrying(true);
+    setTimeout(() => setRetrying(false), 1500);
+  }
 
   return (
     <GallerySection
       id="feedback"
-      title="Estados de carga, vacío y mensajes"
+      title="Estados de carga, vacío, error y mensajes"
       description="Toda pantalla con datos tiene estado de carga, vacío y error."
     >
       <GalleryDemo label="Spinner">
@@ -26,15 +34,11 @@ export function FeedbackSection() {
         <Spinner size={14} label="Guardando…" />
       </GalleryDemo>
 
-      <GalleryDemo label="Skeleton" layout="stack">
-        <Card row aria-busy="true">
-          <Skeleton circle height={40} />
-          <div className={styles.lines}>
-            <Skeleton width="60%" height={14} />
-            <Skeleton width="40%" height={12} />
-          </div>
-          <Skeleton width={56} height={20} radius={999} />
-        </Card>
+      <GalleryDemo
+        label="Skeleton y ListSkeleton (carga de una lista)"
+        layout="stack"
+      >
+        <ListSkeleton rows={2} />
         <Skeleton height={96} radius={16} />
       </GalleryDemo>
 
@@ -50,15 +54,16 @@ export function FeedbackSection() {
             </Button>
           }
         />
-        <EmptyState
-          icon="alert"
+      </GalleryDemo>
+
+      <GalleryDemo
+        label="ErrorState (reintentar simula 1,5 s de espera)"
+        layout="stack"
+      >
+        <ErrorState onRetry={retry} retrying={retrying} />
+        <ErrorState
           title="No pudimos cargar los alumnos"
-          message="Revisá tu conexión e intentá de nuevo."
-          action={
-            <Button sm variant="sec" icon="refresh">
-              Reintentar
-            </Button>
-          }
+          message="El servidor está tardando en responder."
         />
       </GalleryDemo>
 

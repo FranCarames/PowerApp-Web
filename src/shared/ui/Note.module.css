@@ -1,0 +1,44 @@
+/*
+ * .note del prototipo: solo existen acc y warn. Los otros tonos extrapolan la misma regla
+ * (fondo suave, borde con 25 % de opacidad y texto del color).
+ */
+.note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.warn {
+  background: var(--warnS);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: var(--warn);
+}
+
+.acc {
+  background: var(--accS);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  color: #c4b5fd;
+}
+
+.pri {
+  background: var(--priS);
+  border: 1px solid rgba(232, 69, 10, 0.25);
+  color: var(--pri);
+}
+
+.ok {
+  background: var(--okS);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  color: var(--ok);
+}
+
+.err {
+  background: var(--errS);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: var(--err);
+}

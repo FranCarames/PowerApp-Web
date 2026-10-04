@@ -1,0 +1,16 @@
+.mark {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.on {
+  background: var(--pri);
+  border-color: var(--pri);
+}

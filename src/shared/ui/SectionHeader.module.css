@@ -1,0 +1,19 @@
+.sec {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 24px 0 10px;
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--acc);
+  letter-spacing: 0.3px;
+}
+
+.aside {
+  font-size: 12px;
+  color: var(--tm);
+}

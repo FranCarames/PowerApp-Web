@@ -175,6 +175,7 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
     - Toast, EmptyState, Spinner y Skeleton.
     - Stat, FiberBar, Fab y Avatar.
     - Íconos del prototipo como componentes.
+    - Piezas que el prototipo repite en casi todas las pantallas (PR de seguimiento): IconButton y LinkButton, Tile y Thumb, Note, SectionHeader, List, ListItem y Columns, ListSkeleton y ErrorState, y VisuallyHidden.
   - Una página `/dev/ui`, solo en desarrollo, para verlos todos.
   - Listo cuando: todos se ven bien en `/dev/ui`, en mobile y en desktop.
 - [ ] **T04 · AppShell y navegación por rol (2 h)**

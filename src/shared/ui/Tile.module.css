@@ -1,0 +1,40 @@
+/* .tile del prototipo. El tamaño y el radio los pone el componente. */
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--el);
+  color: var(--ts);
+}
+
+.letter {
+  font-family: var(--fD);
+  font-weight: 800;
+  font-size: 22px;
+}
+
+.pri {
+  background: var(--priS);
+  color: var(--pri);
+}
+
+.ok {
+  background: var(--okS);
+  color: var(--ok);
+}
+
+.warn {
+  background: var(--warnS);
+  color: var(--warn);
+}
+
+.err {
+  background: var(--errS);
+  color: var(--err);
+}
+
+.acc {
+  background: var(--accS);
+  color: var(--acc);
+}

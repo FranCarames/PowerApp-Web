@@ -4,6 +4,7 @@ import { Icon } from '@/shared/icons';
 import { cx } from '@/shared/lib/cx';
 
 import styles from './ToastView.module.css';
+import { VisuallyHidden } from './VisuallyHidden';
 
 export interface ToastData {
   /** Cambia con cada toast, aunque el mensaje se repita. */
@@ -57,9 +58,9 @@ export function ToastView({ toast }: { toast: ToastData | null }) {
   return (
     <>
       {/* Anuncio para lectores de pantalla. La región existe siempre, así el cambio de texto se lee. */}
-      <div role="status" aria-live="polite" className={styles.srOnly}>
+      <VisuallyHidden role="status" aria-live="polite">
         {toast?.message}
-      </div>
+      </VisuallyHidden>
       <div
         ref={ref}
         popover={supportsPopover ? 'manual' : undefined}

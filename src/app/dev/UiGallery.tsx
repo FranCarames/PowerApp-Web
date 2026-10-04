@@ -8,8 +8,11 @@ import { ColorsSection } from './sections/ColorsSection';
 import { DataSection } from './sections/DataSection';
 import { FeedbackSection } from './sections/FeedbackSection';
 import { FieldsSection } from './sections/FieldsSection';
+import { IconButtonsSection } from './sections/IconButtonsSection';
 import { IconsSection } from './sections/IconsSection';
+import { ListsSection } from './sections/ListsSection';
 import { ModalsSection } from './sections/ModalsSection';
+import { NotesSection } from './sections/NotesSection';
 import { TypographySection } from './sections/TypographySection';
 
 const INDEX = [
@@ -17,8 +20,11 @@ const INDEX = [
   { id: 'colores', label: 'Colores' },
   { id: 'iconos', label: 'Íconos' },
   { id: 'botones', label: 'Botones' },
+  { id: 'botones-icono', label: 'Botones de ícono' },
   { id: 'campos', label: 'Campos' },
   { id: 'tarjetas', label: 'Tarjetas' },
+  { id: 'listas', label: 'Listas' },
+  { id: 'avisos', label: 'Avisos' },
   { id: 'seleccion', label: 'Chips y segmentado' },
   { id: 'datos', label: 'Stats y progreso' },
   { id: 'feedback', label: 'Feedback' },
@@ -49,8 +55,11 @@ export function UiGallery() {
       <ColorsSection />
       <IconsSection />
       <ButtonsSection />
+      <IconButtonsSection />
       <FieldsSection />
       <CardsSection />
+      <ListsSection />
+      <NotesSection />
       <ChoiceSection />
       <DataSection />
       <FeedbackSection />

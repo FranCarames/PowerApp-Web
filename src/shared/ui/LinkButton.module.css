@@ -1,0 +1,20 @@
+/*
+ * .link del prototipo. Se le suma padding con margen negativo del mismo tamaño: el texto queda
+ * donde estaba, pero el área tocable pasa de ~18 px a ~26 px de alto.
+ */
+.link {
+  padding: 4px 2px;
+  margin: -4px -2px;
+  color: var(--acc);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.danger {
+  color: var(--err);
+}
+
+.link:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
