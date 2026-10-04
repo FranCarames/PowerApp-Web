@@ -8,13 +8,14 @@ import {
 import { useToast } from '@/shared/ui';
 
 import { AuthContext, type AuthApi } from '../hooks/authContext';
+import { logout } from '../logout';
 import {
   completePasswordChange,
-  endSession,
   getSession,
   onSessionEnded,
   startSession,
   subscribeSession,
+  updateSessionUser,
 } from '../sessionStore';
 
 /**
@@ -34,8 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       token: session?.token ?? null,
       passwordChangeRequired: session?.passwordChangeRequired === true,
       signIn: startSession,
-      // Sin argumentos: así un onClick no le pasa el evento como aviso.
-      signOut: () => endSession(),
+      signOut: logout,
+      updateUser: updateSessionUser,
       completePasswordChange,
     }),
     [session],
