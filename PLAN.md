@@ -247,11 +247,18 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - Verificado contra un doble local que responde como el código del backend (200 con el mismo mensaje para cualquier email, y 500), no contra el backend real.
   - Pendiente del backend, sin ticket en este plan: el servicio de email está sin integrar. El backend imprime la temporal en su consola (`[EMAIL STUB]`), así que hoy ningún usuario recibe el correo. Para probar el ingreso con la temporal con el backend local, se toma de esa consola.
   - Para las tareas que siguen: T12 recibe a quien entra con la temporal. Hasta que B9 exista, el login no avisa que se usó una temporal, así que el cambio obligatorio solo se ve con las cuentas de demo.
-- [ ] **T12 · Cambiar contraseña (1 h) · CU-U-05**
+- [x] **T12 · Cambiar contraseña (1 h) · CU-U-05**
   - Voluntario: desde Mi cuenta, con contraseña actual, nueva y repetir.
   - Obligatorio: después de entrar con la temporal; la "actual" es la temporal.
   - Un 401 se muestra como "La contraseña actual es incorrecta".
   - Al terminar el cambio obligatorio, se libera el guard y se va al home.
+  - Cómo quedó: `ChangePasswordPage` reemplaza la provisoria y atiende las dos formas en `/cambiar-contrasena`, según `passwordChangeRequired`. `changePasswordSchema` replica `ChangePasswordDto` y "repetir" no viaja. Está explicado en el README, sección "Cambiar contraseña".
+  - **Corrección en la capa de API (T07):** el 401 de este endpoint es un error de negocio (`{ error }`), no una sesión vencida, pero el cliente cerraba la sesión ante cualquier 401 con token: escribir mal la contraseña actual te deslogueaba. Ahora `connectApi` cierra solo ante un 401 de guard (`isSessionExpiredError`: el cuerpo trae `statusCode`) o uno que no reconoce. La regla de `CLAUDE.md` ("cuenta solo un 401 de un request que llevaba token") queda afinada por esto; sugiero actualizar su texto.
+  - V5: la tarjeta de requisitos solo muestra las reglas del DTO (6 a 50 caracteres y que coincidan), no las del prototipo (8, mayúscula y número).
+  - La contraseña actual se pide también en el cambio obligatorio (el prototipo no la tiene): el DTO exige `current_password` y ahí es la temporal. Se agregó "Cerrar sesión" como salida de esa variante, porque con el cambio pendiente no hay otra pantalla a la que ir.
+  - Mock: `POST /users/change-password` atiende solo a las cuentas de demo (por su token falso) y el resto pasa al backend real. Con esto el cambio obligatorio se puede recorrer completo sin backend: login de la cuenta con contraseña temporal, modal, cambio y home. El estado vive en memoria.
+  - Verificado contra un doble local que responde como el código del backend (guard 401, 400 por campos de más, 401 de negocio, 200 y 500), no contra el backend real.
+  - Para las tareas que siguen: T13 (Mi cuenta) tiene que linkear a `/cambiar-contrasena` para el cambio voluntario. Si se prefiere que esa pantalla se vea dentro del marco de la app (con la tab bar), como en el prototipo, alcanza con registrar el mismo componente también bajo `/cuenta/contrasena`.
 - [ ] **T13 · Mi cuenta, datos personales y cerrar sesión (1,5 h) · CU-U-06, CU-U-03**
   - Menú de cuenta compartido por los tres roles.
   - Datos personales precargados con `GET /users/get/{id}` y guardados con `POST /users/edit`. Un 409 se muestra como "El email ya está en uso". Al guardar, se actualiza el usuario de la sesión. La foto de perfil va como URL.
