@@ -1,0 +1,28 @@
+/* .demo del prototipo: el bloque para elegir con qué rol entrar. */
+.demo {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--border2);
+}
+
+.caption {
+  font-size: 12px;
+  color: var(--tm);
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.roles {
+  display: grid;
+  gap: 10px;
+}
+
+.devLink {
+  display: block;
+  margin-top: 16px;
+  text-align: center;
+  color: var(--acc);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}

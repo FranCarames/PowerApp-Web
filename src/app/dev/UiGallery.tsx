@@ -8,6 +8,7 @@ import { ColorsSection } from './sections/ColorsSection';
 import { DataSection } from './sections/DataSection';
 import { FeedbackSection } from './sections/FeedbackSection';
 import { FieldsSection } from './sections/FieldsSection';
+import { HeaderSection } from './sections/HeaderSection';
 import { IconButtonsSection } from './sections/IconButtonsSection';
 import { IconsSection } from './sections/IconsSection';
 import { ListsSection } from './sections/ListsSection';
@@ -25,6 +26,7 @@ const INDEX = [
   { id: 'tarjetas', label: 'Tarjetas' },
   { id: 'listas', label: 'Listas' },
   { id: 'avisos', label: 'Avisos' },
+  { id: 'cabecera', label: 'Marca y cabecera' },
   { id: 'seleccion', label: 'Chips y segmentado' },
   { id: 'datos', label: 'Stats y progreso' },
   { id: 'feedback', label: 'Feedback' },
@@ -60,6 +62,7 @@ export function UiGallery() {
       <CardsSection />
       <ListsSection />
       <NotesSection />
+      <HeaderSection />
       <ChoiceSection />
       <DataSection />
       <FeedbackSection />

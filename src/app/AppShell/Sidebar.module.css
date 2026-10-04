@@ -1,0 +1,103 @@
+/* .sidebar, .side-brand, .side-item, .side-sep y .side-foot del prototipo. Solo existe desde 960 px. */
+.sidebar {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 26px 16px 16px;
+    border-right: 1px solid var(--border);
+    background: var(--card);
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px 24px;
+}
+
+.wordmark {
+  font-family: var(--fD);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* .sub del prototipo */
+.role {
+  font-size: 12px;
+  color: var(--tm);
+  margin-top: 2px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  color: var(--ts);
+  font-weight: 600;
+  font-size: 14px;
+  width: 100%;
+  text-decoration: none;
+}
+
+.item:hover {
+  background: var(--el);
+  color: var(--tp);
+}
+
+/* Con dos clases, para ganarle al :hover como en el prototipo. */
+.item.on {
+  background: var(--priS);
+  color: var(--pri);
+}
+
+.sep {
+  font-size: 11px;
+  color: var(--tm);
+  font-weight: 700;
+  padding: 18px 12px 6px;
+}
+
+.foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 8px 4px;
+  border-top: 1px solid var(--border);
+}
+
+.who {
+  flex: 1;
+  min-width: 0;
+}
+
+.fullName {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.who .role {
+  margin: 0;
+}
+
+.foot .logout {
+  color: var(--ts);
+}
