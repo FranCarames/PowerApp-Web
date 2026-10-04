@@ -25,7 +25,7 @@ export class ApiError extends Error {
   readonly serverMessage: string | null;
   /** El cuerpo de la respuesta, ya parseado si era JSON. */
   readonly body: unknown;
-  /** Si el request llevaba el token de la sesión. Un 401 con token es una sesión vencida. */
+  /** Si el request llevaba el token de la sesión. Un 401 de guard con token es una sesión vencida. */
   readonly authenticated: boolean;
 
   constructor({
@@ -111,6 +111,23 @@ export function isAccountDisabledError(error: ApiError): boolean {
   return (
     error.status === 403 && error.serverMessage === ACCOUNT_DISABLED_MESSAGE
   );
+}
+
+/**
+ * Si el 401 dice que la sesión murió (el token falta, es inválido o venció). Lo manda un guard, con
+ * `{ statusCode, message }`. Un service también puede responder 401 por una regla de negocio, con
+ * `{ error }` y sin `statusCode`: el de "La contraseña actual es incorrecta" al cambiar la contraseña
+ * es de esos, y no cierra la sesión. Ante un cuerpo que no se reconoce, se lo toma como sesión muerta.
+ */
+export function isSessionExpiredError(error: ApiError): boolean {
+  if (error.status !== 401) return false;
+  const { body } = error;
+  const isBusinessError =
+    typeof body === 'object' &&
+    body !== null &&
+    !('statusCode' in body) &&
+    typeof (body as { error?: unknown }).error === 'string';
+  return !isBusinessError;
 }
 
 /**
