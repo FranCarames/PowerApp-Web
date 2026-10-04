@@ -185,11 +185,12 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - Layout de las pantallas de auth.
   - Listo cuando: con un usuario mock se puede navegar entre tabs vacíos de cada rol.
   - Para poder cumplirlo, T04 dejó un `AuthProvider` mínimo, el guard `RequireRole` y una sesión de prueba en `/login` (`features/auth`). Cada pantalla vacía lleva el comentario `TEMPORAL (Txx)` con la tarea que la reemplaza.
-- [ ] **T05 · Capa de API (1,5 h)**
-  - Scripts `api:fetch` y `api:gen`.
+- [x] **T05 · Capa de API (1,5 h)**
+  - Scripts `api:fetch` y `api:gen`. El primero venía de T01; `api:gen` ahora también genera `src/api/publicOperations.ts`, con los endpoints que no piden token.
   - Cliente `fetch` tipado: URL base, Bearer, parseo de errores y captura del header `Authorization`.
   - QueryClient, proxy de Vite a `localhost:3000` y `.env.example`.
-  - Listo cuando: un hook de prueba lista `GET /membership/all` contra el backend local.
+  - Listo cuando: un hook de prueba lista `GET /membership/all` contra el backend local. El hook está en `src/app/dev` y se ve en `/dev/api`, que además prueba un 404 y un 401.
+  - Falta para T07: el cliente ya llama a `onUnauthorized` ante un 401 de un request con token, pero nadie lo conecta todavía.
 - [ ] **T06 · Mocks con MSW (1,5 h)**
   - Registry por endpoint, handlers por dominio, fixtures tipadas y `pending.ts`.
   - Activación con `VITE_USE_MOCKS`, también en el build de Render.
@@ -197,7 +198,7 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
 - [ ] **T07 · Sesión, guards y arranque en frío (1,5 h)**
   - AuthProvider con token y usuario en `localStorage` (la base ya está desde T04).
   - Rutas protegidas por rol, redirección al home de cada rol y guard de cambio de contraseña pendiente (`RequireRole` ya existe desde T04, sin el guard de contraseña).
-  - Ante un 401, se cierra la sesión.
+  - Ante un 401, se cierra la sesión. Se conecta con `configureApi({ onUnauthorized })` (el cliente solo lo llama si el request llevaba token). El 403 con "La cuenta está deshabilitada." también cierra la sesión y el de permisos no; `ApiError.serverMessage` trae el texto para distinguirlos.
   - Aviso de "despertando el servidor" a los 4 segundos de espera.
   - Listo cuando: un usuario mock de cada rol entra a su home y no puede abrir rutas de otro rol.
 - [ ] **T08 · Deploy en Render (1 h)**
