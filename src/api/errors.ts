@@ -95,6 +95,24 @@ const DEFAULT_MESSAGES = {
 /** Los 5xx con los que un proxy dice que no pudo hablar con el backend. */
 const UNREACHABLE_STATUSES: ReadonlySet<number> = new Set([502, 503, 504]);
 
+/** Si el estado es el de un proxy que no pudo hablar con el backend (502, 503 o 504). */
+export function isUnreachableStatus(status: number): boolean {
+  return UNREACHABLE_STATUSES.has(status);
+}
+
+/** Lo que dice el backend (en `message`) cuando un request autenticado llega con la cuenta dada de baja. */
+const ACCOUNT_DISABLED_MESSAGE = 'La cuenta está deshabilitada.';
+
+/**
+ * Si es el 403 de una cuenta deshabilitada. Es el único 403 que cierra la sesión: el de
+ * "Acceso denegado. Permisos insuficientes." (el rol no alcanza) no.
+ */
+export function isAccountDisabledError(error: ApiError): boolean {
+  return (
+    error.status === 403 && error.serverMessage === ACCOUNT_DISABLED_MESSAGE
+  );
+}
+
 /**
  * Textos para sobrescribir los de por defecto en una pantalla, por estado HTTP (`409: 'El email ya
  * está en uso'`) o por tipo: `network` (no se pudo llegar al servidor: sin respuesta, 502, 503 o 504)
@@ -120,7 +138,7 @@ export function getErrorMessage(
   if (byStatus) return byStatus;
   // Sin respuesta, o con la del proxy de la plataforma cuando el backend no contesta (por ejemplo,
   // Render mientras despierta): para el usuario es lo mismo, no se pudo llegar al servidor.
-  if (error.kind === 'network' || UNREACHABLE_STATUSES.has(error.status)) {
+  if (error.kind === 'network' || isUnreachableStatus(error.status)) {
     return overrides.network ?? DEFAULT_MESSAGES.network;
   }
   if (error.status >= 500) return overrides.server ?? DEFAULT_MESSAGES.server;

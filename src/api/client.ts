@@ -6,7 +6,8 @@ import type {
   OptionsArg,
   PathsFor,
 } from './contractTypes';
-import { ApiError, extractServerMessage } from './errors';
+import { trackRequest } from './coldStart';
+import { ApiError, extractServerMessage, isUnreachableStatus } from './errors';
 import { PUBLIC_OPERATIONS } from './publicOperations';
 
 // Cliente de la API: un wrapper sobre `fetch` que pone la URL base y el token, parsea la respuesta
@@ -18,6 +19,11 @@ interface ClientConfig {
   getToken: () => string | null;
   /** Se llama cuando un request que llevaba token recibe 401: la sesión murió. */
   onUnauthorized?: (error: ApiError) => void;
+  /**
+   * Se llama cuando un request que llevaba token recibe 403. Puede ser una cuenta deshabilitada (la
+   * sesión murió) o un rol sin permisos (no): quien lo conecta lo distingue con `isAccountDisabledError`.
+   */
+  onForbidden?: (error: ApiError) => void;
 }
 
 let config: ClientConfig = { getToken: () => null };
@@ -91,6 +97,9 @@ export async function request<T>(
     headers.set('Content-Type', 'application/json');
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
+  // Cuenta cuánto tarda el request, para avisar del arranque en frío (ver coldStart.ts).
+  const finishTracking = trackRequest();
+  let serverResponded = false;
   let response: Response;
   let body: unknown;
   try {
@@ -101,6 +110,7 @@ export async function request<T>(
         options.body === undefined ? undefined : JSON.stringify(options.body),
       signal: options.signal,
     });
+    serverResponded = !isUnreachableStatus(response.status);
     body = await readBody(response);
   } catch (cause) {
     if (options.signal?.aborted) throw cause;
@@ -112,6 +122,8 @@ export async function request<T>(
       authenticated,
       cause,
     });
+  } finally {
+    finishTracking(serverResponded);
   }
 
   if (!response.ok) {
@@ -122,8 +134,12 @@ export async function request<T>(
       body,
       authenticated,
     });
-    if (response.status === 401 && authenticated)
-      config.onUnauthorized?.(error);
+    // Si la sesión cambió mientras el request estaba en vuelo (otro login, un cierre de sesión), el
+    // error es de la sesión anterior y no tiene que cerrar la actual.
+    if (authenticated && config.getToken() === token) {
+      if (response.status === 401) config.onUnauthorized?.(error);
+      if (response.status === 403) config.onForbidden?.(error);
+    }
     throw error;
   }
 
