@@ -207,12 +207,16 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - Cómo quedó: la sesión vive en `sessionStore.ts` (fuera de React) y `AuthProvider` se suscribe; el cliente cierra la sesión por un 401 o por el 403 de cuenta deshabilitada, siempre que la sesión no haya cambiado mientras el request volaba. `Session.passwordChangeRequired` es la bandera del cliente del cambio pendiente. Está explicado en el README, sección "Sesión, guards y arranque en frío".
   - Para las tareas que siguen: T09 tiene que guardar la bandera con el campo de B9 (`signIn({ token, user, passwordChangeRequired })`) y navegar con `homePathFor(session)`. T12 llama a `completePasswordChange()` al terminar el cambio obligatorio. T13 usa `signOut()`, que cierra la sesión local; el `POST /users/logout` y el aviso en el login de por qué se cerró quedan para ellas.
   - Provisorio: el botón "Entrar con contraseña temporal" de `/login` y los de prueba de `/cambiar-contrasena` (T09 y T12 los reemplazan).
-- [ ] **T08 · Deploy en Render (1 h)**
-  - Static Site desde `main`: build `npm run build`, publish `dist`.
+- [x] **T08 · Deploy en Render (1 h)**
+  - Static Site desde `main`: build `npm ci && npm run build`, publish `dist`.
   - Rewrite de `/*` a `/index.html`.
   - Variables `VITE_API_URL` y `VITE_USE_MOCKS`.
   - Requiere C1.
   - Listo cuando: la URL de Render abre el login y recargar una ruta interna no da 404.
+  - Cómo quedó: el sitio es `powerapp-web` y está en https://powerapp-web.onrender.com. Se redespliega solo con cada push a `main`. La configuración está en el README, sección "Deploy". Variables: `VITE_API_URL=https://powerapp-backend.onrender.com`, `VITE_USE_MOCKS=true` (los mocks siguen prendidos hasta T44) y `NODE_VERSION=22`.
+  - Verificado en el sitio real: `/login` abre con los assets en 200 y MSW activo; recargar `/u/plan` mantiene la sesión y la pantalla; con sesión de Usuario, `/c/alumnos` vuelve a `/u/plan`; sin sesión, `/a/inicio` va a `/login`; una ruta inexistente muestra "Página no encontrada". Ninguna da 404 del servidor.
+  - Pendiente: C1. El backend de Render no respondió a un preflight de prueba (25 s), así que no se pudo comprobar. No bloquea esta tarea, porque el sitio con mocks no necesita CORS, pero el login contra el backend real desde el sitio desplegado no puede leer el token hasta que C1 esté. Cuando exista, probar con `OPTIONS` desde el origen `https://powerapp-web.onrender.com` y mirar que `Access-Control-Expose-Headers` incluya `Authorization`.
+  - Para las tareas que siguen: las variables `VITE_*` se incrustan al compilar. Si se cambian en Render hay que redesplegar (Manual Deploy), no alcanza con guardarlas. T44 apaga los mocks con `mock: false` en el registry y pasa `VITE_USE_MOCKS` a `false` en Render.
 - [ ] **T09 · Login (1 h) · CU-U-02**
   - Email y contraseña, con las validaciones de `LoginUserDto`.
   - Credenciales inválidas: error genérico. Cuenta inactiva (403): mensaje específico.

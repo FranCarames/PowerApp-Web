@@ -170,12 +170,20 @@ Los releases van de `develop` a `main`, y Render despliega `main`.
 
 ## Deploy
 
-Static Site en Render, desplegado desde `main`:
+Static Site en Render, desplegado desde `main`: https://powerapp-web.onrender.com. Cada push a `main` lo redespliega.
 
-- **Build:** `npm run build`
+- **Build:** `npm ci && npm run build`
 - **Publish:** `dist`
-- **Rewrite:** `/*` a `/index.html`, para que recargar una ruta interna no dé 404.
-- **Variables:** `VITE_API_URL` y `VITE_USE_MOCKS`. Con `VITE_USE_MOCKS=true` el build incluye MSW y `mockServiceWorker.js`; con `false`, ninguno de los dos.
+- **Rewrite:** `/*` a `/index.html`, con acción *Rewrite* (no *Redirect*), para que recargar una ruta interna no dé 404. Se carga en el servicio, pestaña *Redirects/Rewrites*.
+- **Variables:** se cargan en la pestaña *Environment* del servicio.
+
+| Variable | Valor en Render |
+|---|---|
+| `VITE_API_URL` | `https://powerapp-backend.onrender.com` |
+| `VITE_USE_MOCKS` | `true` hasta que T44 apague los mocks. Con `true` el build incluye MSW y `mockServiceWorker.js`; con `false`, ninguno de los dos. |
+| `NODE_VERSION` | `22` (Vite 8 pide Node 20.19 o 22.12 o más) |
+
+Las variables `VITE_*` se leen al compilar: si las cambiás en Render hay que redesplegar (*Manual Deploy*), no alcanza con guardarlas.
 
 El backend tiene que habilitar CORS para el dominio del front, con `Access-Control-Expose-Headers: Authorization`. Sin eso, el navegador no deja leer el token del login.
 
