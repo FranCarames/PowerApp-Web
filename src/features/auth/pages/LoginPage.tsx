@@ -45,9 +45,10 @@ export function LoginPage() {
           ))}
         </div>
         {import.meta.env.DEV && (
-          <Link to="/dev/ui" className={styles.devLink}>
-            Galería de componentes
-          </Link>
+          <div className={styles.devLinks}>
+            <Link to="/dev/ui">Galería de componentes</Link>
+            <Link to="/dev/api">Prueba de la API</Link>
+          </div>
         )}
       </div>
     </>

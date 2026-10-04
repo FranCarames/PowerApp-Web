@@ -17,10 +17,15 @@
   gap: 10px;
 }
 
-.devLink {
-  display: block;
+.devLinks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 18px;
   margin-top: 16px;
-  text-align: center;
+}
+
+.devLinks a {
   color: var(--acc);
   font-size: 13px;
   font-weight: 600;
