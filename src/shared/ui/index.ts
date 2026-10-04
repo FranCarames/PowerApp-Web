@@ -21,6 +21,7 @@ export { Modal } from './Modal';
 export { Note } from './Note';
 export { PageHeader } from './PageHeader';
 export { PasswordInput } from './PasswordInput';
+export { PhoneField } from './PhoneField';
 export { Pill } from './Pill';
 export { SearchInput } from './SearchInput';
 export { SectionHeader } from './SectionHeader';

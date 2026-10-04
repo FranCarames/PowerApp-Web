@@ -1,0 +1,6 @@
+/* Código de país de 76 px y el número, con 8 px entre los dos (grid del prototipo). */
+.phone {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 8px;
+}
