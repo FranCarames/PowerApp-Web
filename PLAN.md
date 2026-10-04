@@ -61,7 +61,7 @@ Para cada uno se indica qué necesita el front. El contrato lo diseña Fran. Has
 | B6 | Historial de entrenamientos | CU-E-06, CU-E-07 | Rutinas ejecutadas por un alumno, con fecha. Filtro por ejercicio con peso, reps y fecha. | T43 |
 | B7 | Asignar y editar la planificación de un alumno | CU-E-13, CU-E-14 | Body de `POST /planification/user/assign` y `/user/edit/{id}`: alumno, planificación, fechas y nota. Cómo se informa un solapamiento con un plan vigente y cómo se confirma igual. Qué id recibe `DELETE /planification/user/{id}` y si hace la baja lógica que pide CU-E-14. | T41 |
 | B8 | Editar entrenador | CU-A-18 | Editar `coach_email` y `cuil`. | T37 |
-| B9 | Flag de contraseña temporal | CU-U-02 | Un campo en la respuesta del login que indique cambio de contraseña obligatorio. T09 propone `password_change_required` (boolean, junto a los campos del `User`; falta o `false` es una contraseña común). | T09 (con mock), T44 |
+| B9 | Flag de contraseña temporal | CU-U-02 | Un campo en la respuesta del login que indique cambio de contraseña obligatorio. T09 propone `password_change_required` (boolean, junto a los campos del `User`; falta o `false` es una contraseña común). Hoy el `loginUser` del backend, cuando la contraseña no es la común, prueba la temporal y responde igual que un login normal, sin ningún flag: se agregaría en esa rama. | T09 (con mock), T44 |
 
 ### 4.2 Configuración y trabajo del backend
 
@@ -229,10 +229,15 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - Reemplazó el `/login` provisorio de T07 (los botones "Entrar como…" y `mockSession.ts`). Los botones de prueba de `/cambiar-contrasena` siguen hasta T12.
   - Verificado contra un doble local del contrato (`.claude/fake-backend.cjs`), no contra el backend real: el de Render no responde y el local no estaba encendido. Falta probarlo con el real, ya con C1 en Render.
   - Para las tareas que siguen: T10 y T12 reutilizan `zodResolver` y el patrón de `schemas.ts` (un schema por formulario). T44 apaga el mock del login (`mock: false`) cuando B9 exista en el contrato, y con eso dejan de existir las cuentas de demo.
-- [ ] **T10 · Registro (1 h) · CU-U-01**
+- [x] **T10 · Registro (1 h) · CU-U-01**
   - Campos de `CreateUserDto`: nombre, apellido, email, prefijo, teléfono y contraseña. Siempre con `role: user`.
   - Email ya registrado: mensaje con links a login y a recuperar.
   - Después del alta, vuelve al login (V5, V6).
+  - Cómo quedó: `RegisterPage` con React Hook Form y `registerSchema` (todos obligatorios; nombre y apellido hasta 50, email hasta 50, prefijo hasta 10, teléfono hasta 20, contraseña de 6 a 50). `useRegister()` manda siempre `role: 'user'`. Sin mock: `POST /users/register` es real. Está explicado en el README, sección "Registro".
+  - V5: el front valida con el DTO (6 caracteres, sin mayúscula ni número), y el placeholder dice "Mínimo 6 caracteres", no 8 como el prototipo. V6: el token que devuelve el registro se ignora; se vuelve a `/login` con un aviso y sin abrir sesión.
+  - Email repetido: confirmado en `users.service.ts` del backend, responde 409 con `{ error: 'Ya existe un usuario con ese email' }`. La pantalla muestra el aviso con los links, deja el foco en el email y conserva lo escrito.
+  - Verificado contra un doble local que responde como ese código (201 con token en el header, 409, 400 y 500), no contra el backend real: el de Render no responde y el local no estaba encendido.
+  - Para las tareas que siguen: `schemas.ts` ya comparte las reglas de `email` y de contraseña entre el login y el registro. El teléfono con código de país y número vuelve a aparecer en T14 (datos personales): si se repite, conviene extraerlo a `shared/ui`.
 - [ ] **T11 · Recuperar contraseña (0,5 h) · CU-U-04**
   - Envía el email a `POST /users/recover-password`.
   - El modal de confirmación muestra el mismo mensaje exista o no el email.
