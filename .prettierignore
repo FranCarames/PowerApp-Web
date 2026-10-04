@@ -14,3 +14,6 @@ src/shared/styles/tokens.css
 CLAUDE.md
 PLAN.md
 README.md
+
+# Service worker de MSW: lo genera `npx msw init public/`, no se edita
+public/mockServiceWorker.js

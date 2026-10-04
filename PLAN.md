@@ -191,10 +191,13 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - QueryClient, proxy de Vite a `localhost:3000` y `.env.example`.
   - Listo cuando: un hook de prueba lista `GET /membership/all` contra el backend local. El hook está en `src/app/dev` y se ve en `/dev/api`, que además prueba un 404 y un 401.
   - Falta para T07: el cliente ya llama a `onUnauthorized` ante un 401 de un request con token, pero nadie lo conecta todavía.
-- [ ] **T06 · Mocks con MSW (1,5 h)**
+- [x] **T06 · Mocks con MSW (1,5 h)**
   - Registry por endpoint, handlers por dominio, fixtures tipadas y `pending.ts`.
   - Activación con `VITE_USE_MOCKS`, también en el build de Render.
   - Listo cuando: con mocks activados, `/membership/all` responde el fixture; desactivados, responde el backend.
+  - Cómo se suma un mock, para las tareas que siguen: fixture en `src/mocks/fixtures/`, handler con `mockEndpoint` en `src/mocks/handlers/<dominio>.ts` (y en `handlers/index.ts`) y la entrada con `mock: true` en `registry.ts`. T44 apaga los mocks pasando esa entrada a `mock: false`. Está explicado en el README, sección "Backend y mocks".
+  - `pending.ts` trae solo B7 y B8, cuyos campos salen de entidades del contrato. B1 a B6 y B9 los tipa la tarea que los usa.
+  - Con `VITE_USE_MOCKS=false` el build no incluye MSW ni su worker; con `true`, sí.
 - [ ] **T07 · Sesión, guards y arranque en frío (1,5 h)**
   - AuthProvider con token y usuario en `localStorage` (la base ya está desde T04).
   - Rutas protegidas por rol, redirección al home de cada rol y guard de cambio de contraseña pendiente (`RequireRole` ya existe desde T04, sin el guard de contraseña).
