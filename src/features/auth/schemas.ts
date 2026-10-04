@@ -28,6 +28,11 @@ export const loginSchema = z.object({
 
 export type LoginValues = z.input<typeof loginSchema>;
 
+/** `RecoverPasswordDto`: solo el email. */
+export const recoverSchema = z.object({ email });
+
+export type RecoverValues = z.input<typeof recoverSchema>;
+
 /**
  * `CreateUserDto`, menos `role`: el registro siempre manda `user` y no es un campo del formulario.
  * Todos son obligatorios y tienen un largo máximo (nombre y apellido, 50; prefijo, 10; teléfono, 20).
