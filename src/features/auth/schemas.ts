@@ -28,6 +28,27 @@ export const loginSchema = z.object({
 
 export type LoginValues = z.input<typeof loginSchema>;
 
+/**
+ * `ChangePasswordDto` más "repetir contraseña", que es solo del formulario: el body lleva
+ * `current_password` y `new_password`. La actual puede ser la temporal (cuando se entró con ella), y
+ * el DTO le pide solo el largo máximo; la nueva, entre 6 y 50.
+ */
+export const changePasswordSchema = z
+  .object({
+    current_password: z
+      .string()
+      .min(1, 'Ingresá tu contraseña actual')
+      .max(50, 'La contraseña no puede tener más de 50 caracteres'),
+    new_password: password('Ingresá una contraseña nueva'),
+    confirm_password: z.string().min(1, 'Repetí la contraseña nueva'),
+  })
+  .refine((values) => values.new_password === values.confirm_password, {
+    path: ['confirm_password'],
+    message: 'Las contraseñas no coinciden',
+  });
+
+export type ChangePasswordValues = z.input<typeof changePasswordSchema>;
+
 /** `RecoverPasswordDto`: solo el email. */
 export const recoverSchema = z.object({ email });
 
