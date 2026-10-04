@@ -1,0 +1,15 @@
+import { redirect, type RouteObject } from 'react-router';
+
+import { MembershipsPage } from './pages/MembershipsPage';
+import { PlansPage } from './pages/PlansPage';
+import { RoutinesPage } from './pages/RoutinesPage';
+import { StudentsPage } from './pages/StudentsPage';
+
+/** Pantallas del rol Entrenador, bajo /c. Van dentro de <AppShell> (lo arma el router). */
+export const coachRoutes: RouteObject[] = [
+  { index: true, loader: () => redirect('/c/alumnos') },
+  { path: 'alumnos', Component: StudentsPage },
+  { path: 'membresias', Component: MembershipsPage },
+  { path: 'planes', Component: PlansPage },
+  { path: 'rutinas', Component: RoutinesPage },
+];
