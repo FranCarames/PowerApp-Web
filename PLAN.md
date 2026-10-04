@@ -238,10 +238,15 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - Email repetido: confirmado en `users.service.ts` del backend, responde 409 con `{ error: 'Ya existe un usuario con ese email' }`. La pantalla muestra el aviso con los links, deja el foco en el email y conserva lo escrito.
   - Verificado contra un doble local que responde como ese código (201 con token en el header, 409, 400 y 500), no contra el backend real: el de Render no responde y el local no estaba encendido.
   - Para las tareas que siguen: `schemas.ts` ya comparte las reglas de `email` y de contraseña entre el login y el registro. El teléfono con código de país y número vuelve a aparecer en T14 (datos personales): si se repite, conviene extraerlo a `shared/ui`.
-- [ ] **T11 · Recuperar contraseña (0,5 h) · CU-U-04**
+- [x] **T11 · Recuperar contraseña (0,5 h) · CU-U-04**
   - Envía el email a `POST /users/recover-password`.
   - El modal de confirmación muestra el mismo mensaje exista o no el email.
   - Si falla el envío, permite reintentar.
+  - Cómo quedó: `RecoverPage` con React Hook Form y `recoverSchema`. `useRecoverPassword()` llama al endpoint real y la pantalla ignora su respuesta: el modal dice siempre "Si *email* está registrado, te enviamos una contraseña temporal…". Con un fallo, aviso rojo, botón "Reintentar" y el email conservado. Sin mock. Está explicado en el README, sección "Recuperar contraseña".
+  - Textos que cambian respecto del prototipo, porque no serían ciertos: la contraseña temporal real tiene 10 caracteres entre letras y números (el prototipo dice "6 dígitos"), y "la enviamos a *email*" pasa a "si *email* está registrado, te enviamos…" (con un email que no existe, la versión del prototipo sería falsa).
+  - Verificado contra un doble local que responde como el código del backend (200 con el mismo mensaje para cualquier email, y 500), no contra el backend real.
+  - Pendiente del backend, sin ticket en este plan: el servicio de email está sin integrar. El backend imprime la temporal en su consola (`[EMAIL STUB]`), así que hoy ningún usuario recibe el correo. Para probar el ingreso con la temporal con el backend local, se toma de esa consola.
+  - Para las tareas que siguen: T12 recibe a quien entra con la temporal. Hasta que B9 exista, el login no avisa que se usó una temporal, así que el cambio obligatorio solo se ve con las cuentas de demo.
 - [ ] **T12 · Cambiar contraseña (1 h) · CU-U-05**
   - Voluntario: desde Mi cuenta, con contraseña actual, nueva y repetir.
   - Obligatorio: después de entrar con la temporal; la "actual" es la temporal.

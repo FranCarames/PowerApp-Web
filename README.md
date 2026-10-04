@@ -135,6 +135,15 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están det
 - **Teléfono:** son dos controles bajo una etiqueta: el código de país (arranca en `+54`) y el número. La etiqueta "Teléfono" es la del número, y el código tiene su propio `id` y `aria-label`. Se muestra un solo mensaje de error, el del primero que falle.
 - **Sin mock:** `POST /users/register` es real. Con el backend sin responder, el alta avisa que no pudo conectarse.
 
+## Recuperar contraseña
+
+- **Pantalla:** `/recuperar` (`src/features/auth/pages/RecoverPage.tsx`), con `recoverSchema` (`features/auth/schemas.ts`), que replica `RecoverPasswordDto`: el email, de hasta 50 caracteres. `useRecoverPassword()` hace `POST /users/recover-password` (real).
+- **Mismo aviso exista o no el email (CU-U-04):** el backend responde 200 con el mismo mensaje en los dos casos y la pantalla ni lo lee: el modal "Revisá tu correo" dice siempre "Si *email* está registrado, te enviamos una contraseña temporal…". Así no hay forma de saber si el email existe. Cerrarlo con Escape o tocando el fondo vuelve al formulario con el email escrito; "Ir a iniciar sesión" lleva a `/login`.
+- **Si falla el envío:** con un 5xx o sin conexión, un aviso rojo explica que no se pudo enviar, el botón pasa a "Reintentar" y el email queda escrito.
+- **La contraseña temporal** tiene 10 caracteres entre letras y números (el prototipo dice "6 dígitos"), así que los textos no mencionan el largo. El login la acepta, porque está entre los 6 y los 50 caracteres que pide `LoginUserDto`.
+- **El backend todavía no manda el email.** Genera la temporal y la imprime en su consola (`[EMAIL STUB] Contraseña temporal para …`): con el backend local, ahí se lee para probar el ingreso con ella.
+- **Sin mock:** `POST /users/recover-password` es real.
+
 ## Estructura del proyecto
 
 ```
