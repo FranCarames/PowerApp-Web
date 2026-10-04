@@ -178,12 +178,13 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
     - Piezas que el prototipo repite en casi todas las pantallas (PR de seguimiento): IconButton y LinkButton, Tile y Thumb, Note, SectionHeader, List, ListItem y Columns, ListSkeleton y ErrorState, y VisuallyHidden.
   - Una página `/dev/ui`, solo en desarrollo, para verlos todos.
   - Listo cuando: todos se ven bien en `/dev/ui`, en mobile y en desktop.
-- [ ] **T04 · AppShell y navegación por rol (2 h)**
+- [x] **T04 · AppShell y navegación por rol (2 h)**
   - Tab bar inferior en mobile y sidebar desde 960 px.
   - Tabs por rol según `CLAUDE.md`.
   - PageHeader con eyebrow, título, acciones y "Volver".
   - Layout de las pantallas de auth.
   - Listo cuando: con un usuario mock se puede navegar entre tabs vacíos de cada rol.
+  - Para poder cumplirlo, T04 dejó un `AuthProvider` mínimo, el guard `RequireRole` y una sesión de prueba en `/login` (`features/auth`). Cada pantalla vacía lleva el comentario `TEMPORAL (Txx)` con la tarea que la reemplaza.
 - [ ] **T05 · Capa de API (1,5 h)**
   - Scripts `api:fetch` y `api:gen`.
   - Cliente `fetch` tipado: URL base, Bearer, parseo de errores y captura del header `Authorization`.
@@ -194,8 +195,8 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - Activación con `VITE_USE_MOCKS`, también en el build de Render.
   - Listo cuando: con mocks activados, `/membership/all` responde el fixture; desactivados, responde el backend.
 - [ ] **T07 · Sesión, guards y arranque en frío (1,5 h)**
-  - AuthProvider con token y usuario en `localStorage`.
-  - Rutas protegidas por rol, redirección al home de cada rol y guard de cambio de contraseña pendiente.
+  - AuthProvider con token y usuario en `localStorage` (la base ya está desde T04).
+  - Rutas protegidas por rol, redirección al home de cada rol y guard de cambio de contraseña pendiente (`RequireRole` ya existe desde T04, sin el guard de contraseña).
   - Ante un 401, se cierra la sesión.
   - Aviso de "despertando el servidor" a los 4 segundos de espera.
   - Listo cuando: un usuario mock de cada rol entra a su home y no puede abrir rutas de otro rol.
