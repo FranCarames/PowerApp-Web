@@ -16,6 +16,27 @@ if (!rootElement) {
 
 connectApiToSession();
 
+/**
+ * Con `VITE_USE_MOCKS=true` arranca MSW antes del primer render, para que intercepte hasta los
+ * primeros requests. Vite reemplaza `import.meta.env.VITE_USE_MOCKS` por su valor al compilar: con
+ * cualquier otro valor descarta este bloque y el import dinámico, y MSW no entra al bundle.
+ */
+async function enableMocks(): Promise<void> {
+  if (import.meta.env.VITE_USE_MOCKS !== 'true') return;
+  try {
+    const { startMocks } = await import('@/mocks/browser');
+    await startMocks();
+  } catch (error) {
+    // Sin el worker la app arranca igual, pero contra el backend real: se avisa fuerte.
+    console.error(
+      '[mocks] No se pudo iniciar MSW: las requests van al backend real.',
+      error,
+    );
+  }
+}
+
+await enableMocks();
+
 createRoot(rootElement).render(
   <StrictMode>
     <App />
