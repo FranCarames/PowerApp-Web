@@ -259,10 +259,20 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - Mock: `POST /users/change-password` atiende solo a las cuentas de demo (por su token falso) y el resto pasa al backend real. Con esto el cambio obligatorio se puede recorrer completo sin backend: login de la cuenta con contraseña temporal, modal, cambio y home. El estado vive en memoria.
   - Verificado contra un doble local que responde como el código del backend (guard 401, 400 por campos de más, 401 de negocio, 200 y 500), no contra el backend real.
   - Para las tareas que siguen: T13 (Mi cuenta) tiene que linkear a `/cambiar-contrasena` para el cambio voluntario. Si se prefiere que esa pantalla se vea dentro del marco de la app (con la tab bar), como en el prototipo, alcanza con registrar el mismo componente también bajo `/cuenta/contrasena`.
-- [ ] **T13 · Mi cuenta, datos personales y cerrar sesión (1,5 h) · CU-U-06, CU-U-03**
+- [x] **T13 · Mi cuenta, datos personales y cerrar sesión (1,5 h) · CU-U-06, CU-U-03**
   - Menú de cuenta compartido por los tres roles.
   - Datos personales precargados con `GET /users/get/{id}` y guardados con `POST /users/edit`. Un 409 se muestra como "El email ya está en uso". Al guardar, se actualiza el usuario de la sesión. La foto de perfil va como URL.
   - Cerrar sesión: `POST /users/logout` y limpieza de la sesión. Aunque el request falle, la sesión se cierra igual.
+  - Cómo quedó: `AccountPage` con el menú por rol, `PersonalDataPage` con su formulario y `logout()` para cerrar la sesión. Está explicado en el README, sección "Mi cuenta".
+  - Menú: Datos personales y Cambiar contraseña van para los tres roles, como dice la sección 5 de este plan; el prototipo se los muestra solo al alumno. Faltan en el encabezado la píldora "Membresía activa" del alumno (sale del último pago: T14) y "N alumnos activos" del entrenador (sale del listado de alumnos: T15).
+  - Hasta que existan sus tareas, tres ítems abren "Página no encontrada": Historial de pagos (T14), Control de membresías del entrenador (T17) y Biblioteca de ejercicios (T28). T14 tiene además que dejar `/cuenta/pagos` solo para el rol Usuario.
+  - Datos personales: la foto de perfil es un campo opcional con un link `http(s)`. Una foto vacía no se manda, porque el backend la valida como URL y no hay cómo borrarla con ese DTO. El teléfono se pide completo (código y número), como en el registro: en el DTO es opcional, pero un usuario sembrado sin teléfono tendría que cargarlo para guardar otros cambios.
+  - **Bug encontrado y corregido durante la verificación:** el formulario tomaba `defaultValues` al montarse, así que con el dato viejo en el caché mostraba lo anterior al reabrirse tras guardar (y guardar desde ahí lo habría pisado). Ahora el caché queda con lo guardado y el formulario usa `values` con `keepDirtyValues`.
+  - Cerrar sesión: `POST /users/logout` es público y el backend solo confirma (el cierre es descartar el token). El request sale sin esperarse y la sesión se cierra enseguida; si falla, se cierra igual y sin error. `useAuth().signOut` ahora hace esto, y también lo usa el cierre de sesión del cambio obligatorio de contraseña.
+  - Se extrajo `PhoneField` a `shared/ui` (lo usan el registro y los datos personales), las reglas de campos de usuario a `shared/lib/userFields.ts` y `formatMonthYear` a `shared/lib/dates.ts`. El registro, el login y la recuperación se volvieron a verificar: mismos mensajes y mismo teléfono.
+  - Mock: `GET /users/get/{id}` y `POST /users/edit` atienden solo a las cuentas de demo y el resto pasa al backend real. Las ediciones viven en memoria.
+  - Verificado contra un doble local que responde como el código del backend (guard, 400 por campos de más y URL inválida, 409, 500 y 200), no contra el backend real.
+  - Para las tareas que siguen: T14 y T15 completan el encabezado de Mi cuenta (la píldora y el conteo de alumnos). Cualquier pantalla que edite al usuario de la sesión tiene que pasar por `useAuth().updateUser`, para que el nombre y la foto se actualicen en toda la app.
 - [ ] **T14 · Historial de pagos del usuario (1 h) · CU-U-07**
   - Pagos ordenados por fecha descendente, con su `expired_at`.
   - Tarjeta con la membresía actual y su estado, según el último pago.

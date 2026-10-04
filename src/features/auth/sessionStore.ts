@@ -1,4 +1,5 @@
 import { queryClient } from '@/api/queryClient';
+import type { User } from '@/api/types';
 
 import {
   clearSession,
@@ -58,6 +59,17 @@ export function endSession(notice?: string): void {
   current = null;
   notifyChange();
   if (notice) endListeners.forEach((listener) => listener(notice));
+}
+
+/**
+ * Cambia el usuario de la sesión (después de editar sus datos personales). El token y el cambio de
+ * contraseña pendiente siguen igual, y el caché no se vacía: es la misma sesión.
+ */
+export function updateSessionUser(user: User): void {
+  if (!current) return;
+  current = { ...current, user };
+  writeSession(current);
+  notifyChange();
 }
 
 /** Termina el cambio obligatorio de contraseña: la sesión sigue, pero se libera el guard. */

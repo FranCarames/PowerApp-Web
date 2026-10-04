@@ -1,0 +1,26 @@
+/* El bloque centrado de arriba: avatar, nombre y subtítulo, con 22 px hasta el menú. */
+.profile {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.avatar {
+  margin: 0 auto;
+}
+
+.name {
+  font-size: 19px;
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+/* .sub del prototipo. */
+.subtitle {
+  font-size: 12px;
+  color: var(--tm);
+  margin-top: 2px;
+}
+
+.signOut {
+  margin-top: 16px;
+}

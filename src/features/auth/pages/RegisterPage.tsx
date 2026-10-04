@@ -1,4 +1,3 @@
-import { useId } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router';
 
@@ -12,6 +11,7 @@ import {
   Note,
   PageHeader,
   PasswordInput,
+  PhoneField,
   useToast,
 } from '@/shared/ui';
 
@@ -23,9 +23,6 @@ export function RegisterPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const signUp = useRegister();
-  // El <Field> del teléfono le da su id al número, que es el que lleva la etiqueta "Teléfono". El
-  // código de país necesita el suyo, o los dos controles compartirían id.
-  const prefixId = useId();
 
   const {
     register,
@@ -112,24 +109,13 @@ export function RegisterPage() {
             {...register('email')}
           />
         </Field>
-        <Field label="Teléfono" error={phoneError}>
-          <div className={styles.phone}>
-            <Input
-              id={prefixId}
-              aria-label="Código de país"
-              autoComplete="tel-country-code"
-              invalid={Boolean(errors.phone_prefix)}
-              {...register('phone_prefix')}
-            />
-            <Input
-              type="tel"
-              autoComplete="tel-national"
-              placeholder="11 2345 6789"
-              invalid={Boolean(errors.phone_number)}
-              {...register('phone_number')}
-            />
-          </div>
-        </Field>
+        <PhoneField
+          error={phoneError}
+          prefixProps={register('phone_prefix')}
+          numberProps={register('phone_number')}
+          prefixInvalid={Boolean(errors.phone_prefix)}
+          numberInvalid={Boolean(errors.phone_number)}
+        />
         <Field label="Contraseña" error={errors.password?.message}>
           <PasswordInput
             autoComplete="new-password"
