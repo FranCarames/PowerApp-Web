@@ -11,19 +11,22 @@ interface EmptyStateProps {
   icon?: IconName;
   /** Acción sugerida, p. ej. un <Button> para crear el primer registro o reintentar. */
   action?: ReactNode;
+  /** `alert` hace que se anuncie al aparecer: lo usa <ErrorState>. */
+  role?: 'alert' | 'status';
   className?: string;
 }
 
-/** Estado vacío (y, con una acción de reintento, también sirve para los errores de carga). */
+/** Estado vacío. Para un error de carga con reintento está <ErrorState>. */
 export function EmptyState({
   message,
   title,
   icon,
   action,
+  role,
   className,
 }: EmptyStateProps) {
   return (
-    <div className={cx(styles.empty, className)}>
+    <div role={role} className={cx(styles.empty, className)}>
       {icon && <Icon name={icon} size={28} className={styles.icon} />}
       {title && <div className={styles.title}>{title}</div>}
       <div>{message}</div>

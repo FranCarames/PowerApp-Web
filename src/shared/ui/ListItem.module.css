@@ -1,0 +1,32 @@
+/*
+ * .grow, .name, .sub y .chev del prototipo; .meta es el texto de acento de las filas de rutinas y entrenadores.
+ * Los textos son <span> con display:block porque la fila puede ser un <button>, que solo admite contenido en línea.
+ */
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.subtitle {
+  display: block;
+  font-size: 12px;
+  color: var(--tm);
+  margin-top: 2px;
+}
+
+.meta {
+  display: block;
+  font-size: 12px;
+  color: var(--acc);
+  margin-top: 4px;
+}
+
+.chevron {
+  color: var(--tm);
+}
