@@ -61,7 +61,7 @@ Para cada uno se indica qué necesita el front. El contrato lo diseña Fran. Has
 | B6 | Historial de entrenamientos | CU-E-06, CU-E-07 | Rutinas ejecutadas por un alumno, con fecha. Filtro por ejercicio con peso, reps y fecha. | T43 |
 | B7 | Asignar y editar la planificación de un alumno | CU-E-13, CU-E-14 | Body de `POST /planification/user/assign` y `/user/edit/{id}`: alumno, planificación, fechas y nota. Cómo se informa un solapamiento con un plan vigente y cómo se confirma igual. Qué id recibe `DELETE /planification/user/{id}` y si hace la baja lógica que pide CU-E-14. | T41 |
 | B8 | Editar entrenador | CU-A-18 | Editar `coach_email` y `cuil`. | T37 |
-| B9 | Flag de contraseña temporal | CU-U-02 | Un campo en la respuesta del login que indique cambio de contraseña obligatorio. | T09 (con mock), T44 |
+| B9 | Flag de contraseña temporal | CU-U-02 | Un campo en la respuesta del login que indique cambio de contraseña obligatorio. T09 propone `password_change_required` (boolean, junto a los campos del `User`; falta o `false` es una contraseña común). | T09 (con mock), T44 |
 
 ### 4.2 Configuración y trabajo del backend
 
@@ -217,12 +217,18 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - Verificado en el sitio real: `/login` abre con los assets en 200 y MSW activo; recargar `/u/plan` mantiene la sesión y la pantalla; con sesión de Usuario, `/c/alumnos` vuelve a `/u/plan`; sin sesión, `/a/inicio` va a `/login`; una ruta inexistente muestra "Página no encontrada". Ninguna da 404 del servidor.
   - Pendiente: C1. El backend de Render no respondió a un preflight de prueba (25 s), así que no se pudo comprobar. No bloquea esta tarea, porque el sitio con mocks no necesita CORS, pero el login contra el backend real desde el sitio desplegado no puede leer el token hasta que C1 esté. Cuando exista, probar con `OPTIONS` desde el origen `https://powerapp-web.onrender.com` y mirar que `Access-Control-Expose-Headers` incluya `Authorization`.
   - Para las tareas que siguen: las variables `VITE_*` se incrustan al compilar. Si se cambian en Render hay que redesplegar (Manual Deploy), no alcanza con guardarlas. T44 apaga los mocks con `mock: false` en el registry y pasa `VITE_USE_MOCKS` a `false` en Render.
-- [ ] **T09 · Login (1 h) · CU-U-02**
+- [x] **T09 · Login (1 h) · CU-U-02**
   - Email y contraseña, con las validaciones de `LoginUserDto`.
   - Credenciales inválidas: error genérico. Cuenta inactiva (403): mensaje específico.
   - Redirección según el rol.
   - Si el flag de B9 (con mock hasta que exista) indica contraseña temporal, se abre un modal bloqueante "Actualizá tu contraseña" que lleva a `/cambiar-contrasena`.
   - Links a registro y a recuperar.
+  - Cómo quedó: `LoginPage` con React Hook Form y `loginSchema` (email hasta 50, contraseña de 6 a 50). Sumó `react-hook-form` y `zod`, que son del stack, y un `zodResolver` propio en `shared/lib` en lugar de `@hookform/resolvers`, que no está en la lista. `useLogin()` llama a `POST /users/login` (real) y arma la `Session` con el token del header. Está explicado en el README, sección "Login".
+  - B9: el tipo provisional es `LoginResponse` en `pending.ts`, con el campo propuesto `password_change_required` (boolean). Con `true`, la sesión no se abre hasta que el usuario toca el botón del modal bloqueante: si se abriera antes, el guard de T07 lo llevaría a `/cambiar-contrasena` sin mostrarlo.
+  - Mock: `POST /users/login` está en `mock: true`, pero solo responde las cuentas de demo de `src/mocks/fixtures/users.ts` (una por rol, una con contraseña temporal y una cerrada). Los demás emails pasan al backend real con `passthrough`. El token de las cuentas de demo es falso, así que los endpoints reales las rechazan con 401.
+  - Reemplazó el `/login` provisorio de T07 (los botones "Entrar como…" y `mockSession.ts`). Los botones de prueba de `/cambiar-contrasena` siguen hasta T12.
+  - Verificado contra un doble local del contrato (`.claude/fake-backend.cjs`), no contra el backend real: el de Render no responde y el local no estaba encendido. Falta probarlo con el real, ya con C1 en Render.
+  - Para las tareas que siguen: T10 y T12 reutilizan `zodResolver` y el patrón de `schemas.ts` (un schema por formulario). T44 apaga el mock del login (`mock: false`) cuando B9 exista en el contrato, y con eso dejan de existir las cuentas de demo.
 - [ ] **T10 · Registro (1 h) · CU-U-01**
   - Campos de `CreateUserDto`: nombre, apellido, email, prefijo, teléfono y contraseña. Siempre con `role: user`.
   - Email ya registrado: mensaje con links a login y a recuperar.
