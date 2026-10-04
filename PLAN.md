@@ -198,12 +198,15 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - Cómo se suma un mock, para las tareas que siguen: fixture en `src/mocks/fixtures/`, handler con `mockEndpoint` en `src/mocks/handlers/<dominio>.ts` (y en `handlers/index.ts`) y la entrada con `mock: true` en `registry.ts`. T44 apaga los mocks pasando esa entrada a `mock: false`. Está explicado en el README, sección "Backend y mocks".
   - `pending.ts` trae solo B7 y B8, cuyos campos salen de entidades del contrato. B1 a B6 y B9 los tipa la tarea que los usa.
   - Con `VITE_USE_MOCKS=false` el build no incluye MSW ni su worker; con `true`, sí.
-- [ ] **T07 · Sesión, guards y arranque en frío (1,5 h)**
+- [x] **T07 · Sesión, guards y arranque en frío (1,5 h)**
   - AuthProvider con token y usuario en `localStorage` (la base ya está desde T04).
   - Rutas protegidas por rol, redirección al home de cada rol y guard de cambio de contraseña pendiente (`RequireRole` ya existe desde T04, sin el guard de contraseña).
   - Ante un 401, se cierra la sesión. Se conecta con `configureApi({ onUnauthorized })` (el cliente solo lo llama si el request llevaba token). El 403 con "La cuenta está deshabilitada." también cierra la sesión y el de permisos no; `ApiError.serverMessage` trae el texto para distinguirlos.
   - Aviso de "despertando el servidor" a los 4 segundos de espera.
   - Listo cuando: un usuario mock de cada rol entra a su home y no puede abrir rutas de otro rol.
+  - Cómo quedó: la sesión vive en `sessionStore.ts` (fuera de React) y `AuthProvider` se suscribe; el cliente cierra la sesión por un 401 o por el 403 de cuenta deshabilitada, siempre que la sesión no haya cambiado mientras el request volaba. `Session.passwordChangeRequired` es la bandera del cliente del cambio pendiente. Está explicado en el README, sección "Sesión, guards y arranque en frío".
+  - Para las tareas que siguen: T09 tiene que guardar la bandera con el campo de B9 (`signIn({ token, user, passwordChangeRequired })`) y navegar con `homePathFor(session)`. T12 llama a `completePasswordChange()` al terminar el cambio obligatorio. T13 usa `signOut()`, que cierra la sesión local; el `POST /users/logout` y el aviso en el login de por qué se cerró quedan para ellas.
+  - Provisorio: el botón "Entrar con contraseña temporal" de `/login` y los de prueba de `/cambiar-contrasena` (T09 y T12 los reemplazan).
 - [ ] **T08 · Deploy en Render (1 h)**
   - Static Site desde `main`: build `npm run build`, publish `dist`.
   - Rewrite de `/*` a `/index.html`.

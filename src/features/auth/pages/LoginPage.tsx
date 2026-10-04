@@ -5,8 +5,8 @@ import { Button, Note } from '@/shared/ui';
 
 import { BrandBlock } from '../components/BrandBlock';
 import { useAuth } from '../hooks/useAuth';
+import { homePathFor } from '../homePath';
 import { mockSession } from '../mockSession';
-import { HOME_BY_ROLE } from '../roles';
 import styles from './LoginPage.module.css';
 
 const DEMO_ROLES: { role: Role; label: string }[] = [
@@ -20,9 +20,10 @@ export function LoginPage() {
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
-  function enterAs(role: Role) {
-    signIn(mockSession(role));
-    navigate(HOME_BY_ROLE[role], { replace: true });
+  function enterAs(role: Role, passwordChangeRequired = false) {
+    const session = mockSession(role, { passwordChangeRequired });
+    signIn(session);
+    navigate(homePathFor(session), { replace: true });
   }
 
   return (
@@ -43,6 +44,9 @@ export function LoginPage() {
               Entrar como {label}
             </Button>
           ))}
+          <Button variant="ghost" onClick={() => enterAs('user', true)}>
+            Entrar con contraseña temporal
+          </Button>
         </div>
         {import.meta.env.DEV && (
           <div className={styles.devLinks}>

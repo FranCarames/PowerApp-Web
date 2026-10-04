@@ -49,10 +49,18 @@ interface ErrorProbeProps {
   endpoint: string;
   expected: string;
   run: () => Promise<unknown>;
+  /** Qué decir si el request sale bien. Por defecto, que no era lo esperado. */
+  successMessage?: string;
 }
 
 /** Un request que se espera que falle, para ver cómo llega el error y cómo se traduce. */
-function ErrorProbe({ title, endpoint, expected, run }: ErrorProbeProps) {
+function ErrorProbe({
+  title,
+  endpoint,
+  expected,
+  run,
+  successMessage = 'Respondió bien, o sea que no era lo esperado.',
+}: ErrorProbeProps) {
   const probe = useMutation({ mutationFn: run });
 
   return (
@@ -82,7 +90,62 @@ function ErrorProbe({ title, endpoint, expected, run }: ErrorProbeProps) {
       )}
       {probe.isSuccess && (
         <Note tone="ok" icon="check">
-          Respondió bien, o sea que no era lo esperado.
+          {successMessage}
+        </Note>
+      )}
+    </Card>
+  );
+}
+
+const SLOW_MS = 6000;
+
+/** Un request lento a propósito, para ver el aviso de arranque en frío sin esperar a Render. */
+function SlowProbe() {
+  const probe = useMutation({
+    mutationFn: async () => {
+      const started = performance.now();
+      await request('get', '/__dev/slow', {
+        query: { ms: SLOW_MS },
+        auth: false,
+      });
+      return Math.round(performance.now() - started);
+    },
+  });
+
+  return (
+    <Card>
+      <div className={styles.probeHead}>
+        <div>
+          <div className={styles.probeTitle}>Respuesta lenta</div>
+          <code className={styles.endpoint}>GET /__dev/slow?ms={SLOW_MS}</code>
+        </div>
+        <Button
+          sm
+          variant="sec"
+          loading={probe.isPending}
+          onClick={() => probe.mutate()}
+        >
+          Probar
+        </Button>
+      </div>
+      <p className={styles.expected}>
+        Esperado: a los 4 segundos aparece arriba "Despertando el servidor…", y
+        desaparece cuando llega la respuesta.
+      </p>
+      {API_URL && (
+        <Note tone="warn" icon="alert">
+          Este endpoint lo sirve Vite, así que solo anda con VITE_API_URL vacía.
+          Con una URL absoluta el request va al backend y da 404.
+        </Note>
+      )}
+      {probe.isSuccess && (
+        <Note tone="ok" icon="check">
+          Respondió a los {(probe.data / 1000).toFixed(1)} segundos.
+        </Note>
+      )}
+      {probe.isError && (
+        <Note tone="warn" icon="alert">
+          {getErrorMessage(probe.error)}
         </Note>
       )}
     </Card>
@@ -203,6 +266,21 @@ export function ApiProbePage() {
           expected="401"
           run={() => request('get', '/api/v1/users/all', { auth: false })}
         />
+        <ErrorProbe
+          title="Endpoint protegido con la sesión"
+          endpoint="GET /api/v1/users/all"
+          expected="Con la sesión de prueba, 401: el token no es de verdad, así que se cierra la sesión y aparece un aviso (esta página no pide sesión, así que no redirige: las pantallas con sesión sí vuelven a /login). Con un token válido, 200, o 403 si el rol no alcanza, que no cierra la sesión."
+          successMessage="Respondió bien: el token de la sesión es válido."
+          run={() => api.get('/api/v1/users/all')}
+        />
+      </GallerySection>
+
+      <GallerySection
+        id="arranque-en-frio"
+        title="Arranque en frío"
+        description="El backend de Render se duerme y el primer request puede tardar casi un minuto."
+      >
+        <SlowProbe />
       </GallerySection>
     </main>
   );

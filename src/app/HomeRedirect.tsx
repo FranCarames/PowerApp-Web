@@ -1,11 +1,19 @@
 import { Navigate } from 'react-router';
 
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { HOME_BY_ROLE } from '@/features/auth/roles';
+import { homePathFor } from '@/features/auth/homePath';
 
-/** Ruta "/": lleva al inicio del rol de la sesión, o al login si no hay. */
+/**
+ * Ruta "/": lleva al inicio del rol de la sesión (o al cambio de contraseña, si lo tiene pendiente),
+ * o al login si no hay sesión.
+ */
 export function HomeRedirect() {
-  const { user } = useAuth();
+  const { user, passwordChangeRequired } = useAuth();
 
-  return <Navigate to={user ? HOME_BY_ROLE[user.role] : '/login'} replace />;
+  return (
+    <Navigate
+      to={user ? homePathFor({ user, passwordChangeRequired }) : '/login'}
+      replace
+    />
+  );
 }
