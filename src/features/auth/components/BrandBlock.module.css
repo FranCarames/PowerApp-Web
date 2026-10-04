@@ -1,0 +1,20 @@
+.brand {
+  text-align: center;
+  margin: 28px 0 34px;
+}
+
+.logo {
+  margin: 0 auto 18px;
+}
+
+.wordmark {
+  font-family: var(--fD);
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tagline {
+  color: var(--ts);
+  margin-top: 6px;
+}

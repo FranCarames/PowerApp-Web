@@ -1,0 +1,54 @@
+.config {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.config dt {
+  color: var(--tm);
+  font-weight: 600;
+}
+
+.config code,
+.endpoint {
+  font-family: var(--fM);
+  font-size: 12px;
+  color: var(--acc);
+}
+
+.price {
+  font-family: var(--fM);
+  font-weight: 800;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-family: var(--fM);
+  font-size: 12px;
+  color: var(--ts);
+}
+
+.probeHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.probeTitle {
+  font-weight: 700;
+}
+
+.expected {
+  margin: 8px 0 12px;
+  font-size: 12px;
+  color: var(--tm);
+}

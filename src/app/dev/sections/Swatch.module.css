@@ -1,0 +1,29 @@
+.swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.chip {
+  height: 48px;
+  margin-bottom: 4px;
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+}
+
+.name {
+  font-family: var(--fM);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.value {
+  font-family: var(--fM);
+  font-size: 11px;
+  color: var(--ts);
+  overflow-wrap: anywhere;
+}

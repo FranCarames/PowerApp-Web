@@ -5,7 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig([
-  globalIgnores(['dist', 'src/api/schema.d.ts']),
+  globalIgnores(['dist', 'src/api/schema.d.ts', 'public/mockServiceWorker.js']),
   {
     files: ['**/*.{ts,tsx}'],
     // "recommended" de typescript-eslint ya prohíbe `any` y `@ts-ignore`.

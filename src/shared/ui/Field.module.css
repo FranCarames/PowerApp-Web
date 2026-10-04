@@ -1,0 +1,21 @@
+.field {
+  margin-bottom: 14px;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ts);
+  margin-bottom: 6px;
+}
+
+.message {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--tm);
+}
+
+.error {
+  color: var(--err);
+}

@@ -1,0 +1,20 @@
+.spinner {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  border: 2px solid var(--el);
+  border-top-color: var(--pri);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.current {
+  border-color: color-mix(in srgb, currentColor 30%, transparent);
+  border-top-color: currentColor;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

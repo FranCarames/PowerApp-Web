@@ -43,15 +43,17 @@ No se usan Tailwind, Redux, Zustand, axios ni librerías de componentes de UI. C
    npm install
    ```
 
-2. Copiá `.env.example` a `.env` (se crea en la T05). En local alcanza con dejar `VITE_API_URL` vacía: Vite hace proxy de `/api` a `http://localhost:3000`, así que no hay problemas de CORS.
+2. Si necesitás cambiar alguna variable, copiá `.env.example` a `.env`. Para trabajar en local no hace falta: con `VITE_API_URL` vacía, Vite hace proxy de `/api` a `http://localhost:3000`, así que no hay problemas de CORS.
 
-3. Levantá el backend local en el puerto 3000, o activá los mocks con `VITE_USE_MOCKS=true`.
+3. Levantá el backend local en el puerto 3000, o activá los mocks con `VITE_USE_MOCKS=true`. Los mocks responden solo lo que el registry marca como mock; el resto sigue yendo al backend, así que para eso igual tiene que estar levantado.
 
 4. Arrancá el servidor de desarrollo:
 
    ```bash
    npm run dev
    ```
+
+5. Para comprobar que el front llega al backend, abrí `/dev/api` (existe solo en desarrollo): lista las membresías y prueba un 404 y un 401 con el mensaje que vería el usuario.
 
 ### Scripts
 
@@ -64,7 +66,7 @@ No se usan Tailwind, Redux, Zustand, axios ni librerías de componentes de UI. C
 | `npm run lint` | ESLint |
 | `npm run format` | Prettier |
 | `npm run api:fetch` | Descarga el JSON del Swagger del backend local a `src/api/openapi.json`. La URL sale de `API_DOCS_URL` (por defecto `http://localhost:3000/docs-json`) o del primer argumento: `npm run api:fetch -- <url>`. |
-| `npm run api:gen` | Genera `src/api/schema.d.ts` desde `src/api/openapi.json` |
+| `npm run api:gen` | Genera `src/api/schema.d.ts` (los tipos) y `src/api/publicOperations.ts` (los endpoints que no piden token) desde `src/api/openapi.json` |
 
 Antes de dar una tarea por terminada, `typecheck`, `lint` y `build` tienen que pasar sin errores.
 
@@ -74,6 +76,7 @@ Antes de dar una tarea por terminada, `typecheck`, `lint` y `build` tienen que p
 |---|---|
 | `VITE_API_URL` | Origen del backend, sin `/api/v1`. En Render: `https://powerapp-backend.onrender.com`. En local queda vacía. |
 | `VITE_USE_MOCKS` | `true` activa MSW para los endpoints marcados como mock en `src/mocks/registry.ts`. El resto va al backend real. |
+| `API_PROXY_TARGET` | Solo del servidor de desarrollo (no llega al navegador). A dónde reenvía Vite las requests a `/api`. Por defecto, `http://localhost:3000`. |
 
 ## Backend y mocks
 
@@ -83,15 +86,45 @@ El backend lo desarrolla Fran por separado y **este repo nunca lo modifica**. Lo
 - **Sin contrato:** los tipos provisionales viven en `src/api/pending.ts`, marcados con `// PENDIENTE-CONTRATO: <id> <CU>`. Cuando el contrato aparece en `openapi.json`, se borran, se regeneran los tipos y se ajusta el código.
 - **Arranque en frío:** el backend corre en el free tier de Render y se duerme. Si una request tarda más de 4 segundos, el front muestra "Despertando el servidor, puede tardar un poco…".
 
+### Cómo funcionan los mocks
+
+Con `VITE_USE_MOCKS=true`, `main.tsx` arranca MSW (`src/mocks/browser.ts`) antes del primer render. MSW registra el service worker `public/mockServiceWorker.js`, que responde solo los endpoints marcados `mock: true` en el registry. Todo lo demás sigue su camino al backend real, con la misma URL base (`VITE_API_URL`, o el proxy de Vite si está vacía).
+
+| Archivo | Qué es |
+|---|---|
+| `src/mocks/registry.ts` | Qué endpoints se mockean: método y path del contrato (si no existen en `openapi.json`, no compila) y `mock: true \| false`. Lo que no figura es real. |
+| `src/mocks/handlers/<dominio>.ts` | Los mocks de cada dominio, con `mockEndpoint(método, path, resolver)`. El resolver recibe el body del request y los parámetros de ruta tipados con el contrato, y el compilador exige que devuelva lo que el contrato declara. |
+| `src/mocks/fixtures/` | Datos de ejemplo en español, tipados con los tipos generados. |
+| `src/mocks/responses.ts` | Los errores con los dos formatos del backend (`serviceError`: `{ error }`; `guardError`: `{ statusCode, message, error }`), la respuesta vacía y `authTokenHeaders`, el header `Authorization` con el que el login manda el token. |
+| `src/mocks/endpoint.ts` | `mockEndpoint` y `mockPendingEndpoint`. |
+
+- **Sumar un mock:** fixture en `fixtures/`, handler en `handlers/<dominio>.ts` (y en `handlers/index.ts`) y la entrada con `mock: true` en el registry. Si el registry y los handlers no coinciden, la consola avisa al arrancar.
+- **Un endpoint sin contrato** (`PENDIENTE-CONTRATO`) se mockea con `mockPendingEndpoint` y una entrada con `pending: '<id>'` (el de la dependencia del PLAN) en el registry. Sus tipos van en `src/api/pending.ts`.
+- **Apagar un mock** cuando el backend implementa el endpoint: `mock: false` en el registry. El handler queda.
+- **Demora:** cada mock responde después de 100 a 400 ms, como un backend de verdad, para que se vean los estados de carga.
+- **CORS:** los mocks no lo reproducen. La respuesta sale del service worker, así que el navegador deja leer `Authorization` aunque el backend real todavía no lo exponga (C1 de `PLAN.md`).
+- **La variable se lee al compilar** y al arrancar `npm run dev`. Con `VITE_USE_MOCKS=false` (o sin definirla), el build no incluye MSW ni `mockServiceWorker.js`. Con `true` van los dos en `dist`, que es lo que necesita el deploy en Render.
+- **`public/mockServiceWorker.js`** lo genera MSW y no se edita. Al actualizar `msw`, se regenera con `npx msw init` (el directorio ya está guardado en `package.json`).
+- **MSW 3** pide Node 22.12 o más.
+
 Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están detalladas en la sección 4 de [`PLAN.md`](PLAN.md).
+
+## Sesión, guards y arranque en frío
+
+- **La sesión** (token y usuario) vive en `src/features/auth/sessionStore.ts`: en memoria y en `localStorage` (clave `powerapp.session`), que se lee una sola vez, al cargar la página. `useAuth()` la expone.
+- **Cierre automático:** un 401 en un request que llevaba token, o un 403 con "La cuenta está deshabilitada.", cierran la sesión, vacían el caché de TanStack Query y muestran un aviso; los guards llevan a `/login`. El 403 de "Permisos insuficientes" no la cierra. Si la sesión cambió mientras el request estaba en vuelo (otro login, un cierre), su error no toca la sesión nueva.
+- **Guards:** `RequireRole` (cada zona exige su rol; quien tiene otro vuelve a su inicio), `RequireSession` (`/cambiar-contrasena`) y `PublicRoute` (login, registro, recuperar y las direcciones que no existen).
+- **Cambio de contraseña pendiente:** `session.passwordChangeRequired`, que marca el login (el campo de la respuesta es B9, todavía sin contrato). Con eso la única ruta permitida es `/cambiar-contrasena`, incluso después de recargar. `completePasswordChange()` libera el guard.
+- **Arranque en frío:** si un request pasa de 4 segundos (`COLD_START_HINT_MS`, en `src/api/coldStart.ts`) sin que el backend conteste, aparece arriba "Despertando el servidor, puede tardar un poco…", sin cortar el request. Se va cuando el backend contesta (con lo que sea, menos 502, 503 o 504) o 3 segundos después del último request que falló sin respuesta, para que no parpadee mientras TanStack Query reintenta.
+- **Para probarlo en desarrollo**, `/dev/api` tiene un probe que manda el token de la sesión a un endpoint protegido (con la sesión de prueba da 401 y la cierra) y otro de respuesta lenta, que pide `/__dev/slow` (lo sirve Vite, solo en desarrollo, y anda solo con `VITE_API_URL` vacía).
 
 ## Estructura del proyecto
 
 ```
 src/
   app/            router, providers, AppShell (tab bar y sidebar)
-  api/            client.ts, openapi.json (bajado del Swagger), schema.d.ts (generado), pending.ts, queryKeys.ts
-  mocks/          browser.ts, registry.ts, handlers/<dominio>.ts, fixtures/
+  api/            client.ts, coldStart.ts, errors.ts, queryClient.ts, queryKeys.ts, types.ts, openapi.json (bajado del Swagger), schema.d.ts y publicOperations.ts (generados), pending.ts
+  mocks/          browser.ts, registry.ts, endpoint.ts, responses.ts, handlers/<dominio>.ts, fixtures/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
     account/      Mi cuenta, compartida por los tres roles
@@ -103,7 +136,8 @@ src/
     icons/        íconos SVG del prototipo como componentes
     lib/          formato de números, fechas y moneda; helpers
     styles/       tokens.css, global.css
-scripts/          fetch-openapi.mjs (lo que corre npm run api:fetch)
+public/           mockServiceWorker.js (el service worker de MSW, generado con npx msw init)
+scripts/          fetch-openapi.mjs y gen-public-operations.mjs (lo que corren npm run api:fetch y npm run api:gen)
 ```
 
 Cada feature organiza su código en `pages/`, `components/` y `hooks/`.
@@ -141,7 +175,7 @@ Static Site en Render, desplegado desde `main`:
 - **Build:** `npm run build`
 - **Publish:** `dist`
 - **Rewrite:** `/*` a `/index.html`, para que recargar una ruta interna no dé 404.
-- **Variables:** `VITE_API_URL` y `VITE_USE_MOCKS`.
+- **Variables:** `VITE_API_URL` y `VITE_USE_MOCKS`. Con `VITE_USE_MOCKS=true` el build incluye MSW y `mockServiceWorker.js`; con `false`, ninguno de los dos.
 
 El backend tiene que habilitar CORS para el dominio del front, con `Access-Control-Expose-Headers: Authorization`. Sin eso, el navegador no deja leer el token del login.
 

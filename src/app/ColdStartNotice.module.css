@@ -1,0 +1,44 @@
+/*
+ * Aviso de arranque en frío, arriba y al centro (el toast va abajo). El elemento que se posiciona
+ * (.notice) no define `display`: un popover cerrado depende del display:none del navegador. El
+ * aspecto visible está en .body, con el mismo fondo y borde que el toast.
+ */
+.notice {
+  position: fixed;
+  inset: auto;
+  left: 50%;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  z-index: 95;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+  transform: translateX(-50%);
+  pointer-events: none;
+  animation: notice-in 0.25s ease-out;
+}
+
+.body {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: var(--el);
+  border: 1px solid var(--border2);
+  color: var(--tp);
+  padding: 11px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+}

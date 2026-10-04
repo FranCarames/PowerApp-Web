@@ -1,0 +1,37 @@
+/* .logo del prototipo; .sm es el de .side-brand */
+.logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--pri), var(--priL));
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(232, 69, 10, 0.35);
+}
+
+.logo::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--acc);
+  box-shadow: 0 0 10px var(--acc);
+}
+
+.sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+.sm::after {
+  width: 11px;
+  height: 11px;
+}

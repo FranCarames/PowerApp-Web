@@ -161,12 +161,12 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - Guardar el JSON del Swagger en `src/api/openapi.json`. La documentación no se copia: se lee de PowerApp-Docs.
   - Agregar `CLAUDE.md` y este `PLAN.md` en la raíz.
   - Listo cuando: `npm run dev` levanta una página vacía, y `typecheck`, `lint` y `build` pasan.
-- [ ] **T02 · Estilos globales (1 h)**
+- [x] **T02 · Estilos globales (1 h)**
   - `tokens.css` copiado exacto del prototipo.
   - `global.css` con reset, foco visible, reduced motion y safe areas.
   - Google Fonts con preconnect, `viewport-fit=cover` y `theme-color`.
   - Listo cuando: una página de prueba muestra las tipografías y los colores igual que el prototipo.
-- [ ] **T03 · Componentes base (3 h)**
+- [x] **T03 · Componentes base (3 h)**
   - Componentes:
     - Button (variantes pri, sec, ghost, danger y sm).
     - Field con Input, PasswordInput (mostrar y ocultar), Select y Textarea, todos con estado de error.
@@ -175,29 +175,38 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
     - Toast, EmptyState, Spinner y Skeleton.
     - Stat, FiberBar, Fab y Avatar.
     - Íconos del prototipo como componentes.
+    - Piezas que el prototipo repite en casi todas las pantallas (PR de seguimiento): IconButton y LinkButton, Tile y Thumb, Note, SectionHeader, List, ListItem y Columns, ListSkeleton y ErrorState, y VisuallyHidden.
   - Una página `/dev/ui`, solo en desarrollo, para verlos todos.
   - Listo cuando: todos se ven bien en `/dev/ui`, en mobile y en desktop.
-- [ ] **T04 · AppShell y navegación por rol (2 h)**
+- [x] **T04 · AppShell y navegación por rol (2 h)**
   - Tab bar inferior en mobile y sidebar desde 960 px.
   - Tabs por rol según `CLAUDE.md`.
   - PageHeader con eyebrow, título, acciones y "Volver".
   - Layout de las pantallas de auth.
   - Listo cuando: con un usuario mock se puede navegar entre tabs vacíos de cada rol.
-- [ ] **T05 · Capa de API (1,5 h)**
-  - Scripts `api:fetch` y `api:gen`.
+  - Para poder cumplirlo, T04 dejó un `AuthProvider` mínimo, el guard `RequireRole` y una sesión de prueba en `/login` (`features/auth`). Cada pantalla vacía lleva el comentario `TEMPORAL (Txx)` con la tarea que la reemplaza.
+- [x] **T05 · Capa de API (1,5 h)**
+  - Scripts `api:fetch` y `api:gen`. El primero venía de T01; `api:gen` ahora también genera `src/api/publicOperations.ts`, con los endpoints que no piden token.
   - Cliente `fetch` tipado: URL base, Bearer, parseo de errores y captura del header `Authorization`.
   - QueryClient, proxy de Vite a `localhost:3000` y `.env.example`.
-  - Listo cuando: un hook de prueba lista `GET /membership/all` contra el backend local.
-- [ ] **T06 · Mocks con MSW (1,5 h)**
+  - Listo cuando: un hook de prueba lista `GET /membership/all` contra el backend local. El hook está en `src/app/dev` y se ve en `/dev/api`, que además prueba un 404 y un 401.
+  - Falta para T07: el cliente ya llama a `onUnauthorized` ante un 401 de un request con token, pero nadie lo conecta todavía.
+- [x] **T06 · Mocks con MSW (1,5 h)**
   - Registry por endpoint, handlers por dominio, fixtures tipadas y `pending.ts`.
   - Activación con `VITE_USE_MOCKS`, también en el build de Render.
   - Listo cuando: con mocks activados, `/membership/all` responde el fixture; desactivados, responde el backend.
-- [ ] **T07 · Sesión, guards y arranque en frío (1,5 h)**
-  - AuthProvider con token y usuario en `localStorage`.
-  - Rutas protegidas por rol, redirección al home de cada rol y guard de cambio de contraseña pendiente.
-  - Ante un 401, se cierra la sesión.
+  - Cómo se suma un mock, para las tareas que siguen: fixture en `src/mocks/fixtures/`, handler con `mockEndpoint` en `src/mocks/handlers/<dominio>.ts` (y en `handlers/index.ts`) y la entrada con `mock: true` en `registry.ts`. T44 apaga los mocks pasando esa entrada a `mock: false`. Está explicado en el README, sección "Backend y mocks".
+  - `pending.ts` trae solo B7 y B8, cuyos campos salen de entidades del contrato. B1 a B6 y B9 los tipa la tarea que los usa.
+  - Con `VITE_USE_MOCKS=false` el build no incluye MSW ni su worker; con `true`, sí.
+- [x] **T07 · Sesión, guards y arranque en frío (1,5 h)**
+  - AuthProvider con token y usuario en `localStorage` (la base ya está desde T04).
+  - Rutas protegidas por rol, redirección al home de cada rol y guard de cambio de contraseña pendiente (`RequireRole` ya existe desde T04, sin el guard de contraseña).
+  - Ante un 401, se cierra la sesión. Se conecta con `configureApi({ onUnauthorized })` (el cliente solo lo llama si el request llevaba token). El 403 con "La cuenta está deshabilitada." también cierra la sesión y el de permisos no; `ApiError.serverMessage` trae el texto para distinguirlos.
   - Aviso de "despertando el servidor" a los 4 segundos de espera.
   - Listo cuando: un usuario mock de cada rol entra a su home y no puede abrir rutas de otro rol.
+  - Cómo quedó: la sesión vive en `sessionStore.ts` (fuera de React) y `AuthProvider` se suscribe; el cliente cierra la sesión por un 401 o por el 403 de cuenta deshabilitada, siempre que la sesión no haya cambiado mientras el request volaba. `Session.passwordChangeRequired` es la bandera del cliente del cambio pendiente. Está explicado en el README, sección "Sesión, guards y arranque en frío".
+  - Para las tareas que siguen: T09 tiene que guardar la bandera con el campo de B9 (`signIn({ token, user, passwordChangeRequired })`) y navegar con `homePathFor(session)`. T12 llama a `completePasswordChange()` al terminar el cambio obligatorio. T13 usa `signOut()`, que cierra la sesión local; el `POST /users/logout` y el aviso en el login de por qué se cerró quedan para ellas.
+  - Provisorio: el botón "Entrar con contraseña temporal" de `/login` y los de prueba de `/cambiar-contrasena` (T09 y T12 los reemplazan).
 - [ ] **T08 · Deploy en Render (1 h)**
   - Static Site desde `main`: build `npm run build`, publish `dist`.
   - Rewrite de `/*` a `/index.html`.

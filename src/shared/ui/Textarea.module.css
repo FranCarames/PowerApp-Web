@@ -1,0 +1,6 @@
+/* textarea.input del prototipo */
+textarea.textarea {
+  resize: vertical;
+  min-height: 96px;
+  line-height: 1.5;
+}

@@ -1,0 +1,14 @@
+/* El valor numérico de las filas de RM: .data del prototipo. */
+.value {
+  font-family: var(--fM);
+  font-weight: 800;
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+.unit {
+  font-family: var(--fB);
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--tm);
+}

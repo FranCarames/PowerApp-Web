@@ -1,0 +1,58 @@
+/*
+ * #toast del prototipo. El elemento que se posiciona (.toast) no define `display`: un popover
+ * cerrado depende del display:none del navegador. El aspecto visible está en .body.
+ */
+.toast {
+  position: fixed;
+  inset: auto;
+  left: 50%;
+  bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+  z-index: 90;
+  width: max-content;
+  max-width: calc(100% - 40px);
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+  transform: translate(-50%, 16px);
+  opacity: 0;
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
+  pointer-events: none;
+}
+
+.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.body {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: var(--el);
+  border: 1px solid var(--border2);
+  color: var(--tp);
+  padding: 11px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.icon {
+  color: var(--ok);
+}
+
+.err .icon {
+  color: var(--err);
+}
+
+@media (min-width: 960px) {
+  .toast {
+    bottom: 40px;
+  }
+}

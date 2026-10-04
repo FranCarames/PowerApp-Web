@@ -1,0 +1,25 @@
+.empty {
+  text-align: center;
+  color: var(--tm);
+  padding: 28px 16px;
+  border: 1px dashed var(--border2);
+  border-radius: 16px;
+  grid-column: 1 / -1;
+}
+
+.icon {
+  display: block;
+  margin: 0 auto 10px;
+}
+
+.title {
+  font-weight: 700;
+  color: var(--ts);
+  margin-bottom: 4px;
+}
+
+.action {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}

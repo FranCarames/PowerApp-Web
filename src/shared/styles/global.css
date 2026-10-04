@@ -1,0 +1,81 @@
+/*
+ * Estilos globales: reset, base tipográfica, foco visible, reduced motion y safe areas.
+ * Basado en el CSS global del prototipo (PowerApp-Docs: UI Front/powerapp-prototype-web.html).
+ * Las variables salen de tokens.css, que se importa antes.
+ */
+
+/*
+ * Safe areas: el index.html declara viewport-fit=cover, así que el contenido llega
+ * hasta los bordes y hay que apartarlo del notch, el home indicator y las esquinas.
+ * Los elementos fixed (tab bar, FAB, toast, sheet) suman su propia safe area.
+ * Este :root le gana al reset de más abajo por especificidad.
+ */
+:root {
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+  background: var(--base);
+}
+
+/* Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--base);
+  color: var(--tp);
+  font-family: var(--fB);
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  text-align: inherit;
+}
+
+/*
+ * Foco visible solo para teclado. A diferencia del prototipo no fuerza border-radius:
+ * el outline ya sigue el radio de cada elemento, y forzarlo deformaría los botones
+ * redondos (avatares, FAB) al enfocarlos.
+ */
+:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+
+/*
+ * Reduced motion: en vez de `animation: none` y `transition: none` (como el prototipo)
+ * se deja una duración casi nula, para que animationend y transitionend se sigan
+ * disparando y ningún componente quede esperando un evento que no llega.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

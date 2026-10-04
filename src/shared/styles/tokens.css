@@ -1,0 +1,16 @@
+/*
+ * Tokens del prototipo (PowerApp-Docs: UI Front/powerapp-prototype-web.html, bloque :root).
+ * Copia literal: está en .prettierignore para poder compararla con el original.
+ */
+:root{
+  --base:#0B0D16;--card:#13161F;--el:#1B1F2E;--border:#232739;--border2:#2E3347;
+  --pri:#E8450A;--priL:#FF6B3D;--acc:#8B5CF6;
+  --tp:#F5F1EB;--ts:#8892A8;--tm:#5B6280;
+  --ok:#22C55E;--warn:#F59E0B;--err:#EF4444;
+  --okS:rgba(34,197,94,.12);--warnS:rgba(245,158,11,.12);--errS:rgba(239,68,68,.12);
+  --priS:rgba(232,69,10,.12);--accS:rgba(139,92,246,.14);
+  --fD:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --fB:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --fM:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
