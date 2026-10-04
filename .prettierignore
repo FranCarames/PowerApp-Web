@@ -2,9 +2,10 @@ dist
 package-lock.json
 .claude
 
-# Contrato de la API: el JSON se baja con `npm run api:fetch` y los tipos se generan
+# Contrato de la API: el JSON se baja con `npm run api:fetch` y lo demás se genera con `npm run api:gen`
 src/api/openapi.json
 src/api/schema.d.ts
+src/api/publicOperations.ts
 
 # Tokens de diseño: copia literal del prototipo, para poder compararla con el original
 src/shared/styles/tokens.css

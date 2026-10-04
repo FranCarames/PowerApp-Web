@@ -14,9 +14,10 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "api:fetch": "node scripts/fetch-openapi.mjs",
-    "api:gen": "openapi-typescript src/api/openapi.json -o src/api/schema.d.ts"
+    "api:gen": "openapi-typescript src/api/openapi.json -o src/api/schema.d.ts && node scripts/gen-public-operations.mjs"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.104.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router": "^7.18.4"
