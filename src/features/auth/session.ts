@@ -6,14 +6,28 @@ import { isRole } from './roles';
 export interface Session {
   token: string;
   user: User;
+  /**
+   * El usuario entró con una contraseña temporal. Hasta que la cambie, la única pantalla permitida es
+   * /cambiar-contrasena. Lo marca el login (el campo de la respuesta es B9, pendiente de contrato).
+   */
+  passwordChangeRequired?: boolean;
 }
 
 const STORAGE_KEY = 'powerapp.session';
 
 function isSession(value: unknown): value is Session {
   if (typeof value !== 'object' || value === null) return false;
-  const { token, user } = value as Record<string, unknown>;
+  const { token, user, passwordChangeRequired } = value as Record<
+    string,
+    unknown
+  >;
   if (typeof token !== 'string') return false;
+  if (
+    passwordChangeRequired !== undefined &&
+    typeof passwordChangeRequired !== 'boolean'
+  ) {
+    return false;
+  }
   if (typeof user !== 'object' || user === null) return false;
   const { id, first_name, last_name, role } = user as Record<string, unknown>;
   return (

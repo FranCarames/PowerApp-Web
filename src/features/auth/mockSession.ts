@@ -44,6 +44,13 @@ const MOCK_USERS: Record<Role, User> = {
   },
 };
 
-export function mockSession(role: Role): Session {
-  return { token: 'mock-token', user: MOCK_USERS[role] };
+export function mockSession(
+  role: Role,
+  { passwordChangeRequired = false } = {},
+): Session {
+  return {
+    token: 'mock-token',
+    user: MOCK_USERS[role],
+    ...(passwordChangeRequired && { passwordChangeRequired }),
+  };
 }

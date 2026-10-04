@@ -1,36 +1,42 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react';
 
-import { queryClient } from '@/api/queryClient';
+import { useToast } from '@/shared/ui';
 
 import { AuthContext, type AuthApi } from '../hooks/authContext';
 import {
-  clearSession,
-  readSession,
-  writeSession,
-  type Session,
-} from '../session';
+  completePasswordChange,
+  endSession,
+  getSession,
+  onSessionEnded,
+  startSession,
+  subscribeSession,
+} from '../sessionStore';
 
 /**
- * Guarda la sesión en memoria y en localStorage, y provee `useAuth()`. Al entrar y al salir vacía
- * el caché de TanStack Query, para que los datos de una sesión no se vean en la siguiente.
+ * Provee `useAuth()`. La sesión vive en `sessionStore`, que la guarda en memoria y en localStorage y
+ * vacía el caché de TanStack Query al entrar y al salir. Acá se muestra el aviso cuando el cliente
+ * la cierra solo (sesión vencida, cuenta deshabilitada).
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(readSession);
+  const session = useSyncExternalStore(subscribeSession, getSession);
+  const toast = useToast();
+
+  useEffect(() => onSessionEnded((notice) => toast.error(notice)), [toast]);
 
   const api = useMemo<AuthApi>(
     () => ({
       user: session?.user ?? null,
       token: session?.token ?? null,
-      signIn: (next) => {
-        writeSession(next);
-        queryClient.clear();
-        setSession(next);
-      },
-      signOut: () => {
-        clearSession();
-        queryClient.clear();
-        setSession(null);
-      },
+      passwordChangeRequired: session?.passwordChangeRequired === true,
+      signIn: startSession,
+      // Sin argumentos: así un onClick no le pasa el evento como aviso.
+      signOut: () => endSession(),
+      completePasswordChange,
     }),
     [session],
   );
