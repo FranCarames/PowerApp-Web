@@ -16,5 +16,13 @@ export const devRoutes: RouteObject[] = import.meta.env.DEV
           return { Component: UiGallery };
         },
       },
+      {
+        path: '/dev/api',
+        HydrateFallback: RouteFallback,
+        lazy: async () => {
+          const { ApiProbePage } = await import('./ApiProbePage');
+          return { Component: ApiProbePage };
+        },
+      },
     ]
   : [];

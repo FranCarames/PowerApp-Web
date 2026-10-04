@@ -43,7 +43,7 @@ No se usan Tailwind, Redux, Zustand, axios ni librerías de componentes de UI. C
    npm install
    ```
 
-2. Copiá `.env.example` a `.env` (se crea en la T05). En local alcanza con dejar `VITE_API_URL` vacía: Vite hace proxy de `/api` a `http://localhost:3000`, así que no hay problemas de CORS.
+2. Si necesitás cambiar alguna variable, copiá `.env.example` a `.env`. Para trabajar en local no hace falta: con `VITE_API_URL` vacía, Vite hace proxy de `/api` a `http://localhost:3000`, así que no hay problemas de CORS.
 
 3. Levantá el backend local en el puerto 3000, o activá los mocks con `VITE_USE_MOCKS=true`.
 
@@ -52,6 +52,8 @@ No se usan Tailwind, Redux, Zustand, axios ni librerías de componentes de UI. C
    ```bash
    npm run dev
    ```
+
+5. Para comprobar que el front llega al backend, abrí `/dev/api` (existe solo en desarrollo): lista las membresías y prueba un 404 y un 401 con el mensaje que vería el usuario.
 
 ### Scripts
 
@@ -64,7 +66,7 @@ No se usan Tailwind, Redux, Zustand, axios ni librerías de componentes de UI. C
 | `npm run lint` | ESLint |
 | `npm run format` | Prettier |
 | `npm run api:fetch` | Descarga el JSON del Swagger del backend local a `src/api/openapi.json`. La URL sale de `API_DOCS_URL` (por defecto `http://localhost:3000/docs-json`) o del primer argumento: `npm run api:fetch -- <url>`. |
-| `npm run api:gen` | Genera `src/api/schema.d.ts` desde `src/api/openapi.json` |
+| `npm run api:gen` | Genera `src/api/schema.d.ts` (los tipos) y `src/api/publicOperations.ts` (los endpoints que no piden token) desde `src/api/openapi.json` |
 
 Antes de dar una tarea por terminada, `typecheck`, `lint` y `build` tienen que pasar sin errores.
 
@@ -74,6 +76,7 @@ Antes de dar una tarea por terminada, `typecheck`, `lint` y `build` tienen que p
 |---|---|
 | `VITE_API_URL` | Origen del backend, sin `/api/v1`. En Render: `https://powerapp-backend.onrender.com`. En local queda vacía. |
 | `VITE_USE_MOCKS` | `true` activa MSW para los endpoints marcados como mock en `src/mocks/registry.ts`. El resto va al backend real. |
+| `API_PROXY_TARGET` | Solo del servidor de desarrollo (no llega al navegador). A dónde reenvía Vite las requests a `/api`. Por defecto, `http://localhost:3000`. |
 
 ## Backend y mocks
 
@@ -90,7 +93,7 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están det
 ```
 src/
   app/            router, providers, AppShell (tab bar y sidebar)
-  api/            client.ts, openapi.json (bajado del Swagger), schema.d.ts (generado), pending.ts, queryKeys.ts
+  api/            client.ts, errors.ts, queryClient.ts, queryKeys.ts, types.ts, openapi.json (bajado del Swagger), schema.d.ts y publicOperations.ts (generados), pending.ts
   mocks/          browser.ts, registry.ts, handlers/<dominio>.ts, fixtures/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
@@ -103,7 +106,7 @@ src/
     icons/        íconos SVG del prototipo como componentes
     lib/          formato de números, fechas y moneda; helpers
     styles/       tokens.css, global.css
-scripts/          fetch-openapi.mjs (lo que corre npm run api:fetch)
+scripts/          fetch-openapi.mjs y gen-public-operations.mjs (lo que corren npm run api:fetch y npm run api:gen)
 ```
 
 Cada feature organiza su código en `pages/`, `components/` y `hooks/`.

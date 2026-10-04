@@ -57,7 +57,7 @@ No uses Tailwind, Redux, Zustand, axios ni librerías de componentes de UI.
 | `npm run lint` | ESLint |
 | `npm run format` | Prettier |
 | `npm run api:fetch` | Descarga el JSON del Swagger del backend local a `src/api/openapi.json`. La URL sale de `API_DOCS_URL` (por defecto `http://localhost:3000/docs-json`; ajustala si tu server usa otro puerto o ruta). |
-| `npm run api:gen` | Genera `src/api/schema.d.ts` desde `src/api/openapi.json` |
+| `npm run api:gen` | Genera `src/api/schema.d.ts` (los tipos) y `src/api/publicOperations.ts` (los endpoints que no piden token) desde `src/api/openapi.json` |
 
 Antes de dar una tarea por terminada, `typecheck`, `lint` y `build` tienen que pasar sin errores.
 
@@ -67,15 +67,16 @@ Antes de dar una tarea por terminada, `typecheck`, `lint` y `build` tienen que p
 |---|---|
 | `VITE_API_URL` | Origen del backend, sin `/api/v1`. En Render: `https://powerapp-backend.onrender.com`. En local queda vacía y se usa el proxy de Vite. |
 | `VITE_USE_MOCKS` | `true` activa MSW para los endpoints marcados como mock en `src/mocks/registry.ts`. |
+| `API_PROXY_TARGET` | Solo del servidor de desarrollo. A dónde reenvía Vite las requests a `/api`. Por defecto, `http://localhost:3000`. |
 
-En desarrollo, Vite hace proxy de `/api` a `http://localhost:3000`. Así se evita CORS en local.
+En desarrollo, Vite hace proxy de `/api` al backend local (`http://localhost:3000`, o `API_PROXY_TARGET`). Así se evita CORS en local.
 
 ## Estructura de carpetas
 
 ```
 src/
   app/            router, providers, AppShell (tab bar y sidebar)
-  api/            client.ts, openapi.json (bajado del Swagger), schema.d.ts (generado), pending.ts, queryKeys.ts
+  api/            client.ts, errors.ts, queryClient.ts, queryKeys.ts, types.ts, openapi.json (bajado del Swagger), schema.d.ts y publicOperations.ts (generados), pending.ts
   mocks/          browser.ts, registry.ts, handlers/<dominio>.ts, fixtures/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
@@ -95,11 +96,12 @@ Cada feature organiza su código en `pages/`, `components/` y `hooks/`. Los hook
 ## API
 
 - **Paths:** los paths del contrato ya incluyen `/api/v1`. Usalos tal cual figuran en `openapi.json`.
-- **Token:** el login y el registro devuelven el JWT en el **header `Authorization` de la respuesta**, no en el body. Guardalo en `localStorage`, en la clave `powerapp.session`, junto con el `User`. En los endpoints con `security: bearer`, mandá `Authorization: Bearer <token>`.
-- **401:** limpiá la sesión y redirigí a `/login`.
+- **Token:** el login y el registro devuelven el JWT en el **header `Authorization` de la respuesta**, no en el body. Guardalo en `localStorage`, en la clave `powerapp.session`, junto con el `User`. En los endpoints con `security: bearer`, mandá `Authorization: Bearer <token>`: el cliente (`src/api/client.ts`) ya lo hace, y el token del login se lee con `readAuthToken(response)`.
+- **Llamadas:** los endpoints del contrato se llaman con `api.get`, `api.post` y `api.delete`, que están tipados con `schema.d.ts`; si hace falta la respuesta (el login), con `apiRequest`. Lo que el contrato no tiene (`pending.ts`) o describe mal se llama con `request<T>`. Pasá el `signal` de la query.
+- **401:** limpiá la sesión y redirigí a `/login`. Cuenta solo un 401 de un request que llevaba token (`ApiError.authenticated`): el 401 del login es "credenciales inválidas". El 403 con "La cuenta está deshabilitada." también cierra la sesión; el de "Permisos insuficientes", no.
 - **Login con 403:** la cuenta está inactiva. Mostrá un mensaje específico.
 - **Login con credenciales inválidas:** mostrá un mensaje genérico, sin decir qué campo falló.
-- **Errores en general:** traducí 400, 404 y 409 a mensajes en español, en el formulario o en un toast. Nunca muestres el error crudo del servidor.
+- **Errores en general:** traducí 400, 404 y 409 a mensajes en español, en el formulario o en un toast. Nunca muestres el error crudo del servidor. Los errores llegan como `ApiError`, y `getErrorMessage(error, { 409: '…' })` (`src/api/errors.ts`) da el texto, con los de por defecto y los de cada pantalla.
 - **Arranque en frío:** el backend corre en el free tier de Render y se duerme. Si una request tarda más de 4 segundos (`COLD_START_HINT_MS`), mostrá "Despertando el servidor, puede tardar un poco…" sin cortar la request.
 - **Hooks:** cada endpoint se consume desde un hook en `features/<x>/hooks`. Las query keys van centralizadas en `src/api/queryKeys.ts`. Después de cada mutación, invalidá las queries afectadas.
 

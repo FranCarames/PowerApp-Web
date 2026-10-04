@@ -7,11 +7,14 @@ import '@/shared/styles/tokens.css';
 import '@/shared/styles/global.css';
 
 import { App } from '@/app/App';
+import { connectApiToSession } from '@/app/connectApi';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error('No se encontró el elemento #root');
 }
+
+connectApiToSession();
 
 createRoot(rootElement).render(
   <StrictMode>
