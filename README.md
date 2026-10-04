@@ -45,7 +45,7 @@ No se usan Tailwind, Redux, Zustand, axios ni librerías de componentes de UI. C
 
 2. Si necesitás cambiar alguna variable, copiá `.env.example` a `.env`. Para trabajar en local no hace falta: con `VITE_API_URL` vacía, Vite hace proxy de `/api` a `http://localhost:3000`, así que no hay problemas de CORS.
 
-3. Levantá el backend local en el puerto 3000, o activá los mocks con `VITE_USE_MOCKS=true`.
+3. Levantá el backend local en el puerto 3000, o activá los mocks con `VITE_USE_MOCKS=true`. Los mocks responden solo lo que el registry marca como mock; el resto sigue yendo al backend, así que para eso igual tiene que estar levantado.
 
 4. Arrancá el servidor de desarrollo:
 
@@ -86,6 +86,27 @@ El backend lo desarrolla Fran por separado y **este repo nunca lo modifica**. Lo
 - **Sin contrato:** los tipos provisionales viven en `src/api/pending.ts`, marcados con `// PENDIENTE-CONTRATO: <id> <CU>`. Cuando el contrato aparece en `openapi.json`, se borran, se regeneran los tipos y se ajusta el código.
 - **Arranque en frío:** el backend corre en el free tier de Render y se duerme. Si una request tarda más de 4 segundos, el front muestra "Despertando el servidor, puede tardar un poco…".
 
+### Cómo funcionan los mocks
+
+Con `VITE_USE_MOCKS=true`, `main.tsx` arranca MSW (`src/mocks/browser.ts`) antes del primer render. MSW registra el service worker `public/mockServiceWorker.js`, que responde solo los endpoints marcados `mock: true` en el registry. Todo lo demás sigue su camino al backend real, con la misma URL base (`VITE_API_URL`, o el proxy de Vite si está vacía).
+
+| Archivo | Qué es |
+|---|---|
+| `src/mocks/registry.ts` | Qué endpoints se mockean: método y path del contrato (si no existen en `openapi.json`, no compila) y `mock: true \| false`. Lo que no figura es real. |
+| `src/mocks/handlers/<dominio>.ts` | Los mocks de cada dominio, con `mockEndpoint(método, path, resolver)`. El resolver recibe el body del request y los parámetros de ruta tipados con el contrato, y el compilador exige que devuelva lo que el contrato declara. |
+| `src/mocks/fixtures/` | Datos de ejemplo en español, tipados con los tipos generados. |
+| `src/mocks/responses.ts` | Los errores con los dos formatos del backend (`serviceError`: `{ error }`; `guardError`: `{ statusCode, message, error }`), la respuesta vacía y `authTokenHeaders`, el header `Authorization` con el que el login manda el token. |
+| `src/mocks/endpoint.ts` | `mockEndpoint` y `mockPendingEndpoint`. |
+
+- **Sumar un mock:** fixture en `fixtures/`, handler en `handlers/<dominio>.ts` (y en `handlers/index.ts`) y la entrada con `mock: true` en el registry. Si el registry y los handlers no coinciden, la consola avisa al arrancar.
+- **Un endpoint sin contrato** (`PENDIENTE-CONTRATO`) se mockea con `mockPendingEndpoint` y una entrada con `pending: '<id>'` (el de la dependencia del PLAN) en el registry. Sus tipos van en `src/api/pending.ts`.
+- **Apagar un mock** cuando el backend implementa el endpoint: `mock: false` en el registry. El handler queda.
+- **Demora:** cada mock responde después de 100 a 400 ms, como un backend de verdad, para que se vean los estados de carga.
+- **CORS:** los mocks no lo reproducen. La respuesta sale del service worker, así que el navegador deja leer `Authorization` aunque el backend real todavía no lo exponga (C1 de `PLAN.md`).
+- **La variable se lee al compilar** y al arrancar `npm run dev`. Con `VITE_USE_MOCKS=false` (o sin definirla), el build no incluye MSW ni `mockServiceWorker.js`. Con `true` van los dos en `dist`, que es lo que necesita el deploy en Render.
+- **`public/mockServiceWorker.js`** lo genera MSW y no se edita. Al actualizar `msw`, se regenera con `npx msw init` (el directorio ya está guardado en `package.json`).
+- **MSW 3** pide Node 22.12 o más.
+
 Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están detalladas en la sección 4 de [`PLAN.md`](PLAN.md).
 
 ## Estructura del proyecto
@@ -94,7 +115,7 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están det
 src/
   app/            router, providers, AppShell (tab bar y sidebar)
   api/            client.ts, errors.ts, queryClient.ts, queryKeys.ts, types.ts, openapi.json (bajado del Swagger), schema.d.ts y publicOperations.ts (generados), pending.ts
-  mocks/          browser.ts, registry.ts, handlers/<dominio>.ts, fixtures/
+  mocks/          browser.ts, registry.ts, endpoint.ts, responses.ts, handlers/<dominio>.ts, fixtures/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
     account/      Mi cuenta, compartida por los tres roles
@@ -106,6 +127,7 @@ src/
     icons/        íconos SVG del prototipo como componentes
     lib/          formato de números, fechas y moneda; helpers
     styles/       tokens.css, global.css
+public/           mockServiceWorker.js (el service worker de MSW, generado con npx msw init)
 scripts/          fetch-openapi.mjs y gen-public-operations.mjs (lo que corren npm run api:fetch y npm run api:gen)
 ```
 
@@ -144,7 +166,7 @@ Static Site en Render, desplegado desde `main`:
 - **Build:** `npm run build`
 - **Publish:** `dist`
 - **Rewrite:** `/*` a `/index.html`, para que recargar una ruta interna no dé 404.
-- **Variables:** `VITE_API_URL` y `VITE_USE_MOCKS`.
+- **Variables:** `VITE_API_URL` y `VITE_USE_MOCKS`. Con `VITE_USE_MOCKS=true` el build incluye MSW y `mockServiceWorker.js`; con `false`, ninguno de los dos.
 
 El backend tiene que habilitar CORS para el dominio del front, con `Access-Control-Expose-Headers: Authorization`. Sin eso, el navegador no deja leer el token del login.
 
