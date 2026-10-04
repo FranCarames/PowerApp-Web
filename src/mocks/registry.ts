@@ -28,7 +28,10 @@ interface PendingEntry {
 
 type RegistryEntry = ContractEntry | PendingEntry;
 
-export const registry: readonly RegistryEntry[] = [];
+export const registry: readonly RegistryEntry[] = [
+  // Membresías (tipos)
+  { method: 'get', path: '/api/v1/membership/all', mock: true },
+];
 
 /** La clave de un endpoint: la misma forma que `PUBLIC_OPERATIONS` ("get /api/v1/users/all"). */
 export function endpointKey(method: HttpMethod, path: string): string {
