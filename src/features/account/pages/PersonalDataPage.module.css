@@ -1,0 +1,16 @@
+/* .narrow del prototipo: los formularios de una columna no se estiran en pantallas anchas. */
+.narrow {
+  max-width: 540px;
+}
+
+/* El aviso de error del guardado, sobre los campos. */
+.error {
+  margin-bottom: 16px;
+}
+
+/* Una etiqueta y un campo en gris, con la misma separación que un <Field>. */
+.skeletonField {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}

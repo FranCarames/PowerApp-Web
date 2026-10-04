@@ -269,7 +269,7 @@ export function ApiProbePage() {
         <ErrorProbe
           title="Endpoint protegido con la sesión"
           endpoint="GET /api/v1/users/all"
-          expected="Con la sesión de prueba, 401: el token no es de verdad, así que se cierra la sesión y aparece un aviso (esta página no pide sesión, así que no redirige: las pantallas con sesión sí vuelven a /login). Con un token válido, 200, o 403 si el rol no alcanza, que no cierra la sesión."
+          expected="Con una cuenta de demo, 401: el token no es de verdad, así que se cierra la sesión y aparece un aviso (esta página no pide sesión, así que no redirige: las pantallas con sesión sí vuelven a /login). Con un token válido, 200, o 403 si el rol no alcanza, que no cierra la sesión."
           successMessage="Respondió bien: el token de la sesión es válido."
           run={() => api.get('/api/v1/users/all')}
         />

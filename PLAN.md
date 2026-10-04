@@ -61,7 +61,7 @@ Para cada uno se indica qué necesita el front. El contrato lo diseña Fran. Has
 | B6 | Historial de entrenamientos | CU-E-06, CU-E-07 | Rutinas ejecutadas por un alumno, con fecha. Filtro por ejercicio con peso, reps y fecha. | T43 |
 | B7 | Asignar y editar la planificación de un alumno | CU-E-13, CU-E-14 | Body de `POST /planification/user/assign` y `/user/edit/{id}`: alumno, planificación, fechas y nota. Cómo se informa un solapamiento con un plan vigente y cómo se confirma igual. Qué id recibe `DELETE /planification/user/{id}` y si hace la baja lógica que pide CU-E-14. | T41 |
 | B8 | Editar entrenador | CU-A-18 | Editar `coach_email` y `cuil`. | T37 |
-| B9 | Flag de contraseña temporal | CU-U-02 | Un campo en la respuesta del login que indique cambio de contraseña obligatorio. | T09 (con mock), T44 |
+| B9 | Flag de contraseña temporal | CU-U-02 | Un campo en la respuesta del login que indique cambio de contraseña obligatorio. T09 propone `password_change_required` (boolean, junto a los campos del `User`; falta o `false` es una contraseña común). Hoy el `loginUser` del backend, cuando la contraseña no es la común, prueba la temporal y responde igual que un login normal, sin ningún flag: se agregaría en esa rama. | T09 (con mock), T44 |
 
 ### 4.2 Configuración y trabajo del backend
 
@@ -207,35 +207,72 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - Cómo quedó: la sesión vive en `sessionStore.ts` (fuera de React) y `AuthProvider` se suscribe; el cliente cierra la sesión por un 401 o por el 403 de cuenta deshabilitada, siempre que la sesión no haya cambiado mientras el request volaba. `Session.passwordChangeRequired` es la bandera del cliente del cambio pendiente. Está explicado en el README, sección "Sesión, guards y arranque en frío".
   - Para las tareas que siguen: T09 tiene que guardar la bandera con el campo de B9 (`signIn({ token, user, passwordChangeRequired })`) y navegar con `homePathFor(session)`. T12 llama a `completePasswordChange()` al terminar el cambio obligatorio. T13 usa `signOut()`, que cierra la sesión local; el `POST /users/logout` y el aviso en el login de por qué se cerró quedan para ellas.
   - Provisorio: el botón "Entrar con contraseña temporal" de `/login` y los de prueba de `/cambiar-contrasena` (T09 y T12 los reemplazan).
-- [ ] **T08 · Deploy en Render (1 h)**
-  - Static Site desde `main`: build `npm run build`, publish `dist`.
+- [x] **T08 · Deploy en Render (1 h)**
+  - Static Site desde `main`: build `npm ci && npm run build`, publish `dist`.
   - Rewrite de `/*` a `/index.html`.
   - Variables `VITE_API_URL` y `VITE_USE_MOCKS`.
   - Requiere C1.
   - Listo cuando: la URL de Render abre el login y recargar una ruta interna no da 404.
-- [ ] **T09 · Login (1 h) · CU-U-02**
+  - Cómo quedó: el sitio es `powerapp-web` y está en https://powerapp-web.onrender.com. Se redespliega solo con cada push a `main`. La configuración está en el README, sección "Deploy". Variables: `VITE_API_URL=https://powerapp-backend.onrender.com`, `VITE_USE_MOCKS=true` (los mocks siguen prendidos hasta T44) y `NODE_VERSION=22`.
+  - Verificado en el sitio real: `/login` abre con los assets en 200 y MSW activo; recargar `/u/plan` mantiene la sesión y la pantalla; con sesión de Usuario, `/c/alumnos` vuelve a `/u/plan`; sin sesión, `/a/inicio` va a `/login`; una ruta inexistente muestra "Página no encontrada". Ninguna da 404 del servidor.
+  - Pendiente: C1. El backend de Render no respondió a un preflight de prueba (25 s), así que no se pudo comprobar. No bloquea esta tarea, porque el sitio con mocks no necesita CORS, pero el login contra el backend real desde el sitio desplegado no puede leer el token hasta que C1 esté. Cuando exista, probar con `OPTIONS` desde el origen `https://powerapp-web.onrender.com` y mirar que `Access-Control-Expose-Headers` incluya `Authorization`.
+  - Para las tareas que siguen: las variables `VITE_*` se incrustan al compilar. Si se cambian en Render hay que redesplegar (Manual Deploy), no alcanza con guardarlas. T44 apaga los mocks con `mock: false` en el registry y pasa `VITE_USE_MOCKS` a `false` en Render.
+- [x] **T09 · Login (1 h) · CU-U-02**
   - Email y contraseña, con las validaciones de `LoginUserDto`.
   - Credenciales inválidas: error genérico. Cuenta inactiva (403): mensaje específico.
   - Redirección según el rol.
   - Si el flag de B9 (con mock hasta que exista) indica contraseña temporal, se abre un modal bloqueante "Actualizá tu contraseña" que lleva a `/cambiar-contrasena`.
   - Links a registro y a recuperar.
-- [ ] **T10 · Registro (1 h) · CU-U-01**
+  - Cómo quedó: `LoginPage` con React Hook Form y `loginSchema` (email hasta 50, contraseña de 6 a 50). Sumó `react-hook-form` y `zod`, que son del stack, y un `zodResolver` propio en `shared/lib` en lugar de `@hookform/resolvers`, que no está en la lista. `useLogin()` llama a `POST /users/login` (real) y arma la `Session` con el token del header. Está explicado en el README, sección "Login".
+  - B9: el tipo provisional es `LoginResponse` en `pending.ts`, con el campo propuesto `password_change_required` (boolean). Con `true`, la sesión no se abre hasta que el usuario toca el botón del modal bloqueante: si se abriera antes, el guard de T07 lo llevaría a `/cambiar-contrasena` sin mostrarlo.
+  - Mock: `POST /users/login` está en `mock: true`, pero solo responde las cuentas de demo de `src/mocks/fixtures/users.ts` (una por rol, una con contraseña temporal y una cerrada). Los demás emails pasan al backend real con `passthrough`. El token de las cuentas de demo es falso, así que los endpoints reales las rechazan con 401.
+  - Reemplazó el `/login` provisorio de T07 (los botones "Entrar como…" y `mockSession.ts`). Los botones de prueba de `/cambiar-contrasena` siguen hasta T12.
+  - Verificado contra un doble local del contrato (`.claude/fake-backend.cjs`), no contra el backend real: el de Render no responde y el local no estaba encendido. Falta probarlo con el real, ya con C1 en Render.
+  - Para las tareas que siguen: T10 y T12 reutilizan `zodResolver` y el patrón de `schemas.ts` (un schema por formulario). T44 apaga el mock del login (`mock: false`) cuando B9 exista en el contrato, y con eso dejan de existir las cuentas de demo.
+- [x] **T10 · Registro (1 h) · CU-U-01**
   - Campos de `CreateUserDto`: nombre, apellido, email, prefijo, teléfono y contraseña. Siempre con `role: user`.
   - Email ya registrado: mensaje con links a login y a recuperar.
   - Después del alta, vuelve al login (V5, V6).
-- [ ] **T11 · Recuperar contraseña (0,5 h) · CU-U-04**
+  - Cómo quedó: `RegisterPage` con React Hook Form y `registerSchema` (todos obligatorios; nombre y apellido hasta 50, email hasta 50, prefijo hasta 10, teléfono hasta 20, contraseña de 6 a 50). `useRegister()` manda siempre `role: 'user'`. Sin mock: `POST /users/register` es real. Está explicado en el README, sección "Registro".
+  - V5: el front valida con el DTO (6 caracteres, sin mayúscula ni número), y el placeholder dice "Mínimo 6 caracteres", no 8 como el prototipo. V6: el token que devuelve el registro se ignora; se vuelve a `/login` con un aviso y sin abrir sesión.
+  - Email repetido: confirmado en `users.service.ts` del backend, responde 409 con `{ error: 'Ya existe un usuario con ese email' }`. La pantalla muestra el aviso con los links, deja el foco en el email y conserva lo escrito.
+  - Verificado contra un doble local que responde como ese código (201 con token en el header, 409, 400 y 500), no contra el backend real: el de Render no responde y el local no estaba encendido.
+  - Para las tareas que siguen: `schemas.ts` ya comparte las reglas de `email` y de contraseña entre el login y el registro. El teléfono con código de país y número vuelve a aparecer en T14 (datos personales): si se repite, conviene extraerlo a `shared/ui`.
+- [x] **T11 · Recuperar contraseña (0,5 h) · CU-U-04**
   - Envía el email a `POST /users/recover-password`.
   - El modal de confirmación muestra el mismo mensaje exista o no el email.
   - Si falla el envío, permite reintentar.
-- [ ] **T12 · Cambiar contraseña (1 h) · CU-U-05**
+  - Cómo quedó: `RecoverPage` con React Hook Form y `recoverSchema`. `useRecoverPassword()` llama al endpoint real y la pantalla ignora su respuesta: el modal dice siempre "Si *email* está registrado, te enviamos una contraseña temporal…". Con un fallo, aviso rojo, botón "Reintentar" y el email conservado. Sin mock. Está explicado en el README, sección "Recuperar contraseña".
+  - Textos que cambian respecto del prototipo, porque no serían ciertos: la contraseña temporal real tiene 10 caracteres entre letras y números (el prototipo dice "6 dígitos"), y "la enviamos a *email*" pasa a "si *email* está registrado, te enviamos…" (con un email que no existe, la versión del prototipo sería falsa).
+  - Verificado contra un doble local que responde como el código del backend (200 con el mismo mensaje para cualquier email, y 500), no contra el backend real.
+  - Pendiente del backend, sin ticket en este plan: el servicio de email está sin integrar. El backend imprime la temporal en su consola (`[EMAIL STUB]`), así que hoy ningún usuario recibe el correo. Para probar el ingreso con la temporal con el backend local, se toma de esa consola.
+  - Para las tareas que siguen: T12 recibe a quien entra con la temporal. Hasta que B9 exista, el login no avisa que se usó una temporal, así que el cambio obligatorio solo se ve con las cuentas de demo.
+- [x] **T12 · Cambiar contraseña (1 h) · CU-U-05**
   - Voluntario: desde Mi cuenta, con contraseña actual, nueva y repetir.
   - Obligatorio: después de entrar con la temporal; la "actual" es la temporal.
   - Un 401 se muestra como "La contraseña actual es incorrecta".
   - Al terminar el cambio obligatorio, se libera el guard y se va al home.
-- [ ] **T13 · Mi cuenta, datos personales y cerrar sesión (1,5 h) · CU-U-06, CU-U-03**
+  - Cómo quedó: `ChangePasswordPage` reemplaza la provisoria y atiende las dos formas en `/cambiar-contrasena`, según `passwordChangeRequired`. `changePasswordSchema` replica `ChangePasswordDto` y "repetir" no viaja. Está explicado en el README, sección "Cambiar contraseña".
+  - **Corrección en la capa de API (T07):** el 401 de este endpoint es un error de negocio (`{ error }`), no una sesión vencida, pero el cliente cerraba la sesión ante cualquier 401 con token: escribir mal la contraseña actual te deslogueaba. Ahora `connectApi` cierra solo ante un 401 de guard (`isSessionExpiredError`: el cuerpo trae `statusCode`) o uno que no reconoce. La regla de `CLAUDE.md` ("cuenta solo un 401 de un request que llevaba token") queda afinada por esto; sugiero actualizar su texto.
+  - V5: la tarjeta de requisitos solo muestra las reglas del DTO (6 a 50 caracteres y que coincidan), no las del prototipo (8, mayúscula y número).
+  - La contraseña actual se pide también en el cambio obligatorio (el prototipo no la tiene): el DTO exige `current_password` y ahí es la temporal. Se agregó "Cerrar sesión" como salida de esa variante, porque con el cambio pendiente no hay otra pantalla a la que ir.
+  - Mock: `POST /users/change-password` atiende solo a las cuentas de demo (por su token falso) y el resto pasa al backend real. Con esto el cambio obligatorio se puede recorrer completo sin backend: login de la cuenta con contraseña temporal, modal, cambio y home. El estado vive en memoria.
+  - Verificado contra un doble local que responde como el código del backend (guard 401, 400 por campos de más, 401 de negocio, 200 y 500), no contra el backend real.
+  - Para las tareas que siguen: T13 (Mi cuenta) tiene que linkear a `/cambiar-contrasena` para el cambio voluntario. Si se prefiere que esa pantalla se vea dentro del marco de la app (con la tab bar), como en el prototipo, alcanza con registrar el mismo componente también bajo `/cuenta/contrasena`.
+- [x] **T13 · Mi cuenta, datos personales y cerrar sesión (1,5 h) · CU-U-06, CU-U-03**
   - Menú de cuenta compartido por los tres roles.
   - Datos personales precargados con `GET /users/get/{id}` y guardados con `POST /users/edit`. Un 409 se muestra como "El email ya está en uso". Al guardar, se actualiza el usuario de la sesión. La foto de perfil va como URL.
   - Cerrar sesión: `POST /users/logout` y limpieza de la sesión. Aunque el request falle, la sesión se cierra igual.
+  - Cómo quedó: `AccountPage` con el menú por rol, `PersonalDataPage` con su formulario y `logout()` para cerrar la sesión. Está explicado en el README, sección "Mi cuenta".
+  - Menú: Datos personales y Cambiar contraseña van para los tres roles, como dice la sección 5 de este plan; el prototipo se los muestra solo al alumno. Faltan en el encabezado la píldora "Membresía activa" del alumno (sale del último pago: T14) y "N alumnos activos" del entrenador (sale del listado de alumnos: T15).
+  - Hasta que existan sus tareas, tres ítems abren "Página no encontrada": Historial de pagos (T14), Control de membresías del entrenador (T17) y Biblioteca de ejercicios (T28). T14 tiene además que dejar `/cuenta/pagos` solo para el rol Usuario.
+  - Datos personales: la foto de perfil es un campo opcional con un link `http(s)`. Una foto vacía no se manda, porque el backend la valida como URL y no hay cómo borrarla con ese DTO. El teléfono se pide completo (código y número), como en el registro: en el DTO es opcional, pero un usuario sembrado sin teléfono tendría que cargarlo para guardar otros cambios.
+  - **Bug encontrado y corregido durante la verificación:** el formulario tomaba `defaultValues` al montarse, así que con el dato viejo en el caché mostraba lo anterior al reabrirse tras guardar (y guardar desde ahí lo habría pisado). Ahora el caché queda con lo guardado y el formulario usa `values` con `keepDirtyValues`.
+  - Cerrar sesión: `POST /users/logout` es público y el backend solo confirma (el cierre es descartar el token). El request sale sin esperarse y la sesión se cierra enseguida; si falla, se cierra igual y sin error. `useAuth().signOut` ahora hace esto, y también lo usa el cierre de sesión del cambio obligatorio de contraseña.
+  - Se extrajo `PhoneField` a `shared/ui` (lo usan el registro y los datos personales), las reglas de campos de usuario a `shared/lib/userFields.ts` y `formatMonthYear` a `shared/lib/dates.ts`. El registro, el login y la recuperación se volvieron a verificar: mismos mensajes y mismo teléfono.
+  - Mock: `GET /users/get/{id}` y `POST /users/edit` atienden solo a las cuentas de demo y el resto pasa al backend real. Las ediciones viven en memoria.
+  - Verificado contra un doble local que responde como el código del backend (guard, 400 por campos de más y URL inválida, 409, 500 y 200), no contra el backend real.
+  - Para las tareas que siguen: T14 y T15 completan el encabezado de Mi cuenta (la píldora y el conteo de alumnos). Cualquier pantalla que edite al usuario de la sesión tiene que pasar por `useAuth().updateUser`, para que el nombre y la foto se actualicen en toda la app.
 - [ ] **T14 · Historial de pagos del usuario (1 h) · CU-U-07**
   - Pagos ordenados por fecha descendente, con su `expired_at`.
   - Tarjeta con la membresía actual y su estado, según el último pago.

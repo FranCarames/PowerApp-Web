@@ -1,0 +1,22 @@
+/* El cuadrado del ícono, con 18 px de aire hasta el texto (margin-bottom del prototipo). */
+.tile {
+  margin-bottom: 18px;
+}
+
+/* .muted del prototipo, con el interlineado de 1.6 de esta pantalla. */
+.intro {
+  color: var(--ts);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* El aviso de error, entre el texto y el campo. */
+.error {
+  margin-bottom: 16px;
+}
+
+/* "Volver al inicio de sesión", centrado bajo el botón. */
+.back {
+  text-align: center;
+  margin-top: 22px;
+}

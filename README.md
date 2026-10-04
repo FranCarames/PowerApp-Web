@@ -112,11 +112,54 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están det
 ## Sesión, guards y arranque en frío
 
 - **La sesión** (token y usuario) vive en `src/features/auth/sessionStore.ts`: en memoria y en `localStorage` (clave `powerapp.session`), que se lee una sola vez, al cargar la página. `useAuth()` la expone.
-- **Cierre automático:** un 401 en un request que llevaba token, o un 403 con "La cuenta está deshabilitada.", cierran la sesión, vacían el caché de TanStack Query y muestran un aviso; los guards llevan a `/login`. El 403 de "Permisos insuficientes" no la cierra. Si la sesión cambió mientras el request estaba en vuelo (otro login, un cierre), su error no toca la sesión nueva.
+- **Cierre automático:** un 401 de guard en un request que llevaba token, o un 403 con "La cuenta está deshabilitada.", cierran la sesión, vacían el caché de TanStack Query y muestran un aviso; los guards llevan a `/login`. El 403 de "Permisos insuficientes" no la cierra, ni tampoco un 401 de negocio: el de un service (`{ error }`, sin `statusCode`), como "La contraseña actual es incorrecta" al cambiar la contraseña. Lo decide `isSessionExpiredError` (`src/api/errors.ts`), y ante un cuerpo que no reconoce toma el 401 como sesión muerta. Si la sesión cambió mientras el request estaba en vuelo (otro login, un cierre), su error no toca la sesión nueva.
 - **Guards:** `RequireRole` (cada zona exige su rol; quien tiene otro vuelve a su inicio), `RequireSession` (`/cambiar-contrasena`) y `PublicRoute` (login, registro, recuperar y las direcciones que no existen).
 - **Cambio de contraseña pendiente:** `session.passwordChangeRequired`, que marca el login (el campo de la respuesta es B9, todavía sin contrato). Con eso la única ruta permitida es `/cambiar-contrasena`, incluso después de recargar. `completePasswordChange()` libera el guard.
 - **Arranque en frío:** si un request pasa de 4 segundos (`COLD_START_HINT_MS`, en `src/api/coldStart.ts`) sin que el backend conteste, aparece arriba "Despertando el servidor, puede tardar un poco…", sin cortar el request. Se va cuando el backend contesta (con lo que sea, menos 502, 503 o 504) o 3 segundos después del último request que falló sin respuesta, para que no parpadee mientras TanStack Query reintenta.
-- **Para probarlo en desarrollo**, `/dev/api` tiene un probe que manda el token de la sesión a un endpoint protegido (con la sesión de prueba da 401 y la cierra) y otro de respuesta lenta, que pide `/__dev/slow` (lo sirve Vite, solo en desarrollo, y anda solo con `VITE_API_URL` vacía).
+- **Para probarlo en desarrollo**, `/dev/api` tiene un probe que manda el token de la sesión a un endpoint protegido (con una cuenta de demo da 401 y cierra la sesión, porque su token es falso) y otro de respuesta lenta, que pide `/__dev/slow` (lo sirve Vite, solo en desarrollo, y anda solo con `VITE_API_URL` vacía).
+
+## Login
+
+- **Pantalla:** `/login` (`src/features/auth/pages/LoginPage.tsx`). El formulario usa React Hook Form con el schema `loginSchema` (`features/auth/schemas.ts`), que replica `LoginUserDto`: email de hasta 50 caracteres y contraseña de 6 a 50. El resolver de Zod es propio (`shared/lib/zodResolver.ts`), porque `@hookform/resolvers` no está en el stack.
+- **Llamada:** `useLogin()` hace `POST /users/login` (real) y arma la `Session`: el token sale del header `Authorization` de la respuesta y el usuario, del body. No abre la sesión: eso lo hace la pantalla con `signIn`, y después navega con `homePathFor(session)`. Si la respuesta no trae el token (con el backend real, falta C1), no se abre nada y se avisa.
+- **Errores:** un 401 dice "El email o la contraseña no son correctos." (no aclara cuál falló) y un 403, "Tu cuenta está cerrada…". Para red, 400 y 5xx valen los textos de `getErrorMessage`. Tras un 401 se vacía la contraseña y el foco vuelve a ella.
+- **Contraseña temporal (B9):** el contrato todavía no informa que se entró con una temporal. El front lee `password_change_required` de la respuesta (tipo provisional `LoginResponse` en `src/api/pending.ts`; el nombre es una propuesta que se ajusta cuando el contrato exista). Si es `true`, la sesión **no se abre**: aparece el modal bloqueante "Actualizá tu contraseña" y, recién al tocar su botón, se abre con `passwordChangeRequired` y se va a `/cambiar-contrasena`. Si se abriera antes, el guard de `PublicRoute` llevaría a esa pantalla sin que el modal llegue a verse.
+- **Cuentas de demo (mocks):** con `VITE_USE_MOCKS=true`, `POST /users/login` está en el registry y responde las cuentas de `src/mocks/fixtures/users.ts`: una por rol, una con contraseña temporal y una cerrada. Todas comparten la misma contraseña, que está en ese archivo. Cualquier otro email pasa al backend real (`passthrough`), así que las cuentas de verdad entran igual. El token de las cuentas de demo es falso: sirven para recorrer pantallas con datos mockeados, y un endpoint real las rechaza con 401 y cierra la sesión. Las excepciones son cambiar la contraseña y leer y editar el propio usuario, que también se mockean para las cuentas de demo (ver abajo).
+
+## Registro
+
+- **Pantalla:** `/registro` (`src/features/auth/pages/RegisterPage.tsx`), con `registerSchema` (`features/auth/schemas.ts`), que replica `CreateUserDto`. Todos los campos son obligatorios: nombre y apellido de hasta 50 caracteres, email de hasta 50, código de país de hasta 10, teléfono de hasta 20 y contraseña de 6 a 50. `role` no es un campo del formulario: `useRegister()` siempre manda `role: 'user'`.
+- **Contraseña (V5):** el prototipo pide 8 caracteres con mayúscula y número, pero el DTO acepta desde 6 y el front valida con el DTO. Subir la regla es un cambio de backend.
+- **Después del alta (V6):** `POST /users/register` devuelve un token, pero CU-U-01 pide volver al login. El front lo ignora: no abre sesión y navega a `/login` con un aviso.
+- **Email ya registrado:** el backend responde 409 con `{ error: 'Ya existe un usuario con ese email' }`. La pantalla muestra un aviso con links a `/login` y `/recuperar`, deja el foco en el email y conserva lo escrito. Los demás errores usan `getErrorMessage`.
+- **Teléfono:** son dos controles bajo una etiqueta: el código de país (arranca en `+54`) y el número. La etiqueta "Teléfono" es la del número, y el código tiene su propio `id` y `aria-label`. Se muestra un solo mensaje de error, el del primero que falle.
+- **Sin mock:** `POST /users/register` es real. Con el backend sin responder, el alta avisa que no pudo conectarse.
+
+## Mi cuenta
+
+- **Menú** (`/cuenta`, `src/features/account/pages/AccountPage.tsx`): el avatar (con la foto si hay, o la inicial), el nombre, una línea según el rol y el menú de ese rol. La línea es "Miembro desde *mes año*" para el alumno, "Entrenador" para el entrenador y el email para el admin. **Datos personales** y **Cambiar contraseña** son de los tres roles (el PLAN los comparte; el prototipo se los muestra solo al alumno). El alumno suma Historial de pagos, Mis RMs y Biblioteca de ejercicios, y el entrenador, Control de membresías. Un ítem que lleva a una pantalla todavía sin hacer abre "Página no encontrada" hasta su tarea.
+- **Datos personales** (`/cuenta/datos`): se precargan con `GET /users/get/{id}` (con carga, error y reintento) y se guardan con `POST /users/edit`. `profileSchema` (`features/account/schemas.ts`) replica `EditUserDto`: nombre, apellido, email y teléfono (código y número) son obligatorios, y la foto de perfil es opcional, un link `http(s)` de hasta 150 caracteres. Una foto vacía no se manda: el backend la valida como URL y el DTO no permite borrarla. Al guardar se actualiza el usuario de la sesión (`useAuth().updateUser`), el caché queda al día y se vuelve a Mi cuenta. Un 409 se muestra en el campo del email ("El email ya está en uso"). Si cambian el email o el teléfono, el backend les saca la verificación.
+- **El formulario se mantiene al día** con el servidor: usa `values` con `keepDirtyValues`, así que si llega un dato nuevo se actualizan los campos que no se tocaron y se conserva lo que el usuario ya escribió.
+- **Cerrar sesión** (CU-U-03, `features/auth/logout.ts`, expuesto como `useAuth().signOut`): manda `POST /users/logout` y cierra la sesión local enseguida, sin esperar la respuesta. El endpoint es público y el backend solo confirma: el cierre de verdad es descartar el token. Si el request falla, la sesión se cierra igual y no se muestra ningún error. También lo usa el "Cerrar sesión" del cambio obligatorio de contraseña.
+- **Mocks:** `GET /users/get/{id}` y `POST /users/edit` están en el registry y atienden solo a las cuentas de demo (por su id y su token falso); el resto va al backend (`passthrough`). Las ediciones viven en memoria y se pierden al recargar. `POST /users/logout` no se mockea.
+- **Piezas que salieron de acá y se comparten:** `PhoneField` (`shared/ui`), usado por el registro y los datos personales; las reglas de cada campo de usuario (`shared/lib/userFields.ts`), que usan los schemas de auth y de cuenta; y `formatMonthYear` (`shared/lib/dates.ts`).
+
+## Cambiar contraseña
+
+- **Una pantalla, dos formas** (`/cambiar-contrasena`, `src/features/auth/pages/ChangePasswordPage.tsx`). El **obligatorio** es el de quien entró con una contraseña temporal (`session.passwordChangeRequired`): es la única pantalla que puede ver, dice "Paso 3 de 3", no tiene "Volver" y ofrece "Cerrar sesión" como salida. Al terminar llama a `completePasswordChange()`, que libera el guard, y va al inicio de su rol. El **voluntario** se abre desde Mi cuenta (T13 va a linkear acá), con "Volver" a `/cuenta`, y vuelve a ella.
+- **Campos:** contraseña actual, nueva y repetir, con `changePasswordSchema` (`features/auth/schemas.ts`), que replica `ChangePasswordDto`: la actual hasta 50 caracteres y la nueva de 6 a 50. "Repetir" es solo del formulario: no viaja, porque el DTO rechaza campos de más. Cuando se entró con una temporal, "la actual" es esa contraseña temporal, y el campo lo aclara.
+- **Requisitos (V5):** la tarjeta de requisitos del prototipo muestra solo las reglas que el DTO exige, "Entre 6 y 50 caracteres" y "Las dos contraseñas coinciden", y se tildan a medida que se cumplen. El prototipo pide además mayúscula, minúscula y número, pero eso es una regla de backend que no existe.
+- **Contraseña actual incorrecta:** el backend responde 401 con `{ error: 'La contraseña actual es incorrecta' }`. Se muestra en el campo y **no cierra la sesión**, porque no es un 401 de guard (ver "Cierre automático"). Los demás errores, en un aviso arriba.
+- **Cuentas de demo (mocks):** `POST /users/change-password` está en el registry y atiende solo los tokens de las cuentas de demo, para poder terminar el cambio obligatorio sin backend. El cambio vive en memoria: la contraseña vieja deja de servir y la cuenta con contraseña temporal deja de pedir el cambio, hasta que se recarga la página. Con un token de verdad, el request va al backend (`passthrough`).
+
+## Recuperar contraseña
+
+- **Pantalla:** `/recuperar` (`src/features/auth/pages/RecoverPage.tsx`), con `recoverSchema` (`features/auth/schemas.ts`), que replica `RecoverPasswordDto`: el email, de hasta 50 caracteres. `useRecoverPassword()` hace `POST /users/recover-password` (real).
+- **Mismo aviso exista o no el email (CU-U-04):** el backend responde 200 con el mismo mensaje en los dos casos y la pantalla ni lo lee: el modal "Revisá tu correo" dice siempre "Si *email* está registrado, te enviamos una contraseña temporal…". Así no hay forma de saber si el email existe. Cerrarlo con Escape o tocando el fondo vuelve al formulario con el email escrito; "Ir a iniciar sesión" lleva a `/login`.
+- **Si falla el envío:** con un 5xx o sin conexión, un aviso rojo explica que no se pudo enviar, el botón pasa a "Reintentar" y el email queda escrito.
+- **La contraseña temporal** tiene 10 caracteres entre letras y números (el prototipo dice "6 dígitos"), así que los textos no mencionan el largo. El login la acepta, porque está entre los 6 y los 50 caracteres que pide `LoginUserDto`.
+- **El backend todavía no manda el email.** Genera la temporal y la imprime en su consola (`[EMAIL STUB] Contraseña temporal para …`): con el backend local, ahí se lee para probar el ingreso con ella.
+- **Sin mock:** `POST /users/recover-password` es real.
 
 ## Estructura del proyecto
 
@@ -170,12 +213,20 @@ Los releases van de `develop` a `main`, y Render despliega `main`.
 
 ## Deploy
 
-Static Site en Render, desplegado desde `main`:
+Static Site en Render, desplegado desde `main`: https://powerapp-web.onrender.com. Cada push a `main` lo redespliega.
 
-- **Build:** `npm run build`
+- **Build:** `npm ci && npm run build`
 - **Publish:** `dist`
-- **Rewrite:** `/*` a `/index.html`, para que recargar una ruta interna no dé 404.
-- **Variables:** `VITE_API_URL` y `VITE_USE_MOCKS`. Con `VITE_USE_MOCKS=true` el build incluye MSW y `mockServiceWorker.js`; con `false`, ninguno de los dos.
+- **Rewrite:** `/*` a `/index.html`, con acción *Rewrite* (no *Redirect*), para que recargar una ruta interna no dé 404. Se carga en el servicio, pestaña *Redirects/Rewrites*.
+- **Variables:** se cargan en la pestaña *Environment* del servicio.
+
+| Variable | Valor en Render |
+|---|---|
+| `VITE_API_URL` | `https://powerapp-backend.onrender.com` |
+| `VITE_USE_MOCKS` | `true` hasta que T44 apague los mocks. Con `true` el build incluye MSW y `mockServiceWorker.js`; con `false`, ninguno de los dos. |
+| `NODE_VERSION` | `22` (Vite 8 pide Node 20.19 o 22.12 o más) |
+
+Las variables `VITE_*` se leen al compilar: si las cambiás en Render hay que redesplegar (*Manual Deploy*), no alcanza con guardarlas.
 
 El backend tiene que habilitar CORS para el dominio del front, con `Access-Control-Expose-Headers: Authorization`. Sin eso, el navegador no deja leer el token del login.
 

@@ -11,7 +11,10 @@ export interface AuthApi {
   /** Entró con una contraseña temporal y todavía no la cambió: solo puede ir a /cambiar-contrasena. */
   passwordChangeRequired: boolean;
   signIn: (session: Session) => void;
+  /** Cierra la sesión y avisa al backend (CU-U-03). */
   signOut: () => void;
+  /** Cambia el usuario de la sesión, p. ej. con lo que devuelve editar los datos personales. */
+  updateUser: (user: User) => void;
   /** Termina el cambio obligatorio de contraseña: libera el guard, sin cerrar la sesión. */
   completePasswordChange: () => void;
 }

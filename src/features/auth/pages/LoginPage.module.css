@@ -1,20 +1,35 @@
-/* .demo del prototipo: el bloque para elegir con qué rol entrar. */
-.demo {
-  margin-top: 32px;
-  padding-top: 20px;
-  border-top: 1px dashed var(--border2);
+/* El aviso de error de ingreso, entre la marca y los campos. */
+.error {
+  margin-bottom: 16px;
 }
 
-.caption {
-  font-size: 12px;
+/* El link de "¿Olvidaste tu contraseña?" del prototipo: a la derecha, pegado al campo de arriba. */
+.forgot {
+  text-align: right;
+  margin: -4px 0 20px;
+}
+
+/* .or del prototipo: el "o" entre el ingreso y el registro, con una línea a cada lado. */
+.or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
   color: var(--tm);
-  text-align: center;
-  margin-bottom: 10px;
+  font-size: 12px;
 }
 
-.roles {
-  display: grid;
-  gap: 10px;
+.or::before,
+.or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* "Crear cuenta nueva": ghost, pero con el texto en el color principal (como en el prototipo). */
+.register {
+  color: var(--tp);
 }
 
 .devLinks {
@@ -22,7 +37,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px 18px;
-  margin-top: 16px;
+  margin-top: 28px;
 }
 
 .devLinks a {

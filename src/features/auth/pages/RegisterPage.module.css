@@ -1,0 +1,28 @@
+/* .muted del prototipo, pegado al título (margin: -8px 0 22px). */
+.subtitle {
+  color: var(--ts);
+  margin: -8px 0 22px;
+}
+
+/* El aviso de error del alta, entre el subtítulo y los campos. */
+.error {
+  margin-bottom: 16px;
+}
+
+.link {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.submit {
+  margin-top: 6px;
+}
+
+/* .sub del prototipo, centrado bajo el botón. */
+.terms {
+  font-size: 12px;
+  color: var(--tm);
+  text-align: center;
+  margin-top: 14px;
+}
