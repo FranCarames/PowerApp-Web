@@ -33,6 +33,7 @@ export const registry: readonly RegistryEntry[] = [
   { method: 'get', path: '/api/v1/membership/all', mock: true },
   // Usuarios: solo las cuentas de demo; los demás emails pasan al backend real (ver handlers/users.ts)
   { method: 'post', path: '/api/v1/users/login', mock: true },
+  { method: 'post', path: '/api/v1/users/change-password', mock: true },
 ];
 
 /** La clave de un endpoint: la misma forma que `PUBLIC_OPERATIONS` ("get /api/v1/users/all"). */

@@ -6,7 +6,7 @@ import type { User } from '@/api/types';
 //
 // Su token es falso (el handler lo arma), así que sirven para recorrer las pantallas con datos
 // mockeados, no para llamar a endpoints reales: el backend los rechaza con 401 y el cliente cierra
-// la sesión.
+// la sesión. Cambiar la contraseña es la excepción: también la mockea (`handlers/users.ts`).
 
 /** La contraseña de todas las cuentas de demo (cumple las reglas de `LoginUserDto`: 6 a 50). */
 export const DEMO_PASSWORD = 'demo123';
@@ -17,6 +17,21 @@ export interface DemoAccount {
   passwordChangeRequired?: true;
   /** Cuenta cerrada: el login responde 403 aunque la contraseña sea correcta. */
   closed?: true;
+}
+
+/** El token de las cuentas de demo empieza así: ningún JWT de verdad lo hace. */
+const DEMO_TOKEN_PREFIX = 'mock-token-';
+
+export function demoToken({ user }: DemoAccount): string {
+  return `${DEMO_TOKEN_PREFIX}${user.id}`;
+}
+
+/** La cuenta de demo a la que pertenece el token (el valor del header `Authorization`), si lo es. */
+export function demoAccountForToken(
+  authorization: string | null,
+): DemoAccount | undefined {
+  const token = authorization?.replace(/^Bearer\s+/i, '').trim();
+  return demoAccounts.find((account) => demoToken(account) === token);
 }
 
 const TIMESTAMP = '2026-01-01T00:00:00.000Z';
