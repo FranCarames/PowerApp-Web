@@ -4,7 +4,7 @@ Front web de **PowerApp**, una app de gestión de gimnasio con tres roles: **Usu
 
 Es mobile-first: se usa sobre todo desde el celular en el gimnasio, y en escritorio se adapta.
 
-> **Estado:** en desarrollo. El scaffolding (T01) está hecho; el resto de las tareas y su estado están en [`PLAN.md`](PLAN.md). Entrega final: **20/11/2026**.
+> **Estado:** en desarrollo. Las tareas, su orden y su estado están en [`PLAN.md`](PLAN.md). Entrega final: **20/11/2026**.
 
 ## Qué hace cada rol
 
@@ -243,10 +243,11 @@ El backend tiene que habilitar CORS para el dominio del front, con `Access-Contr
 
 | Etapa | Fechas | Contenido |
 |---|---|---|
-| Semana 1 | 3 al 10/10 | Fundaciones, Auth, Mi cuenta |
-| Semana 2 | 11 al 17/10 | Entrenador con contrato existente |
-| Semana 3 | 18 al 24/10 | Contratos nuevos, Usuario sin dependencias, Admin |
-| Semana 4 | 25 al 31/10 | Núcleo del Usuario, pendientes del Entrenador, paso a backend real |
+| Semana 1 | 3 al 10/10 | Fundaciones, Auth y Mi cuenta. Desde el 5/10, Admin: navegación, panel, usuarios, ejercicios, catálogo, membresías y entrenadores |
+| Semana 2 | 11 al 17/10 | Circuitos (Admin y Entrenador) y Entrenador con contrato existente |
+| Semana 3 | 18 al 24/10 | Contratos nuevos, Usuario sin dependencias y núcleo del Usuario |
+| Semana 4 | 25 al 31/10 | Historial de entrenamientos, paso a backend real y, si el backend ya está, el bloque C2 |
+| Bloque C2 | Cuando el backend de rutinas y planificaciones esté completo (previsto antes del 31/10) | Rutinas y planificaciones para el Admin y el Entrenador, y asignaciones a alumnos |
 | Debug | 1 al 20/11 | Pruebas manuales, corrección, documentación |
 | Entrega final | 20/11 | — |
 
