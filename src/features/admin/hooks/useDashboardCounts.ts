@@ -2,20 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 
 import { api } from '@/api/client';
 import { queryKeys } from '@/api/queryKeys';
+import { useUserCount } from '@/features/account/hooks/useUserCount';
 
 // Los números del panel del Admin. Cada uno es una query con su `select`: el panel no necesita las
 // listas, solo cuántos hay. Las listas completas las piden después las pantallas de cada sección (con
 // la misma query key, así que comparten el caché).
-
-/** `GET /users/all`: cuántos usuarios hay, de cualquier rol. Con un solo resultado por página alcanza el `total`. */
-function useUserTotal() {
-  return useQuery({
-    queryKey: queryKeys.users.total(),
-    queryFn: ({ signal }) =>
-      api.get('/api/v1/users/all', { query: { page: 1, limit: 1 }, signal }),
-    select: ({ total }) => total,
-  });
-}
 
 /** `GET /exercise/all`: cuántos ejercicios tiene el catálogo. */
 function useExerciseCount() {
@@ -67,7 +58,8 @@ function useActiveCoachCount() {
  * "–" solo a su tarjeta. `retry` vuelve a pedir únicamente los que fallaron.
  */
 export function useDashboardCounts() {
-  const users = useUserTotal();
+  // Cuántos usuarios hay, de cualquier rol.
+  const users = useUserCount();
   const exercises = useExerciseCount();
   const circuits = useActiveCircuitCount();
   const routines = useRoutineCount();

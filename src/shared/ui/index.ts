@@ -5,6 +5,7 @@ export { Chip } from './Chip';
 export { ChipGroup } from './ChipGroup';
 export { Columns } from './Columns';
 export { ConfirmDialog } from './ConfirmDialog';
+export { DetailList } from './DetailList';
 export { EmptyState } from './EmptyState';
 export { ErrorState } from './ErrorState';
 export { Fab } from './Fab';
