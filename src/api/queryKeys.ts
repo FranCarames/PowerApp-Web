@@ -5,6 +5,8 @@ export const queryKeys = {
   memberships: {
     all: ['memberships'] as const,
     list: () => [...queryKeys.memberships.all, 'list'] as const,
+    payments: (userId: string) =>
+      [...queryKeys.memberships.all, 'payments', userId] as const,
   },
   users: {
     all: ['users'] as const,

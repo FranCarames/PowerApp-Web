@@ -12,3 +12,26 @@ export function formatMonthYear(iso: string): string {
   const year = parts.find((part) => part.type === 'year')?.value ?? '';
   return `${month} ${year}`.trim();
 }
+
+// Los meses abreviados del prototipo. `Intl` abrevia septiembre como "sept", y el prototipo, "Sep".
+const SHORT_MONTHS = [
+  'Ene',
+  'Feb',
+  'Mar',
+  'Abr',
+  'May',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dic',
+];
+
+/** "15 Jul 2026", a partir de una fecha ISO, en el día local de quien la mira. */
+export function formatDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  return `${date.getDate()} ${SHORT_MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+}
