@@ -1,5 +1,6 @@
 import type { MockEndpoint } from '../endpoint';
 import { membershipMocks } from './memberships';
+import { paymentMocks } from './payments';
 import { userMocks } from './users';
 
 /**
@@ -8,5 +9,6 @@ import { userMocks } from './users';
  */
 export const mocks: readonly MockEndpoint[] = [
   ...membershipMocks,
+  ...paymentMocks,
   ...userMocks,
 ];
