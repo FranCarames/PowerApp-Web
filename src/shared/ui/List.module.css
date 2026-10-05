@@ -1,11 +1,16 @@
-/* .list y .list.g2 del prototipo */
+/*
+ * .list y .list.g2 del prototipo. Las columnas son `minmax(0, 1fr)` y no `1fr` (ni la columna
+ * implícita): con el mínimo en `auto`, una fila con un texto largo en una sola línea (los músculos de
+ * un ejercicio) ensancha la columna más allá de la pantalla.
+ */
 .list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
 
 @media (min-width: 960px) {
   .two {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }

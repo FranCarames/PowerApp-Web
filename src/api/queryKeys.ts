@@ -10,6 +10,12 @@ export const queryKeys = {
   exercises: {
     all: ['exercises'] as const,
     list: () => [...queryKeys.exercises.all, 'list'] as const,
+    detail: (id: string) => [...queryKeys.exercises.all, 'detail', id] as const,
+  },
+  muscles: {
+    all: ['muscles'] as const,
+    /** Los grupos musculares, cada uno con sus músculos. */
+    groups: () => [...queryKeys.muscles.all, 'groups'] as const,
   },
   planifications: {
     all: ['planifications'] as const,

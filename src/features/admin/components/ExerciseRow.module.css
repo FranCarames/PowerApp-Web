@@ -1,0 +1,7 @@
+/* Los músculos van en una sola línea: una lista larga se corta con puntos suspensivos. */
+.subtitle {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -6,6 +6,7 @@ import { CircuitsPage } from './pages/CircuitsPage';
 import { CoachesPage } from './pages/CoachesPage';
 import { ConvertPage } from './pages/ConvertPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { ExerciseEditorPage } from './pages/ExerciseEditorPage';
 import { ExercisesPage } from './pages/ExercisesPage';
 import { MembershipTypesPage } from './pages/MembershipTypesPage';
 import { MorePage } from './pages/MorePage';
@@ -23,6 +24,7 @@ export const adminRoutes: RouteObject[] = [
   { path: 'entrenadores', Component: CoachesPage },
   { path: 'convertir', Component: ConvertPage },
   { path: 'ejercicios', Component: ExercisesPage },
+  { path: 'ejercicios/:id', Component: ExerciseEditorPage },
   { path: 'circuitos', Component: CircuitsPage },
   { path: 'circuitos/:id', Component: CircuitEditorPage },
   { path: 'rutinas', Component: RoutinesPage },

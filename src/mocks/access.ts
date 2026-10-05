@@ -32,3 +32,16 @@ export function withoutInactive<T extends { active: boolean }>(
     new URL(request.url).searchParams.get('include_inactive') === 'true';
   return includeInactive ? [...items] : items.filter((item) => item.active);
 }
+
+/**
+ * Lo mismo que `staffAccess`, para los endpoints que son solo del Admin (`@Auth(UserRole.admin)`): el
+ * entrenador de demo también recibe el 403 de un guard.
+ */
+export function adminAccess(request: Request) {
+  const account = demoAccountForToken(request.headers.get('Authorization'));
+  if (!account) return passthrough();
+  if (account.user.role !== 'admin') {
+    return guardError(403, 'Acceso denegado. Permisos insuficientes.');
+  }
+  return null;
+}
