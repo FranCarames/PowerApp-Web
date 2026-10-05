@@ -1,0 +1,22 @@
+/* Resultado de la búsqueda anterior mientras llega el nuevo. */
+.stale {
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
+.more {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.caption {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--tm);
+}
+
+.error {
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--err);
+}
