@@ -15,17 +15,21 @@ export const KEYWORD_MAX_LENGTH = 100;
  *
  * El texto y el chip se copian a la URL (`?q=ana&<param>=<valor>`) y se leen de ahí solo al abrir
  * la pantalla: al volver del detalle de un elemento, la lista queda como estaba. Cambiarlos no agrega
- * entradas al historial. Un valor del chip que no está en `values` se ignora.
+ * entradas al historial. Un valor del chip que no está en `values` se ignora. Sin `values` (chips
+ * que salen de los datos, como los grupos musculares) se acepta cualquier valor y quien lo usa
+ * comprueba que exista.
  */
-export function useSearchAndFilter<V extends string>(
+export function useSearchAndFilter<V extends string = string>(
   param: string,
-  values: readonly V[],
+  values?: readonly V[],
 ) {
   const navigate = useNavigate();
   const { search: urlSearch } = useLocation();
 
   const [filter, setFilter] = useState<V | null>(() => {
     const value = new URLSearchParams(urlSearch).get(param);
+    if (!value) return null;
+    if (!values) return value as V;
     return values.find((candidate) => candidate === value) ?? null;
   });
   // Lo que se tipea se ve al instante; el backend recibe el texto cuando la mano se detiene.

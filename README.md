@@ -107,7 +107,7 @@ Con `VITE_USE_MOCKS=true`, `main.tsx` arranca MSW (`src/mocks/browser.ts`) antes
 - **`public/mockServiceWorker.js`** lo genera MSW y no se edita. Al actualizar `msw`, se regenera con `npx msw init` (el directorio ya está guardado en `package.json`).
 - **MSW 3** pide Node 22.12 o más.
 
-Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están detalladas en la sección 4 de [`PLAN.md`](PLAN.md).
+Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están detalladas en la sección 4 de [`PLAN.md`](PLAN.md).
 
 ## Sesión, guards y arranque en frío
 
@@ -125,7 +125,7 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están det
 - **Entrenador:** la barra lateral tiene Membresías aparte, bajo "Organización". En mobile se entra desde el botón de la barra superior de Mis alumnos, y mientras tanto la tab Alumnos queda marcada.
 - **Admin:** en desktop, tres bloques: Inicio, Usuarios y Entrenadores; "Entrenamiento" (Ejercicios, Circuitos, Rutinas y Planificaciones); y "Configuración" (Catálogo, Membresías y Perfil). En mobile, la tab bar tiene Inicio, Usuarios, Ejercicios, Rutinas y **Más** (`/a/mas`), una pantalla con los accesos que no entran: Planificaciones, Circuitos, Entrenadores, Catálogo, Membresías y Mi cuenta. Más es la entrada `fallback`: queda marcada en toda pantalla que no pertenece a otra tab, incluida Mi cuenta.
 - **Rutinas y Planificaciones del Admin** (`/a/rutinas`, `/a/rutinas/:id`, `/a/planes`, `/a/planes/:id`) muestran `SectionPlaceholder` (`shared/ui`): "Esta sección se habilita cuando el backend de rutinas y planificaciones esté completo". Aparecen en la navegación como cualquier otra. Las reemplazan T21 a T24 en el bloque C2 del PLAN, y el Entrenador reutiliza el mismo componente en T48.
-- **Pantallas temporales:** el resto de las rutas del Admin que todavía no tienen su tarea (Usuarios, Ejercicios, Circuitos, Catálogo, Membresías...) abren "Pantalla en construcción" con un comentario `TEMPORAL (Txx)`, para que ningún acceso caiga en "Página no encontrada".
+- **Pantallas temporales:** el resto de las rutas del Admin que todavía no tienen su tarea (Circuitos, Catálogo, Membresías...) abren "Pantalla en construcción" con un comentario `TEMPORAL (Txx)`, para que ningún acceso caiga en "Página no encontrada".
 
 ## Panel del Admin
 
@@ -144,6 +144,16 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están det
 - **Acciones:** "Convertir en entrenador" (alumno activo) abre `/a/convertir?alumno=<id>`, que hasta T36 es una pantalla temporal. "Desactivar cuenta" pide confirmación (es una baja lógica: la cuenta no puede ingresar, pero se conservan sus datos) y "Reactivar cuenta" no. No se ofrece desactivar a un admin ni a la propia cuenta. Después de cada cambio se piden de nuevo los listados y los contadores, también los de Mis alumnos.
 - **Mocks:** `GET /users/all`, `POST /users/set-active/{id}`, `GET /membership/status/users`, `GET /coach/get/{id}`, `GET /planification/user/{id}/active` y los pagos responden con datos de ejemplo a las cuentas de demo; las bajas viven en memoria.
 - **Compartido con Mis alumnos:** los hooks de datos de usuarios (`useUsers`, `useUserCount`, `useSetUserActive`...) viven en `features/account/hooks`; el listado paginado, en `features/account/components/UserList.tsx`; y la búsqueda con chip en la URL, en `shared/lib/useSearchAndFilter.ts`.
+
+## Ejercicios del Admin
+
+- **Pantalla** (`/a/ejercicios`, `src/features/admin/pages/ExercisesPage.tsx`): el catálogo de ejercicios (CU-A-01 a CU-A-06). Buscador por nombre (sin mayúsculas ni acentos), chips por grupo muscular, y el botón flotante "Crear ejercicio". La búsqueda y el grupo quedan en la URL (`?q=…&grupo=<id>`).
+- **Fila:** miniatura (la `preview_image`, o un ícono), nombre, los músculos en una línea y los botones Editar y Eliminar. Un ejercicio aparece en todos los grupos a los que pertenecen sus músculos.
+- **Editor** (`/a/ejercicios/nuevo` y `/a/ejercicios/:id`, `ExerciseForm`): nombre, descripción, músculos como chips (✕ quita; "+ Agregar" abre un modal con los que faltan, por grupo), tips de seguridad y de activación, y tres links: video, imagen de vista previa e imagen de fondo (no hay endpoint de subida). Agregar y quitar músculos es mandar la lista completa en `exercised_muscles_ids`.
+- **Datos opcionales:** el backend no deja vaciar un dato ya cargado (rechaza el texto vacío y, si el campo no viene, conserva el anterior), así que el formulario no lo permite y lo avisa.
+- **Eliminar:** pide confirmación. El backend rechaza el borrado de un ejercicio con RMs o entrenamientos hechos con un `500` sin más motivo (V7): el front muestra un aviso con el motivo probable. Si el ejercicio solo está en circuitos, el backend lo borra y lo saca de ellos.
+- **Cruce con los grupos:** `useExerciseCatalog` (`src/features/catalog/hooks`) junta `GET /exercise/all`, que trae los músculos de cada ejercicio, con `GET /muscles/mg/all`, que trae los de cada grupo. Ninguno de los dos campos está en el Swagger (V9): sus tipos están en `pending.ts`. Lo reutiliza la wiki del alumno (T28).
+- **Mocks:** los seis endpoints (`GET /exercise/all`, `GET /exercise/{id}`, `POST /exercise/create`, `POST /exercise/edit/{id}`, `DELETE /exercise/{id}` y `GET /muscles/mg/all`) responden con datos de ejemplo a las cuentas de demo; los ejercicios viven en memoria. Press de banca y Sentadilla están "en uso": borrarlos da el rechazo del backend.
 
 ## Login
 
@@ -220,6 +230,7 @@ src/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
     account/      Mi cuenta, compartida por los tres roles, y los hooks de datos de usuarios que usan varios roles
+    catalog/      Ejercicios y músculos que leen varios roles (hooks); lo propio de cada rol vive en su feature
     user/         pantallas del rol Usuario
     coach/        pantallas del rol Entrenador
     admin/        pantallas del rol Admin

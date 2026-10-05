@@ -1,5 +1,11 @@
 import type { paths } from './schema';
-import type { Coach, User, UserPlanification } from './types';
+import type {
+  Coach,
+  Exercise,
+  MuscleGroup,
+  User,
+  UserPlanification,
+} from './types';
 
 // Tipos provisionales de lo que el contrato (openapi.json) todavía no tiene: las dependencias B1 a
 // B9 de PLAN.md, sección 4.1. Cada uno lleva `// PENDIENTE-CONTRATO: <id> <CU>`. Cuando el contrato
@@ -69,3 +75,34 @@ export interface StudentsByMembershipStatus {
   expiring_soon_days: number;
   students: StudentMembership[];
 }
+
+// PENDIENTE-CONTRATO: V9 CU-A-01
+/**
+ * Un músculo tal como lo trae un ejercicio en `exercisedMuscles`: el `id` es el del músculo, no el
+ * del vínculo `Exercised_Muscle`. Sale del código del backend (`ExerciseService`).
+ */
+export interface ExerciseMuscle {
+  id: string;
+  name: string;
+  description?: string;
+  image_url?: string;
+  preview_image?: string;
+}
+
+// PENDIENTE-CONTRATO: V9 CU-A-01
+/**
+ * Respuesta de `GET /exercise/all` y `GET /exercise/{id}`: el `Exercise` del contrato más sus
+ * músculos. El Swagger no declara `exercisedMuscles`, pero el backend lo manda siempre.
+ */
+export type ExerciseWithMuscles = Exercise & {
+  exercisedMuscles: ExerciseMuscle[];
+};
+
+// PENDIENTE-CONTRATO: V9 CU-A-01
+/**
+ * Respuesta de `GET /muscles/mg/all`: el `MuscleGroup` del contrato más sus músculos, con el `id`
+ * y el `name` (y la `description`). El Swagger no declara `muscles`, pero el backend lo manda.
+ */
+export type MuscleGroupWithMuscles = MuscleGroup & {
+  muscles: Array<Pick<ExerciseMuscle, 'id' | 'name' | 'description'>>;
+};

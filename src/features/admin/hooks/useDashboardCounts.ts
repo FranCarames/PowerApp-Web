@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { queryKeys } from '@/api/queryKeys';
 import { useUserCount } from '@/features/account/hooks/useUserCount';
+import { exercisesQuery } from '@/features/catalog/hooks/useExercises';
 
 // Los números del panel del Admin. Cada uno es una query con su `select`: el panel no necesita las
 // listas, solo cuántos hay. Las listas completas las piden después las pantallas de cada sección (con
@@ -11,8 +12,7 @@ import { useUserCount } from '@/features/account/hooks/useUserCount';
 /** `GET /exercise/all`: cuántos ejercicios tiene el catálogo. */
 function useExerciseCount() {
   return useQuery({
-    queryKey: queryKeys.exercises.list(),
-    queryFn: ({ signal }) => api.get('/api/v1/exercise/all', { signal }),
+    ...exercisesQuery(),
     select: (exercises) => exercises.length,
   });
 }
