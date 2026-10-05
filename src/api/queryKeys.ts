@@ -14,6 +14,7 @@ export const queryKeys = {
   },
   muscles: {
     all: ['muscles'] as const,
+    list: () => [...queryKeys.muscles.all, 'list'] as const,
     /** Los grupos musculares, cada uno con sus músculos. */
     groups: () => [...queryKeys.muscles.all, 'groups'] as const,
   },

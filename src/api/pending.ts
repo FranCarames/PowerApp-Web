@@ -2,6 +2,7 @@ import type { paths } from './schema';
 import type {
   Coach,
   Exercise,
+  Muscle,
   MuscleGroup,
   User,
   UserPlanification,
@@ -106,3 +107,14 @@ export type ExerciseWithMuscles = Exercise & {
 export type MuscleGroupWithMuscles = MuscleGroup & {
   muscles: Array<Pick<ExerciseMuscle, 'id' | 'name' | 'description'>>;
 };
+
+// PENDIENTE-CONTRATO: V9 CU-A-07
+/**
+ * Un elemento de `GET /muscles/all`: el `Muscle` del contrato, pero con su grupo anidado en
+ * `muscle_group` (`id` y `name`) y sin `muscle_group_id`, `created_at` ni `updated_at`: el backend
+ * recorta las columnas con un `select`.
+ */
+export type MuscleWithGroup = Pick<
+  Muscle,
+  'id' | 'name' | 'description' | 'image_url' | 'preview_image'
+> & { muscle_group: Pick<MuscleGroup, 'id' | 'name'> };
