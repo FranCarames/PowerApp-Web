@@ -273,10 +273,20 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
   - Mock: `GET /users/get/{id}` y `POST /users/edit` atienden solo a las cuentas de demo y el resto pasa al backend real. Las ediciones viven en memoria.
   - Verificado contra un doble local que responde como el código del backend (guard, 400 por campos de más y URL inválida, 409, 500 y 200), no contra el backend real.
   - Para las tareas que siguen: T14 y T15 completan el encabezado de Mi cuenta (la píldora y el conteo de alumnos). Cualquier pantalla que edite al usuario de la sesión tiene que pasar por `useAuth().updateUser`, para que el nombre y la foto se actualicen en toda la app.
-- [ ] **T14 · Historial de pagos del usuario (1 h) · CU-U-07**
+- [x] **T14 · Historial de pagos del usuario (1 h) · CU-U-07**
   - Pagos ordenados por fecha descendente, con su `expired_at`.
   - Tarjeta con la membresía actual y su estado, según el último pago.
   - Estado vacío.
+  - Cómo quedó: `PaymentsPage` en `/cuenta/pagos`, solo para el rol Usuario (se agregó el `RequireRole` que T13 dejó anotado). Está explicado en el README, sección "Historial de pagos".
+  - "El último pago" es el de **vencimiento más lejano**, no el más reciente por fecha: así lo hace el backend, y es lo que decide el estado. La lista, en cambio, va por fecha de pago, del más reciente al más antiguo, porque el backend devuelve los pagos sin ordenar.
+  - Estado de la membresía (Activa, Por vencer, Vencida) calculado con `expired_at` y no con el flag `active` del pago, que el backend actualiza una vez por día. La ventana de "por vencer" es de 7 días: es la que el backend usa por defecto, pero se configura (`MEMBERSHIP_EXPIRING_SOON_DAYS`) y solo el resumen de coach/admin la informa, así que el alumno no puede leerla. Si en el backend se cambia, hay que cambiar `EXPIRING_SOON_DAYS` a mano.
+  - Se completó el encabezado de Mi cuenta (T13): la píldora de membresía del alumno, que comparte la query con el historial. Queda pendiente solo el "N alumnos activos" del entrenador (T15).
+  - Con esto, de los tres ítems de Mi cuenta que abrían "Página no encontrada", quedan dos: Control de membresías del entrenador (T17) y Biblioteca de ejercicios (T28).
+  - Cada pago muestra el plan, cuándo se pagó, cuándo vence y el monto en dos líneas fijas; el monto es el del día del pago (el backend lo guarda en el pago).
+  - Piezas nuevas en `shared/lib`: `membershipStatus.ts` (estados, etiquetas, colores y la regla del último pago, que van a reutilizar T15 a T18), `formatDate` y `formatPrice`.
+  - Mock: los pagos de las cuentas de demo, con fechas relativas a hoy: el alumno tiene 4 pagos y vence en 15 días (activa), y la cuenta de contraseña temporal tiene 1 que vence en 3 (por vencer). Los demás ids van al backend real.
+  - Verificado contra un doble local que responde como el código del backend (pagos sin ordenar, vencida, por vencer, sin pagos y error), no contra el backend real.
+  - Para las tareas que siguen: T17 y T18 (membresías del entrenador) reutilizan `MEMBERSHIP_STATUS_LABEL` y `MEMBERSHIP_STATUS_TONE`. El prototipo ya usa ahí las mismas etiquetas: "Activa", "Por vencer" y "Vencida".
 
 ### Semana 2 (11 al 17/10): Entrenador con contrato existente
 
