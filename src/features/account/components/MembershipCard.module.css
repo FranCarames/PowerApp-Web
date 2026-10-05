@@ -1,0 +1,51 @@
+/* La tarjeta del prototipo: el plan a la izquierda y el vencimiento a la derecha. */
+.card {
+  justify-content: space-between;
+}
+
+/* .sub del prototipo, en el gris de texto secundario y sin margen. */
+.label {
+  font-size: 12px;
+  color: var(--ts);
+}
+
+/* El "Vence" de la derecha es el .sub común del prototipo, un tono más tenue que "Membresía actual". */
+.expiryLabel {
+  font-size: 12px;
+  color: var(--tm);
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.name {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.ok {
+  color: var(--ok);
+}
+
+.warn {
+  color: var(--warn);
+}
+
+.err {
+  color: var(--err);
+}
+
+.mut {
+  color: var(--ts);
+}
+
+.expiry {
+  text-align: right;
+}
+
+.date {
+  font-weight: 600;
+}

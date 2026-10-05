@@ -1,0 +1,5 @@
+/* El avatar es un círculo: el anillo de foco tiene que seguir su forma. */
+.link {
+  display: flex;
+  border-radius: 50%;
+}

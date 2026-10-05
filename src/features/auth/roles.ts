@@ -14,6 +14,13 @@ export const ROLE_LABEL: Record<Role, string> = {
   admin: 'Admin',
 };
 
+/** El color del avatar de cada rol: el del alumno es el de marca, el del entrenador el violeta. */
+export const ROLE_AVATAR_TONE = {
+  user: 'pri',
+  coach: 'acc',
+  admin: 'gray',
+} as const satisfies Record<Role, string>;
+
 export function isRole(value: unknown): value is Role {
   return typeof value === 'string' && Object.hasOwn(HOME_BY_ROLE, value);
 }

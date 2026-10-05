@@ -1,4 +1,11 @@
-import type { Coach, User, UserPlanification } from './types';
+import type { paths } from './schema';
+import type {
+  Coach,
+  Exercise,
+  MuscleGroup,
+  User,
+  UserPlanification,
+} from './types';
 
 // Tipos provisionales de lo que el contrato (openapi.json) todavía no tiene: las dependencias B1 a
 // B9 de PLAN.md, sección 4.1. Cada uno lleva `// PENDIENTE-CONTRATO: <id> <CU>`. Cuando el contrato
@@ -34,3 +41,68 @@ export type EditCoachRequest = Pick<Coach, 'coach_email' | 'cuil'>;
  * contraseña común. Mientras el backend no lo mande, solo lo manda el mock de las cuentas de demo.
  */
 export type LoginResponse = User & { password_change_required?: boolean };
+
+// PENDIENTE-CONTRATO: V1 CU-E-27
+/** Los estados que acepta el filtro `status` de `GET /membership/status/users`, los del contrato. */
+export type MembershipStatusFilter = NonNullable<
+  paths['/api/v1/membership/status/users']['get']['parameters']['query']
+>['status'];
+
+// PENDIENTE-CONTRATO: V1 CU-E-27
+/** Un alumno de la respuesta de `GET /membership/status/users` (`StudentMembershipDto` del backend). */
+export interface StudentMembership {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  membership_status: MembershipStatusFilter;
+  /** Vencimiento del último pago; `null` si nunca pagó. */
+  expired_at: string | null;
+  /** Tipo del último pago; `null` si nunca pagó. */
+  membership_name: string | null;
+  membership_id: string | null;
+}
+
+// PENDIENTE-CONTRATO: V1 CU-E-27
+/**
+ * Respuesta de `GET /membership/status/users?status=…`: los alumnos con ese estado de membresía,
+ * ordenados por apellido y nombre. El contrato la declara sin cuerpo; la forma sale del código del
+ * backend (`getStudentsByMembershipStatus`).
+ */
+export interface StudentsByMembershipStatus {
+  status: MembershipStatusFilter;
+  total: number;
+  expiring_soon_days: number;
+  students: StudentMembership[];
+}
+
+// PENDIENTE-CONTRATO: V9 CU-A-01
+/**
+ * Un músculo tal como lo trae un ejercicio en `exercisedMuscles`: el `id` es el del músculo, no el
+ * del vínculo `Exercised_Muscle`. Sale del código del backend (`ExerciseService`).
+ */
+export interface ExerciseMuscle {
+  id: string;
+  name: string;
+  description?: string;
+  image_url?: string;
+  preview_image?: string;
+}
+
+// PENDIENTE-CONTRATO: V9 CU-A-01
+/**
+ * Respuesta de `GET /exercise/all` y `GET /exercise/{id}`: el `Exercise` del contrato más sus
+ * músculos. El Swagger no declara `exercisedMuscles`, pero el backend lo manda siempre.
+ */
+export type ExerciseWithMuscles = Exercise & {
+  exercisedMuscles: ExerciseMuscle[];
+};
+
+// PENDIENTE-CONTRATO: V9 CU-A-01
+/**
+ * Respuesta de `GET /muscles/mg/all`: el `MuscleGroup` del contrato más sus músculos, con el `id`
+ * y el `name` (y la `description`). El Swagger no declara `muscles`, pero el backend lo manda.
+ */
+export type MuscleGroupWithMuscles = MuscleGroup & {
+  muscles: Array<Pick<ExerciseMuscle, 'id' | 'name' | 'description'>>;
+};

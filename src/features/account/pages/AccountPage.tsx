@@ -1,13 +1,15 @@
 import { useNavigate } from 'react-router';
 
 import type { Role, User } from '@/api/types';
-import { ROLE_LABEL } from '@/features/auth/roles';
+import { ROLE_AVATAR_TONE, ROLE_LABEL } from '@/features/auth/roles';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import type { IconName } from '@/shared/icons';
 import { formatMonthYear } from '@/shared/lib/dates';
 import { fullName } from '@/shared/lib/fullName';
 import { Avatar, Button, List, ListItem, PageHeader, Tile } from '@/shared/ui';
 
+import { MembershipPill } from '../components/MembershipPill';
+import { useUserCount } from '../hooks/useUserCount';
 import styles from './AccountPage.module.css';
 
 interface MenuItem {
@@ -71,14 +73,21 @@ const MENU: Record<Role, MenuItem[]> = {
   admin: [PERSONAL_DATA, PASSWORD],
 };
 
-const AVATAR_TONE = { user: 'pri', coach: 'acc', admin: 'gray' } as const;
-
-/** La línea bajo el nombre: desde cuándo es miembro, el rol o, del admin, el email. */
+/** La línea bajo el nombre del alumno y del admin: desde cuándo es miembro o, del admin, el email. */
 function subtitleFor(user: User): string {
-  if (user.role === 'user') {
-    return `Miembro desde ${formatMonthYear(user.created_at)}`;
-  }
-  return user.role === 'coach' ? ROLE_LABEL.coach : user.email;
+  return user.role === 'user'
+    ? `Miembro desde ${formatMonthYear(user.created_at)}`
+    : user.email;
+}
+
+/**
+ * La línea bajo el nombre del entrenador: el rol y cuántos alumnos activos hay. Comparte la query con
+ * los contadores de Mis alumnos. Es un dato de apoyo: mientras carga o si falla, queda solo el rol.
+ */
+function CoachSubtitle() {
+  const { data: activeStudents } = useUserCount({ role: 'user', active: true });
+  if (activeStudents === undefined) return ROLE_LABEL.coach;
+  return `${ROLE_LABEL.coach} · ${activeStudents} ${activeStudents === 1 ? 'alumno activo' : 'alumnos activos'}`;
 }
 
 /** Mi cuenta (CU-U-03): quién sos, el menú de tu rol y cerrar sesión. */
@@ -98,11 +107,18 @@ export function AccountPage() {
           name={name}
           src={user.profile_picture}
           size={80}
-          tone={AVATAR_TONE[user.role]}
+          tone={ROLE_AVATAR_TONE[user.role]}
           className={styles.avatar}
         />
         <div className={styles.name}>{name}</div>
-        <div className={styles.subtitle}>{subtitleFor(user)}</div>
+        <div className={styles.subtitle}>
+          {user.role === 'coach' ? <CoachSubtitle /> : subtitleFor(user)}
+        </div>
+        {user.role === 'user' && (
+          <div className={styles.membership}>
+            <MembershipPill userId={user.id} />
+          </div>
+        )}
       </div>
       <List columns={2}>
         {MENU[user.role].map(({ to, icon, title, subtitle }) => (

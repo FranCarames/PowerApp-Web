@@ -1,0 +1,22 @@
+/* El aviso de error del guardado, sobre los campos. */
+.error {
+  margin-bottom: 16px;
+}
+
+/* Los músculos: una etiqueta y los chips, con la misma separación que un <Field>. */
+.muscles {
+  margin-bottom: 14px;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ts);
+  margin-bottom: 6px;
+}
+
+.muscleError {
+  font-size: 12px;
+  color: var(--err);
+}

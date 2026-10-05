@@ -4,7 +4,7 @@ Front web de **PowerApp**, una app de gestión de gimnasio con tres roles: **Usu
 
 Es mobile-first: se usa sobre todo desde el celular en el gimnasio, y en escritorio se adapta.
 
-> **Estado:** en desarrollo. El scaffolding (T01) está hecho; el resto de las tareas y su estado están en [`PLAN.md`](PLAN.md). Entrega final: **20/11/2026**.
+> **Estado:** en desarrollo. Las tareas, su orden y su estado están en [`PLAN.md`](PLAN.md). Entrega final: **20/11/2026**.
 
 ## Qué hace cada rol
 
@@ -12,7 +12,7 @@ Es mobile-first: se usa sobre todo desde el celular en el gimnasio, y en escrito
 |---|---|---|
 | **Usuario** | Ver su plan semanal y sus rutinas, marcar series, dejar notas, registrar y consultar sus RMs, calcular RMs potenciales, consultar la wiki de ejercicios, usar el temporizador y ver su historial de pagos. | Rutina, RMs, Timer, Perfil |
 | **Entrenador** | Gestionar alumnos, circuitos, rutinas y planificaciones, asignarlas a los alumnos y controlar las membresías y los pagos. | Alumnos, Planes, Rutinas, Perfil |
-| **Admin** | Administrar el catálogo (ejercicios, músculos y grupos musculares), los tipos de membresía y los entrenadores. | Inicio, Catálogo, Coaches, Perfil |
+| **Admin** | Administrar usuarios, ejercicios, circuitos, el catálogo (músculos y grupos musculares), los tipos de membresía y los entrenadores. Rutinas y planificaciones, cuando el backend esté completo. | Inicio, Usuarios, Ejercicios, Rutinas, Más |
 
 Los tres roles comparten Mi cuenta (datos personales, cambio de contraseña y cerrar sesión).
 
@@ -107,7 +107,7 @@ Con `VITE_USE_MOCKS=true`, `main.tsx` arranca MSW (`src/mocks/browser.ts`) antes
 - **`public/mockServiceWorker.js`** lo genera MSW y no se edita. Al actualizar `msw`, se regenera con `npx msw init` (el directorio ya está guardado en `package.json`).
 - **MSW 3** pide Node 22.12 o más.
 
-Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están detalladas en la sección 4 de [`PLAN.md`](PLAN.md).
+Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están detalladas en la sección 4 de [`PLAN.md`](PLAN.md).
 
 ## Sesión, guards y arranque en frío
 
@@ -117,6 +117,43 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están det
 - **Cambio de contraseña pendiente:** `session.passwordChangeRequired`, que marca el login (el campo de la respuesta es B9, todavía sin contrato). Con eso la única ruta permitida es `/cambiar-contrasena`, incluso después de recargar. `completePasswordChange()` libera el guard.
 - **Arranque en frío:** si un request pasa de 4 segundos (`COLD_START_HINT_MS`, en `src/api/coldStart.ts`) sin que el backend conteste, aparece arriba "Despertando el servidor, puede tardar un poco…", sin cortar el request. Se va cuando el backend contesta (con lo que sea, menos 502, 503 o 504) o 3 segundos después del último request que falló sin respuesta, para que no parpadee mientras TanStack Query reintenta.
 - **Para probarlo en desarrollo**, `/dev/api` tiene un probe que manda el token de la sesión a un endpoint protegido (con una cuenta de demo da 401 y cierra la sesión, porque su token es falso) y otro de respuesta lenta, que pide `/__dev/slow` (lo sirve Vite, solo en desarrollo, y anda solo con `VITE_API_URL` vacía).
+
+## Navegación por rol
+
+- **Dónde está:** `src/app/AppShell/navigation.ts`. `TAB_BAR` son las entradas de la tab bar de mobile y `SIDEBAR` los bloques de la barra lateral de desktop (desde 960 px), cada rol con las suyas. `Sidebar.tsx` y `TabBar.tsx` solo las dibujan.
+- **Entrada marcada:** la de la ruta o la de cualquiera de sus `also` (incluido lo que cuelga de ella, `/c/alumnos/12`). En la barra lateral puede haber una por bloque, y la tab bar marca una sola (`activeTabOf`).
+- **Entrenador:** la barra lateral tiene Membresías aparte, bajo "Organización". En mobile se entra desde el botón de la barra superior de Mis alumnos, y mientras tanto la tab Alumnos queda marcada.
+- **Admin:** en desktop, tres bloques: Inicio, Usuarios y Entrenadores; "Entrenamiento" (Ejercicios, Circuitos, Rutinas y Planificaciones); y "Configuración" (Catálogo, Membresías y Perfil). En mobile, la tab bar tiene Inicio, Usuarios, Ejercicios, Rutinas y **Más** (`/a/mas`), una pantalla con los accesos que no entran: Planificaciones, Circuitos, Entrenadores, Catálogo, Membresías y Mi cuenta. Más es la entrada `fallback`: queda marcada en toda pantalla que no pertenece a otra tab, incluida Mi cuenta.
+- **Rutinas y Planificaciones del Admin** (`/a/rutinas`, `/a/rutinas/:id`, `/a/planes`, `/a/planes/:id`) muestran `SectionPlaceholder` (`shared/ui`): "Esta sección se habilita cuando el backend de rutinas y planificaciones esté completo". Aparecen en la navegación como cualquier otra. Las reemplazan T21 a T24 en el bloque C2 del PLAN, y el Entrenador reutiliza el mismo componente en T48.
+- **Pantallas temporales:** el resto de las rutas del Admin que todavía no tienen su tarea (Circuitos, Catálogo, Membresías...) abren "Pantalla en construcción" con un comentario `TEMPORAL (Txx)`, para que ningún acceso caiga en "Página no encontrada".
+
+## Panel del Admin
+
+- **Pantalla** (`/a/inicio`, `src/features/admin/pages/DashboardPage.tsx`): cuatro tarjetas con cuántos hay de lo principal, cada una con un acceso a su sección, y "Gestión", con los accesos a Planificaciones, Entrenadores, Músculos, Grupos musculares y Membresías.
+- **Números** (`useDashboardCounts`, seis queries independientes): Usuarios, el `total` de `GET /users/all` (todos los roles); Ejercicios, `GET /exercise/all`; Circuitos activos, `GET /routine/circuit/all`; Rutinas, `GET /routine/all`; y de apoyo, los planes sistémicos de `GET /planification/all` y los entrenadores con la cuenta activa de `GET /coach/all`. Sin `include_inactive` el backend deja afuera lo dado de baja, así que los circuitos, rutinas y planes son los vigentes. Rutinas y Planificaciones llevan al placeholder hasta el bloque C2.
+- **Catálogo:** "Músculos" y "Grupos musculares" abren `/a/catalogo` con `?seccion=musculos` o `?seccion=grupos`, para elegir el segmento.
+- **Si algo no carga:** esa tarjeta muestra "–", el dato de apoyo vuelve al texto de la sección y aparece un aviso con "Reintentar", que pide solo lo que falló. Mientras carga, el número es un bloque gris.
+- **Mocks:** con una cuenta de demo, los seis endpoints responden con datos de ejemplo (`src/mocks/fixtures/`); con una cuenta de verdad van al backend. Los públicos (ejercicios y entrenadores) no llevan token, así que el mock mira la sesión (`demoAccountForSession`); los demás, el token falso (`staffAccess`).
+
+## Usuarios del Admin
+
+- **Pantalla** (`/a/usuarios`, `src/features/admin/pages/UsersPage.tsx`): los casos de uso CU-E-01 a CU-E-03 vistos desde el Admin. Contadores, buscador, chips y el listado paginado de `GET /users/all`. Tocar un usuario abre su detalle.
+- **Contadores y chips:** Alumnos (`role=user`), Entrenadores (`role=coach`) e Inactivos (`active=false`, de todos los roles), con el `total` de cada uno; los chips son Todos, Alumnos, Entrenadores e Inactivos. Todos incluye las cuentas de admin. La búsqueda (nombre, apellido o email, con debounce) y el chip quedan en la URL (`?q=…&filtro=alumnos`), como en Mis alumnos.
+- **Fila:** avatar (gris si la cuenta está inactiva, violeta si es entrenador), nombre, email, el rol y, si la cuenta está dada de baja, "Inactivo" y la fila apagada. En los alumnos, el email lleva "· membresía activa", "por vencer" o "vencida". Eso sale de `GET /membership/status/users` (cuatro requests, uno por estado, no uno por alumno); si no cargan, la fila no lo dice.
+- **Detalle** (modal): el alumno, su email, su membresía (la del último pago) y, si el backend la responde, su planificación vigente. Hoy `GET /planification/user/{id}/active` no responde (el request cuelga), así que se corta a los 3,5 s y esa fila no aparece. El entrenador, su email profesional y su CUIL (`GET /coach/get/{id}`); el admin, su email.
+- **Acciones:** "Convertir en entrenador" (alumno activo) abre `/a/convertir?alumno=<id>`, que hasta T36 es una pantalla temporal. "Desactivar cuenta" pide confirmación (es una baja lógica: la cuenta no puede ingresar, pero se conservan sus datos) y "Reactivar cuenta" no. No se ofrece desactivar a un admin ni a la propia cuenta. Después de cada cambio se piden de nuevo los listados y los contadores, también los de Mis alumnos.
+- **Mocks:** `GET /users/all`, `POST /users/set-active/{id}`, `GET /membership/status/users`, `GET /coach/get/{id}`, `GET /planification/user/{id}/active` y los pagos responden con datos de ejemplo a las cuentas de demo; las bajas viven en memoria.
+- **Compartido con Mis alumnos:** los hooks de datos de usuarios (`useUsers`, `useUserCount`, `useSetUserActive`...) viven en `features/account/hooks`; el listado paginado, en `features/account/components/UserList.tsx`; y la búsqueda con chip en la URL, en `shared/lib/useSearchAndFilter.ts`.
+
+## Ejercicios del Admin
+
+- **Pantalla** (`/a/ejercicios`, `src/features/admin/pages/ExercisesPage.tsx`): el catálogo de ejercicios (CU-A-01 a CU-A-06). Buscador por nombre (sin mayúsculas ni acentos), chips por grupo muscular, y el botón flotante "Crear ejercicio". La búsqueda y el grupo quedan en la URL (`?q=…&grupo=<id>`).
+- **Fila:** miniatura (la `preview_image`, o un ícono), nombre, los músculos en una línea y los botones Editar y Eliminar. Un ejercicio aparece en todos los grupos a los que pertenecen sus músculos.
+- **Editor** (`/a/ejercicios/nuevo` y `/a/ejercicios/:id`, `ExerciseForm`): nombre, descripción, músculos como chips (✕ quita; "+ Agregar" abre un modal con los que faltan, por grupo), tips de seguridad y de activación, y tres links: video, imagen de vista previa e imagen de fondo (no hay endpoint de subida). Agregar y quitar músculos es mandar la lista completa en `exercised_muscles_ids`.
+- **Datos opcionales:** el backend no deja vaciar un dato ya cargado (rechaza el texto vacío y, si el campo no viene, conserva el anterior), así que el formulario no lo permite y lo avisa.
+- **Eliminar:** pide confirmación. El backend rechaza el borrado de un ejercicio con RMs o entrenamientos hechos con un `500` sin más motivo (V7): el front muestra un aviso con el motivo probable. Si el ejercicio solo está en circuitos, el backend lo borra y lo saca de ellos.
+- **Cruce con los grupos:** `useExerciseCatalog` (`src/features/catalog/hooks`) junta `GET /exercise/all`, que trae los músculos de cada ejercicio, con `GET /muscles/mg/all`, que trae los de cada grupo. Ninguno de los dos campos está en el Swagger (V9): sus tipos están en `pending.ts`. Lo reutiliza la wiki del alumno (T28).
+- **Mocks:** los seis endpoints (`GET /exercise/all`, `GET /exercise/{id}`, `POST /exercise/create`, `POST /exercise/edit/{id}`, `DELETE /exercise/{id}` y `GET /muscles/mg/all`) responden con datos de ejemplo a las cuentas de demo; los ejercicios viven en memoria. Press de banca y Sentadilla están "en uso": borrarlos da el rechazo del backend.
 
 ## Login
 
@@ -137,12 +174,34 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están det
 
 ## Mi cuenta
 
-- **Menú** (`/cuenta`, `src/features/account/pages/AccountPage.tsx`): el avatar (con la foto si hay, o la inicial), el nombre, una línea según el rol y el menú de ese rol. La línea es "Miembro desde *mes año*" para el alumno, "Entrenador" para el entrenador y el email para el admin. **Datos personales** y **Cambiar contraseña** son de los tres roles (el PLAN los comparte; el prototipo se los muestra solo al alumno). El alumno suma Historial de pagos, Mis RMs y Biblioteca de ejercicios, y el entrenador, Control de membresías. Un ítem que lleva a una pantalla todavía sin hacer abre "Página no encontrada" hasta su tarea.
+- **Menú** (`/cuenta`, `src/features/account/pages/AccountPage.tsx`): el avatar (con la foto si hay, o la inicial), el nombre, una línea según el rol y el menú de ese rol. La línea es "Miembro desde *mes año*" para el alumno, "Entrenador · *N* alumnos activos" para el entrenador (el conteo de Mis alumnos; si no carga, queda solo "Entrenador") y el email para el admin. **Datos personales** y **Cambiar contraseña** son de los tres roles (el PLAN los comparte; el prototipo se los muestra solo al alumno). El alumno suma Historial de pagos, Mis RMs y Biblioteca de ejercicios, y el entrenador, Control de membresías. Un ítem que lleva a una pantalla todavía sin hacer abre "Página no encontrada" hasta su tarea.
 - **Datos personales** (`/cuenta/datos`): se precargan con `GET /users/get/{id}` (con carga, error y reintento) y se guardan con `POST /users/edit`. `profileSchema` (`features/account/schemas.ts`) replica `EditUserDto`: nombre, apellido, email y teléfono (código y número) son obligatorios, y la foto de perfil es opcional, un link `http(s)` de hasta 150 caracteres. Una foto vacía no se manda: el backend la valida como URL y el DTO no permite borrarla. Al guardar se actualiza el usuario de la sesión (`useAuth().updateUser`), el caché queda al día y se vuelve a Mi cuenta. Un 409 se muestra en el campo del email ("El email ya está en uso"). Si cambian el email o el teléfono, el backend les saca la verificación.
 - **El formulario se mantiene al día** con el servidor: usa `values` con `keepDirtyValues`, así que si llega un dato nuevo se actualizan los campos que no se tocaron y se conserva lo que el usuario ya escribió.
 - **Cerrar sesión** (CU-U-03, `features/auth/logout.ts`, expuesto como `useAuth().signOut`): manda `POST /users/logout` y cierra la sesión local enseguida, sin esperar la respuesta. El endpoint es público y el backend solo confirma: el cierre de verdad es descartar el token. Si el request falla, la sesión se cierra igual y no se muestra ningún error. También lo usa el "Cerrar sesión" del cambio obligatorio de contraseña.
 - **Mocks:** `GET /users/get/{id}` y `POST /users/edit` están en el registry y atienden solo a las cuentas de demo (por su id y su token falso); el resto va al backend (`passthrough`). Las ediciones viven en memoria y se pierden al recargar. `POST /users/logout` no se mockea.
 - **Piezas que salieron de acá y se comparten:** `PhoneField` (`shared/ui`), usado por el registro y los datos personales; las reglas de cada campo de usuario (`shared/lib/userFields.ts`), que usan los schemas de auth y de cuenta; y `formatMonthYear` (`shared/lib/dates.ts`).
+
+## Historial de pagos
+
+- **Pantalla** (`/cuenta/pagos`, `src/features/account/pages/PaymentsPage.tsx`): es solo del rol Usuario (coach y admin que la abren a mano vuelven a su inicio, y su menú no la muestra). Lee `GET /membership/payment/user/{id}` (real), que el backend devuelve **sin ordenar**: la lista se ordena del pago más reciente al más antiguo, por la fecha en que se registró. Cada pago muestra el plan, cuándo se pagó, cuándo vence y el monto, que es una copia de lo que costaba ese día.
+- **La membresía actual** sale del pago de **vencimiento más lejano**, no del más reciente por fecha: un trimestral pagado hace un mes manda sobre un mensual pagado ayer. Es la misma regla del backend (`shared/lib/membershipStatus.ts`).
+- **El estado** se calcula con el `expired_at` de ese pago, no con el flag `active` del pago, que el backend actualiza una sola vez por día: **Activa** (verde), **Por vencer** (amarillo, desde 7 días antes, hasta el final de ese día) o **Vencida** (rojo; entonces la tarjeta dice "Última membresía" y "Venció"). El backend configura esa ventana con `MEMBERSHIP_EXPIRING_SOON_DAYS` y la informa en el resumen de membresías, pero ese endpoint es solo de entrenadores y admins, así que el alumno usa el valor por defecto (`EXPIRING_SOON_DAYS`).
+- **Estados de la pantalla:** carga (esqueleto), error con reintento, y sin pagos ("Todavía no tenés pagos", sin tarjeta). Mi cuenta muestra el estado en una píldora bajo el nombre, con la misma query, así que los pagos se piden una sola vez; si no cargan, la píldora no se muestra y el historial tiene su propio error.
+- **Formatos:** `formatDate` ("15 Jul 2026", en el día local de quien mira) y `formatPrice` ("$18.000", pesos argentinos con hasta dos decimales), en `shared/lib`.
+- **Mocks:** `GET /membership/payment/user/{id}` atiende solo los ids de las cuentas de demo y el resto va al backend. Las fechas son relativas a hoy, para que el estado no dependa del día: la cuenta de Usuario tiene 4 pagos y su membresía vence en 15 días (activa), y la de contraseña temporal tiene 1 que vence en 3 (por vencer).
+
+## Mis alumnos
+
+- **Pantalla** (`/c/alumnos`, `src/features/coach/pages/StudentsPage.tsx`): el home del Entrenador. De arriba hacia abajo: el encabezado con el botón de Membresías y el avatar que lleva a Mi cuenta, los contadores, el buscador, los chips y el listado. Tocar una fila abre `/c/alumnos/:id` (por ahora una pantalla temporal: el detalle es T16).
+- **No hay vínculo entrenador-alumno:** "alumnos" son todos los usuarios con `role=user`. El listado es `GET /users/all?role=user` (real), de a 20, del alumno más nuevo al más viejo (así los ordena el backend). "Cargar más" pide la página siguiente, y si falla, la lista cargada se queda y el botón pasa a "Reintentar". Cada fila muestra la foto o la inicial, el nombre, el email y el estado de la cuenta (Activo o Inactivo, con el avatar gris). La adherencia y la última sesión del prototipo no van: no hay datos (T45).
+- **Búsqueda** (CU-E-02): `keyword`, que el backend busca de forma parcial, sin distinguir mayúsculas, en nombre, apellido y email. Se manda 300 ms después de la última tecla, sin espacios en los bordes y hasta 100 caracteres (el límite del DTO). Mientras llega el resultado nuevo, la lista anterior queda a la vista, apagada.
+- **Chips** Todos, Activos e Inactivos: el parámetro `active` (el estado de la cuenta, no el de la membresía).
+- **Contadores** Activos, Inactivos y Total: el `total` de `GET /users/all?role=user&active=…&limit=1`, dos requests, y el total es su suma. Son de todos los alumnos y no cambian con la búsqueda ni con el chip. Si no cargan, muestran "–".
+- **Botón de Membresías** (`/c/membresias`): el contador suma los alumnos con la membresía **por vencer o vencida** de `GET /membership/status/summary` (real, solo de entrenador y admin). Si el resumen no carga, el botón queda sin contador. El prototipo hace esa misma suma ("requieren atención").
+- **La URL guarda la búsqueda y el chip** (`?q=ana&estado=inactivos`) y se leen solo al abrir la pantalla: volver del detalle con Atrás deja la lista como estaba. Cambiarlos no agrega entradas al historial.
+- **Estados:** carga (esqueleto), error con reintento, y vacío en tres variantes: "Todavía no hay alumnos" (CU-E-01), "No hay alumnos activos" o "inactivos" (con el chip) y "No hay alumnos que coincidan con la búsqueda" (CU-E-02).
+- **Mocks:** `GET /users/all` y `GET /membership/status/summary` atienden solo a las cuentas de demo (por su token falso) y el resto va al backend. El entrenador de demo ve 29 alumnos, 24 activos y 5 inactivos, con los nombres del prototipo, y 9 que requieren atención. `GET /users/all` filtra, ordena y pagina como el backend.
+- **Piezas que se comparten:** `useDebouncedValue` (`shared/lib`) y `AccountLink` (`features/account`), el avatar de la barra superior, que va a usar también el home del Usuario.
 
 ## Cambiar contraseña
 
@@ -170,7 +229,8 @@ src/
   mocks/          browser.ts, registry.ts, endpoint.ts, responses.ts, handlers/<dominio>.ts, fixtures/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
-    account/      Mi cuenta, compartida por los tres roles
+    account/      Mi cuenta, compartida por los tres roles, y los hooks de datos de usuarios que usan varios roles
+    catalog/      Ejercicios y músculos que leen varios roles (hooks); lo propio de cada rol vive en su feature
     user/         pantallas del rol Usuario
     coach/        pantallas del rol Entrenador
     admin/        pantallas del rol Admin
@@ -234,10 +294,11 @@ El backend tiene que habilitar CORS para el dominio del front, con `Access-Contr
 
 | Etapa | Fechas | Contenido |
 |---|---|---|
-| Semana 1 | 3 al 10/10 | Fundaciones, Auth, Mi cuenta |
-| Semana 2 | 11 al 17/10 | Entrenador con contrato existente |
-| Semana 3 | 18 al 24/10 | Contratos nuevos, Usuario sin dependencias, Admin |
-| Semana 4 | 25 al 31/10 | Núcleo del Usuario, pendientes del Entrenador, paso a backend real |
+| Semana 1 | 3 al 10/10 | Fundaciones, Auth y Mi cuenta. Desde el 5/10, Admin: navegación, panel, usuarios, ejercicios, catálogo, membresías y entrenadores |
+| Semana 2 | 11 al 17/10 | Circuitos (Admin y Entrenador) y Entrenador con contrato existente |
+| Semana 3 | 18 al 24/10 | Contratos nuevos, Usuario sin dependencias y núcleo del Usuario |
+| Semana 4 | 25 al 31/10 | Historial de entrenamientos, paso a backend real y, si el backend ya está, el bloque C2 |
+| Bloque C2 | Cuando el backend de rutinas y planificaciones esté completo (previsto antes del 31/10) | Rutinas y planificaciones para el Admin y el Entrenador, y asignaciones a alumnos |
 | Debug | 1 al 20/11 | Pruebas manuales, corrección, documentación |
 | Entrega final | 20/11 | — |
 

@@ -29,9 +29,34 @@ interface PendingEntry {
 type RegistryEntry = ContractEntry | PendingEntry;
 
 export const registry: readonly RegistryEntry[] = [
+  // Entrenadores y ejercicios (públicos): solo con la sesión de una cuenta de demo (ver handlers/coaches.ts)
+  { method: 'get', path: '/api/v1/coach/all', mock: true },
+  { method: 'get', path: '/api/v1/coach/get/{id}', mock: true },
+  { method: 'get', path: '/api/v1/exercise/all', mock: true },
+  { method: 'get', path: '/api/v1/exercise/{id}', mock: true },
+  { method: 'post', path: '/api/v1/exercise/create', mock: true },
+  { method: 'post', path: '/api/v1/exercise/edit/{id}', mock: true },
+  { method: 'delete', path: '/api/v1/exercise/{id}', mock: true },
+  { method: 'get', path: '/api/v1/muscles/mg/all', mock: true },
+  // Circuitos, rutinas y planificaciones: solo las cuentas de demo; las de verdad pasan al backend real
+  { method: 'get', path: '/api/v1/routine/circuit/all', mock: true },
+  { method: 'get', path: '/api/v1/routine/all', mock: true },
+  { method: 'get', path: '/api/v1/planification/all', mock: true },
+  {
+    method: 'get',
+    path: '/api/v1/planification/user/{id}/active',
+    mock: true,
+  },
   // Membresías (tipos)
   { method: 'get', path: '/api/v1/membership/all', mock: true },
+  // Resumen de estados: solo las cuentas de demo; las de verdad pasan al backend real (ver handlers/memberships.ts)
+  { method: 'get', path: '/api/v1/membership/status/summary', mock: true },
+  { method: 'get', path: '/api/v1/membership/status/users', mock: true },
+  // Pagos: solo los de las cuentas de demo; los demás ids pasan al backend real (ver handlers/payments.ts)
+  { method: 'get', path: '/api/v1/membership/payment/user/{id}', mock: true },
   // Usuarios: solo las cuentas de demo; los demás emails pasan al backend real (ver handlers/users.ts)
+  { method: 'get', path: '/api/v1/users/all', mock: true },
+  { method: 'post', path: '/api/v1/users/set-active/{id}', mock: true },
   { method: 'post', path: '/api/v1/users/login', mock: true },
   { method: 'post', path: '/api/v1/users/change-password', mock: true },
   { method: 'get', path: '/api/v1/users/get/{id}', mock: true },

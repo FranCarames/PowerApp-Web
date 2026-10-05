@@ -80,7 +80,8 @@ src/
   mocks/          browser.ts, registry.ts, handlers/<dominio>.ts, fixtures/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
-    account/      Mi cuenta, compartida por los tres roles
+    account/      Mi cuenta, compartida por los tres roles, y los hooks de datos de usuarios que usan varios roles
+    catalog/      Ejercicios y músculos que leen varios roles (hooks); lo propio de cada rol vive en su feature
     user/         pantallas del rol Usuario
     coach/        pantallas del rol Entrenador
     admin/        pantallas del rol Admin
@@ -98,7 +99,7 @@ Cada feature organiza su código en `pages/`, `components/` y `hooks/`. Los hook
 - **Paths:** los paths del contrato ya incluyen `/api/v1`. Usalos tal cual figuran en `openapi.json`.
 - **Token:** el login y el registro devuelven el JWT en el **header `Authorization` de la respuesta**, no en el body. Guardalo en `localStorage`, en la clave `powerapp.session`, junto con el `User`. En los endpoints con `security: bearer`, mandá `Authorization: Bearer <token>`: el cliente (`src/api/client.ts`) ya lo hace, y el token del login se lee con `readAuthToken(response)`.
 - **Llamadas:** los endpoints del contrato se llaman con `api.get`, `api.post` y `api.delete`, que están tipados con `schema.d.ts`; si hace falta la respuesta (el login), con `apiRequest`. Lo que el contrato no tiene (`pending.ts`) o describe mal se llama con `request<T>`. Pasá el `signal` de la query.
-- **401:** limpiá la sesión y redirigí a `/login`. Cuenta solo un 401 de un request que llevaba token (`ApiError.authenticated`): el 401 del login es "credenciales inválidas". El 403 con "La cuenta está deshabilitada." también cierra la sesión; el de "Permisos insuficientes", no.
+- **401:** cierra la sesión (limpiala y redirigí a `/login`) un 401 de **guard**: el cuerpo trae `statusCode`. Un 401 de **negocio** (`{ error }`, sin `statusCode`) es un error del formulario y no la cierra: el de "La contraseña actual es incorrecta" al cambiar la contraseña. Cuenta solo un 401 de un request que llevaba token (`ApiError.authenticated`): el 401 del login es "credenciales inválidas". El 403 con "La cuenta está deshabilitada." también cierra la sesión; el de "Permisos insuficientes", no. Lo decide `isSessionExpiredError` en `src/api/errors.ts`.
 - **Login con 403:** la cuenta está inactiva. Mostrá un mensaje específico.
 - **Login con credenciales inválidas:** mostrá un mensaje genérico, sin decir qué campo falló.
 - **Errores en general:** traducí 400, 404 y 409 a mensajes en español, en el formulario o en un toast. Nunca muestres el error crudo del servidor. Los errores llegan como `ApiError`, y `getErrorMessage(error, { 409: '…' })` (`src/api/errors.ts`) da el texto, con los de por defecto y los de cada pantalla.
@@ -147,14 +148,14 @@ Tokens, copiados del prototipo. Van en `src/shared/styles/tokens.css`:
 |---|---|---|
 | Usuario | Rutina, RMs, Timer, Perfil | Progreso se suma solo si sobra tiempo (T45). |
 | Entrenador | Alumnos, Planes, Rutinas, Perfil | Rutinas tiene segmentos Rutinas \| Circuitos. Se entra a Membresías desde un botón con badge en la top bar de Mis Alumnos. |
-| Admin | Inicio, Catálogo, Coaches, Perfil | Catálogo tiene segmentos Ejercicios \| Músculos \| Grupos. Se entra a Membresías (tipos) desde Inicio. |
+| Admin | Inicio, Usuarios, Ejercicios, Rutinas, Más (tab bar de mobile) | En desktop, la barra lateral tiene tres grupos: Inicio, Usuarios y Entrenadores; "Entrenamiento" (Ejercicios, Circuitos, Rutinas y Planificaciones); y "Configuración" (Catálogo, Membresías y Perfil). "Más" (`/a/mas`) lleva a Planificaciones, Circuitos, Entrenadores, Catálogo, Membresías y Mi cuenta, y queda marcada en toda pantalla que no esté en la tab bar. Catálogo tiene segmentos Músculos \| Grupos musculares. Músculos, grupos, tipos de membresía (alta y edición) y la edición de entrenadores van en modales, sin ruta propia. Rutinas y Planificaciones muestran un placeholder hasta el bloque C2. |
 
 Rutas:
 
 - **Auth:** `/login`, `/registro`, `/recuperar`, `/cambiar-contrasena`.
 - **Usuario:** `/u/plan`, `/u/rutina/:id`, `/u/ejercicio/:id`, `/u/rms`, `/u/calculadora`, `/u/wiki`, `/u/wiki/:id`, `/u/timer`.
 - **Entrenador:** `/c/alumnos`, `/c/alumnos/:id`, `/c/membresias`, `/c/pago`, `/c/planes`, `/c/planes/:id`, `/c/rutinas`, `/c/rutinas/:id`, `/c/circuitos/:id`.
-- **Admin:** `/a/inicio`, `/a/catalogo`, `/a/ejercicios/:id`, `/a/musculos/:id`, `/a/grupos/:id`, `/a/membresias`, `/a/entrenadores`, `/a/convertir`.
+- **Admin:** `/a/inicio`, `/a/usuarios`, `/a/entrenadores`, `/a/convertir`, `/a/ejercicios`, `/a/ejercicios/:id`, `/a/circuitos`, `/a/circuitos/:id`, `/a/rutinas`, `/a/rutinas/:id`, `/a/planes`, `/a/planes/:id`, `/a/catalogo`, `/a/membresias`, `/a/mas`.
 - **Cuenta (los tres roles):** `/cuenta`, `/cuenta/datos`, `/cuenta/pagos`. El historial de pagos solo se muestra para el rol Usuario.
 
 Las rutas de alta usan `nuevo` como id, por ejemplo `/c/circuitos/nuevo`.

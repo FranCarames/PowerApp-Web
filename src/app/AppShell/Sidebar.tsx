@@ -1,22 +1,16 @@
+import { Fragment } from 'react';
 import { Link, useLocation } from 'react-router';
 
 import type { User } from '@/api/types';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { ROLE_LABEL } from '@/features/auth/roles';
+import { ROLE_AVATAR_TONE, ROLE_LABEL } from '@/features/auth/roles';
 import { Icon } from '@/shared/icons';
 import { cx } from '@/shared/lib/cx';
 import { fullName } from '@/shared/lib/fullName';
 import { Avatar, IconButton, Logo } from '@/shared/ui';
 
-import {
-  isNavItemActive,
-  NAV,
-  ORGANIZATION_NAV,
-  type NavItem,
-} from './navigation';
+import { isNavItemActive, SIDEBAR, type NavItem } from './navigation';
 import styles from './Sidebar.module.css';
-
-const AVATAR_TONE = { user: 'pri', coach: 'acc', admin: 'gray' } as const;
 
 function SideLink({ item, active }: { item: NavItem; active: boolean }) {
   return (
@@ -35,10 +29,6 @@ function SideLink({ item, active }: { item: NavItem; active: boolean }) {
 export function Sidebar({ user }: { user: User }) {
   const { pathname } = useLocation();
   const { signOut } = useAuth();
-  const organization = ORGANIZATION_NAV[user.role];
-  const organizationActive = organization.some((item) =>
-    isNavItemActive(item, pathname),
-  );
   const name = fullName(user);
 
   return (
@@ -52,25 +42,18 @@ export function Sidebar({ user }: { user: User }) {
       </div>
 
       <nav className={styles.nav} aria-label="Navegación principal">
-        {NAV[user.role].map((item) => (
-          <SideLink
-            key={item.to}
-            item={item}
-            active={!organizationActive && isNavItemActive(item, pathname)}
-          />
-        ))}
-        {organization.length > 0 && (
-          <>
-            <div className={styles.sep}>Organización</div>
-            {organization.map((item) => (
+        {SIDEBAR[user.role].map(({ title, items }, index) => (
+          <Fragment key={title ?? index}>
+            {title && <div className={styles.sep}>{title}</div>}
+            {items.map((item) => (
               <SideLink
                 key={item.to}
                 item={item}
                 active={isNavItemActive(item, pathname)}
               />
             ))}
-          </>
-        )}
+          </Fragment>
+        ))}
       </nav>
 
       <div className={styles.foot}>
@@ -78,7 +61,7 @@ export function Sidebar({ user }: { user: User }) {
           name={name}
           src={user.profile_picture}
           size={36}
-          tone={AVATAR_TONE[user.role]}
+          tone={ROLE_AVATAR_TONE[user.role]}
         />
         <div className={styles.who}>
           <div className={styles.fullName}>{name}</div>
