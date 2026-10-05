@@ -8,6 +8,7 @@ import { formatMonthYear } from '@/shared/lib/dates';
 import { fullName } from '@/shared/lib/fullName';
 import { Avatar, Button, List, ListItem, PageHeader, Tile } from '@/shared/ui';
 
+import { MembershipPill } from '../components/MembershipPill';
 import styles from './AccountPage.module.css';
 
 interface MenuItem {
@@ -103,6 +104,11 @@ export function AccountPage() {
         />
         <div className={styles.name}>{name}</div>
         <div className={styles.subtitle}>{subtitleFor(user)}</div>
+        {user.role === 'user' && (
+          <div className={styles.membership}>
+            <MembershipPill userId={user.id} />
+          </div>
+        )}
       </div>
       <List columns={2}>
         {MENU[user.role].map(({ to, icon, title, subtitle }) => (

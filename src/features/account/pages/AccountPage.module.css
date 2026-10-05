@@ -21,6 +21,13 @@
   margin-top: 2px;
 }
 
+/* La píldora de la membresía, 8 px bajo el subtítulo. */
+.membership {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
 .signOut {
   margin-top: 16px;
 }
