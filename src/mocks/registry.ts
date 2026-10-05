@@ -29,6 +29,13 @@ interface PendingEntry {
 type RegistryEntry = ContractEntry | PendingEntry;
 
 export const registry: readonly RegistryEntry[] = [
+  // Entrenadores y ejercicios (públicos): solo con la sesión de una cuenta de demo (ver handlers/coaches.ts)
+  { method: 'get', path: '/api/v1/coach/all', mock: true },
+  { method: 'get', path: '/api/v1/exercise/all', mock: true },
+  // Circuitos, rutinas y planificaciones: solo las cuentas de demo; las de verdad pasan al backend real
+  { method: 'get', path: '/api/v1/routine/circuit/all', mock: true },
+  { method: 'get', path: '/api/v1/routine/all', mock: true },
+  { method: 'get', path: '/api/v1/planification/all', mock: true },
   // Membresías (tipos)
   { method: 'get', path: '/api/v1/membership/all', mock: true },
   // Resumen de estados: solo las cuentas de demo; las de verdad pasan al backend real (ver handlers/memberships.ts)

@@ -1,4 +1,5 @@
 import type { User } from '@/api/types';
+import { getSession } from '@/features/auth/sessionStore';
 
 // Cuentas de demo del login mockeado. Con los mocks encendidos, el login responde estas y deja pasar
 // al backend real cualquier otro email: ahí entran las cuentas de verdad. Los nombres son los del
@@ -32,6 +33,15 @@ export function demoAccountForToken(
 ): DemoAccount | undefined {
   const token = authorization?.replace(/^Bearer\s+/i, '').trim();
   return demoAccounts.find((account) => demoToken(account) === token);
+}
+
+/**
+ * La cuenta de demo con la sesión abierta, si lo es. Los endpoints públicos no llevan el token, así
+ * que un mock que quiere responder solo a las cuentas de demo mira la sesión y no el request.
+ */
+export function demoAccountForSession(): DemoAccount | undefined {
+  const token = getSession()?.token;
+  return token ? demoAccountForToken(`Bearer ${token}`) : undefined;
 }
 
 const TIMESTAMP = '2026-01-01T00:00:00.000Z';

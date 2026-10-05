@@ -127,6 +127,14 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están det
 - **Rutinas y Planificaciones del Admin** (`/a/rutinas`, `/a/rutinas/:id`, `/a/planes`, `/a/planes/:id`) muestran `SectionPlaceholder` (`shared/ui`): "Esta sección se habilita cuando el backend de rutinas y planificaciones esté completo". Aparecen en la navegación como cualquier otra. Las reemplazan T21 a T24 en el bloque C2 del PLAN, y el Entrenador reutiliza el mismo componente en T48.
 - **Pantallas temporales:** el resto de las rutas del Admin que todavía no tienen su tarea (Usuarios, Ejercicios, Circuitos, Catálogo, Membresías...) abren "Pantalla en construcción" con un comentario `TEMPORAL (Txx)`, para que ningún acceso caiga en "Página no encontrada".
 
+## Panel del Admin
+
+- **Pantalla** (`/a/inicio`, `src/features/admin/pages/DashboardPage.tsx`): cuatro tarjetas con cuántos hay de lo principal, cada una con un acceso a su sección, y "Gestión", con los accesos a Planificaciones, Entrenadores, Músculos, Grupos musculares y Membresías.
+- **Números** (`useDashboardCounts`, seis queries independientes): Usuarios, el `total` de `GET /users/all` (todos los roles); Ejercicios, `GET /exercise/all`; Circuitos activos, `GET /routine/circuit/all`; Rutinas, `GET /routine/all`; y de apoyo, los planes sistémicos de `GET /planification/all` y los entrenadores con la cuenta activa de `GET /coach/all`. Sin `include_inactive` el backend deja afuera lo dado de baja, así que los circuitos, rutinas y planes son los vigentes. Rutinas y Planificaciones llevan al placeholder hasta el bloque C2.
+- **Catálogo:** "Músculos" y "Grupos musculares" abren `/a/catalogo` con `?seccion=musculos` o `?seccion=grupos`, para elegir el segmento.
+- **Si algo no carga:** esa tarjeta muestra "–", el dato de apoyo vuelve al texto de la sección y aparece un aviso con "Reintentar", que pide solo lo que falló. Mientras carga, el número es un bloque gris.
+- **Mocks:** con una cuenta de demo, los seis endpoints responden con datos de ejemplo (`src/mocks/fixtures/`); con una cuenta de verdad van al backend. Los públicos (ejercicios y entrenadores) no llevan token, así que el mock mira la sesión (`demoAccountForSession`); los demás, el token falso (`staffAccess`).
+
 ## Login
 
 - **Pantalla:** `/login` (`src/features/auth/pages/LoginPage.tsx`). El formulario usa React Hook Form con el schema `loginSchema` (`features/auth/schemas.ts`), que replica `LoginUserDto`: email de hasta 50 caracteres y contraseña de 6 a 50. El resolver de Zod es propio (`shared/lib/zodResolver.ts`), porque `@hookform/resolvers` no está en el stack.

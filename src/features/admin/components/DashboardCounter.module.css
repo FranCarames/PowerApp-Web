@@ -1,0 +1,24 @@
+/* La tarjeta es un <button>: el texto va a la izquierda y cada línea en su propio bloque. */
+.counter {
+  text-align: left;
+}
+
+.tile {
+  margin-bottom: 12px;
+}
+
+/* .data del prototipo, a 28 px. */
+.value {
+  display: block;
+  font-family: var(--fM);
+  font-variant-numeric: tabular-nums;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  color: var(--ts);
+  margin-top: 2px;
+}
