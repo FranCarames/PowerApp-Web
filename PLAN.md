@@ -89,7 +89,7 @@ El contrato no los documenta del todo. Se resuelven en la tarea indicada.
 | V5 | El DTO pide contraseñas de 6 caracteres como mínimo. El prototipo muestra mínimo 8, con mayúscula y número. El front valida con el DTO; si se quieren las reglas del prototipo, hay que subirlas en el backend. | Resuelto en T10 y T12 |
 | V6 | El registro devuelve token, pero CU-U-01 pide volver al login. El front sigue el caso de uso. | Resuelto en T10 |
 | V7 | Código y mensaje que devuelve el backend cuando rechaza un borrado por integridad (ejercicio, músculo, grupo o entrenador). | T31 a T35 |
-| V8 | Que el rol `admin` tenga permiso en los endpoints pensados para el Entrenador que usa el Admin desde el prototipo del 5/10: `GET /users/all`, `POST /users/set-active/{id}`, `GET /planification/user/{id}/active` y todo `/routine/*`, `/routine/circuit/*` y `/planification/*`. | T46 (relevamiento), T47, T19 a T24 |
+| V8 | Que el rol `admin` tenga permiso en los endpoints pensados para el Entrenador que usa el Admin desde el prototipo del 5/10: `GET /users/all`, `POST /users/set-active/{id}`, `GET /planification/user/{id}/active` y todo `/routine/*`, `/routine/circuit/*` y `/planification/*`. | Relevado en T46: los guards del código del backend le dan permiso al rol `admin` en todos. A confirmar contra el backend real en T47 y T19 a T24 |
 
 ## 5. Mapa de pantallas
 
@@ -306,7 +306,7 @@ Cada tarea es un PR, con una rama `feature/Txx-...` desde `develop`. Claude Code
 
 Por decisión de Fran (5/10), el Admin se adelanta todo lo que su backend permite. El prototipo web del 5/10 le suma accesos a Usuarios, Ejercicios, Circuitos, Rutinas y Planificaciones. Rutinas y Planificaciones quedan con un placeholder hasta el bloque C2. Las tareas conservan su número para no romper las referencias de las tareas hechas ni los comentarios `TEMPORAL (Txx)` del código; las nuevas siguen desde T46.
 
-- [ ] **T46 · Navegación del Admin (1 h)** · nueva
+- [x] **T46 · Navegación del Admin (1 h)** · nueva
   - Sidebar, desde 960 px, en tres grupos con título:
     - Sin título: Inicio, Usuarios y Entrenadores.
     - "Entrenamiento": Ejercicios, Circuitos, Rutinas y Planificaciones.
@@ -319,6 +319,16 @@ Por decisión de Fran (5/10), el Admin se adelanta todo lo que su backend permit
     - En "Navegación y rutas", la fila del Admin y su lista de rutas, según esta tarea.
     - En "API", la regla del 401 según la corrección de T12: cierra la sesión un 401 de guard (el cuerpo trae `statusCode`); un 401 de negocio (`{ error }`) es un error del formulario.
   - Listo cuando: la sidebar y la tab bar del Admin coinciden con el prototipo, Rutinas y Planificaciones muestran el placeholder, y el resto de las rutas abre su pantalla temporal.
+  - Cómo quedó: `src/app/AppShell/navigation.ts` separa `TAB_BAR` (mobile) y `SIDEBAR` (desktop, en bloques con título), y `activeTabOf` marca una sola tab. Está explicado en el README, sección "Navegación por rol".
+  - Medido contra el prototipo del 5/10 en 1280 y 390 px: cada fila de la barra lateral del Admin (posición, alto, colores, tipografía), la tab bar y Más son idénticas. La barra lateral de los tres roles cambió con ese prototipo: 2 px entre entradas en lugar de 4 y desplazamiento vertical si no entra.
+  - `Más` es la entrada `fallback`: queda marcada en toda ruta que no esté en la tab bar, incluida Mi cuenta. La etiqueta de la tab de Entrenadores pasó de "Coaches" a "Entrenadores", como en el prototipo.
+  - Se sumó el ícono `cycle` (Circuitos) del prototipo, que faltaba en `shared/icons`.
+  - `SectionPlaceholder` (`shared/ui`) lo usan `/a/rutinas`, `/a/rutinas/:id`, `/a/planes` y `/a/planes/:id`. Las pantallas temporales son Usuarios (T47), Ejercicios (T31), Circuitos (T19), el editor de circuito (T20), Catálogo (T32 y T33) y Membresías (T34).
+  - Rutas: se sumó `/a/membresias`, que no estaba en la lista de esta tarea pero es una entrada de la barra lateral. `/a/convertir` y `/a/ejercicios/:id` todavía no tienen pantalla (T36 y T31): sus entradas de navegación ya las cubren con `also` y el prefijo. `/a/musculos/:id` y `/a/grupos/:id` salieron de `CLAUDE.md`, porque van en modales.
+  - `CLAUDE.md` actualizado: la fila y las rutas del Admin, y la regla del 401 (cierra la sesión un 401 de guard, no uno de negocio).
+  - **V8, relevado en el código del backend (solo lectura):** `GET /users/all` es `@Auth()` (cualquier autenticado); `POST /users/set-active/{id}` es coach y admin; `GET /planification/user/{id}/active` es user, coach y admin; y todo `/routine/*`, `/routine/circuit/*` y `/planification/*` es coach y admin. El Admin tiene permiso en todos. Falta comprobarlo contra el backend real.
+  - Otros hallazgos del relevamiento, para Fran: (1) `GET /routine/{id}` es solo coach y admin, así que un alumno recibe 403: V4 da negativo para la rutina (T39 / B2), y `GET /exercise/{id}` sí es de cualquier autenticado. (2) `GET /coach/all` y `GET /coach/get/{id}` no tienen guard y devuelven el CUIL y el email profesional de cada entrenador: cualquiera, sin token, puede leerlos. (3) El código local del backend no tiene un endpoint para editar entrenadores (B8): el `CoachController` solo tiene `all`, `get/:id`, `promote_user` y `delete_coach/:id`.
+  - Verificado en el navegador con las cuentas de demo (mocks): qué entrada queda marcada en cada ruta del Admin, en desktop y en mobile, y que la barra lateral y la tab bar del Entrenador siguen igual. No hay requests nuevos.
 - [ ] **T30 · Panel del Admin (1 h)**
   - Contadores que llevan a su sección: usuarios (`total` de `GET /users/all`), ejercicios, circuitos activos (`GET /routine/circuit/all`) y rutinas (`GET /routine/all`, que ya responde; hasta el bloque C2 lleva al placeholder).
   - Sección "Gestión" con accesos a Planificaciones (placeholder hasta el bloque C2), Entrenadores, Músculos, Grupos musculares y Membresías, cada uno con su dato de apoyo (planes, entrenadores activos).

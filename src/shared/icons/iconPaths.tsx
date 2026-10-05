@@ -123,6 +123,12 @@ export const ICON_PATHS = {
       <path d="M21 16l-5-5L5 20" />
     </>
   ),
+  cycle: (
+    <>
+      <path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3" />
+      <path d="M18 3v4h-4M6 21v-4h4" />
+    </>
+  ),
   alert: (
     <>
       <circle cx="12" cy="12" r="9" />

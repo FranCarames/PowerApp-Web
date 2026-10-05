@@ -12,7 +12,7 @@ Es mobile-first: se usa sobre todo desde el celular en el gimnasio, y en escrito
 |---|---|---|
 | **Usuario** | Ver su plan semanal y sus rutinas, marcar series, dejar notas, registrar y consultar sus RMs, calcular RMs potenciales, consultar la wiki de ejercicios, usar el temporizador y ver su historial de pagos. | Rutina, RMs, Timer, Perfil |
 | **Entrenador** | Gestionar alumnos, circuitos, rutinas y planificaciones, asignarlas a los alumnos y controlar las membresías y los pagos. | Alumnos, Planes, Rutinas, Perfil |
-| **Admin** | Administrar el catálogo (ejercicios, músculos y grupos musculares), los tipos de membresía y los entrenadores. | Inicio, Catálogo, Coaches, Perfil |
+| **Admin** | Administrar usuarios, ejercicios, circuitos, el catálogo (músculos y grupos musculares), los tipos de membresía y los entrenadores. Rutinas y planificaciones, cuando el backend esté completo. | Inicio, Usuarios, Ejercicios, Rutinas, Más |
 
 Los tres roles comparten Mi cuenta (datos personales, cambio de contraseña y cerrar sesión).
 
@@ -117,6 +117,15 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están det
 - **Cambio de contraseña pendiente:** `session.passwordChangeRequired`, que marca el login (el campo de la respuesta es B9, todavía sin contrato). Con eso la única ruta permitida es `/cambiar-contrasena`, incluso después de recargar. `completePasswordChange()` libera el guard.
 - **Arranque en frío:** si un request pasa de 4 segundos (`COLD_START_HINT_MS`, en `src/api/coldStart.ts`) sin que el backend conteste, aparece arriba "Despertando el servidor, puede tardar un poco…", sin cortar el request. Se va cuando el backend contesta (con lo que sea, menos 502, 503 o 504) o 3 segundos después del último request que falló sin respuesta, para que no parpadee mientras TanStack Query reintenta.
 - **Para probarlo en desarrollo**, `/dev/api` tiene un probe que manda el token de la sesión a un endpoint protegido (con una cuenta de demo da 401 y cierra la sesión, porque su token es falso) y otro de respuesta lenta, que pide `/__dev/slow` (lo sirve Vite, solo en desarrollo, y anda solo con `VITE_API_URL` vacía).
+
+## Navegación por rol
+
+- **Dónde está:** `src/app/AppShell/navigation.ts`. `TAB_BAR` son las entradas de la tab bar de mobile y `SIDEBAR` los bloques de la barra lateral de desktop (desde 960 px), cada rol con las suyas. `Sidebar.tsx` y `TabBar.tsx` solo las dibujan.
+- **Entrada marcada:** la de la ruta o la de cualquiera de sus `also` (incluido lo que cuelga de ella, `/c/alumnos/12`). En la barra lateral puede haber una por bloque, y la tab bar marca una sola (`activeTabOf`).
+- **Entrenador:** la barra lateral tiene Membresías aparte, bajo "Organización". En mobile se entra desde el botón de la barra superior de Mis alumnos, y mientras tanto la tab Alumnos queda marcada.
+- **Admin:** en desktop, tres bloques: Inicio, Usuarios y Entrenadores; "Entrenamiento" (Ejercicios, Circuitos, Rutinas y Planificaciones); y "Configuración" (Catálogo, Membresías y Perfil). En mobile, la tab bar tiene Inicio, Usuarios, Ejercicios, Rutinas y **Más** (`/a/mas`), una pantalla con los accesos que no entran: Planificaciones, Circuitos, Entrenadores, Catálogo, Membresías y Mi cuenta. Más es la entrada `fallback`: queda marcada en toda pantalla que no pertenece a otra tab, incluida Mi cuenta.
+- **Rutinas y Planificaciones del Admin** (`/a/rutinas`, `/a/rutinas/:id`, `/a/planes`, `/a/planes/:id`) muestran `SectionPlaceholder` (`shared/ui`): "Esta sección se habilita cuando el backend de rutinas y planificaciones esté completo". Aparecen en la navegación como cualquier otra. Las reemplazan T21 a T24 en el bloque C2 del PLAN, y el Entrenador reutiliza el mismo componente en T48.
+- **Pantallas temporales:** el resto de las rutas del Admin que todavía no tienen su tarea (Usuarios, Ejercicios, Circuitos, Catálogo, Membresías...) abren "Pantalla en construcción" con un comentario `TEMPORAL (Txx)`, para que ningún acceso caiga en "Página no encontrada".
 
 ## Login
 
