@@ -122,3 +122,44 @@ export const muscleGroupSchema = z.object({
 });
 
 export type MuscleGroupValues = z.input<typeof muscleGroupSchema>;
+
+/** El precio más alto que entra en la columna del backend: `decimal(10, 2)`. */
+const MAX_PRICE = 99_999_999.99;
+
+/**
+ * `CreateMembershipDto` y `EditMembershipDto`, que tienen las mismas reglas. El nombre llega a 50
+ * caracteres; la duración es un entero de días, de 1 en adelante; el precio es mayor a cero y con
+ * hasta dos decimales. En el formulario son textos (los campos numéricos entregan texto) y el schema
+ * los convierte a número.
+ */
+export const membershipTypeSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Poné un nombre a la membresía')
+    .max(50, 'El nombre no puede tener más de 50 caracteres'),
+  price: z
+    .string()
+    .trim()
+    .min(1, 'Ingresá el precio')
+    .refine(
+      (value) =>
+        /^\d+([.,]\d{1,2})?$/.test(value) &&
+        Number(value.replace(',', '.')) >= 0.01,
+      'El precio tiene que ser mayor a cero, con hasta dos decimales',
+    )
+    .transform((value) => Number(value.replace(',', '.')))
+    .refine((value) => value <= MAX_PRICE, 'El precio es demasiado alto'),
+  duration: z
+    .string()
+    .trim()
+    .min(1, 'Ingresá la duración en días')
+    .refine(
+      (value) => /^\d+$/.test(value) && Number(value) >= 1,
+      'La duración es un número entero de días, de 1 en adelante',
+    )
+    .transform(Number),
+});
+
+export type MembershipTypeInput = z.input<typeof membershipTypeSchema>;
+export type MembershipTypeValues = z.output<typeof membershipTypeSchema>;
