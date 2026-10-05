@@ -1,0 +1,4 @@
+/* Un email largo y sin espacios no tiene dónde cortarse: sin esto, empuja la fila fuera de la pantalla. */
+.email {
+  overflow-wrap: anywhere;
+}

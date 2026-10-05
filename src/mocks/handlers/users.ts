@@ -5,6 +5,7 @@ import type { LoginResponse } from '@/api/pending';
 import type { User } from '@/api/types';
 
 import { mockEndpoint } from '../endpoint';
+import { students } from '../fixtures/students';
 import {
   DEMO_PASSWORD,
   demoAccountForToken,
@@ -12,7 +13,12 @@ import {
   demoToken,
   type DemoAccount,
 } from '../fixtures/users';
-import { authTokenHeaders, emptyResponse, serviceError } from '../responses';
+import {
+  authTokenHeaders,
+  emptyResponse,
+  guardError,
+  serviceError,
+} from '../responses';
 
 // Lo que las cuentas de demo se cambiaron: la contraseña (id → contraseña nueva) y los datos
 // personales (id → usuario editado). Vive en memoria: al recargar la página vuelven a ser los de la
@@ -26,6 +32,23 @@ function passwordOf({ user }: DemoAccount): string {
 
 function userOf(account: DemoAccount): User {
   return editedUsers.get(account.user.id) ?? account.user;
+}
+
+/** Todos los usuarios que conoce el mock: las cuentas de demo que no son alumnos y los alumnos. */
+const allUsers: User[] = [
+  ...demoAccounts.map(({ user }) => user).filter(({ role }) => role !== 'user'),
+  ...students,
+];
+
+/** Como el backend: coincidencia parcial, sin distinguir mayúsculas, en nombre, apellido, nombre completo y email. */
+function matchesKeyword(user: User, keyword: string): boolean {
+  const needle = keyword.toLowerCase();
+  return [
+    user.first_name,
+    user.last_name,
+    `${user.first_name} ${user.last_name}`,
+    user.email,
+  ].some((text) => text.toLowerCase().includes(needle));
 }
 
 /** Los mocks de Usuarios. Cuáles están encendidos lo dice `registry.ts`. */
@@ -69,6 +92,45 @@ export const userMocks = [
     }
     changedPasswords.set(account.user.id, new_password);
     return emptyResponse();
+  }),
+
+  // Listar usuarios es REAL: el mock atiende solo a las cuentas de demo, por su token falso (el
+  // backend lo rechazaría con 401). Imita al backend: filtra por rol, estado y texto, ordena del más
+  // nuevo al más viejo, pagina y valida la página y el límite como el DTO.
+  mockEndpoint('get', '/api/v1/users/all', ({ request }) => {
+    if (!demoAccountForToken(request.headers.get('Authorization'))) {
+      return passthrough();
+    }
+
+    const query = new URL(request.url).searchParams;
+    const page = Number(query.get('page') ?? 1);
+    const limit = Number(query.get('limit') ?? 20);
+    const errors = [
+      ...(Number.isInteger(page) && page >= 1
+        ? []
+        : ['page must not be less than 1']),
+      ...(Number.isInteger(limit) && limit >= 1 && limit <= 100
+        ? []
+        : ['limit must not be greater than 100']),
+    ];
+    if (errors.length > 0) return guardError(400, errors);
+
+    const role = query.get('role');
+    const active = query.get('active');
+    const keyword = query.get('keyword');
+    const matching = allUsers
+      .filter((user) => !role || user.role === role)
+      .filter((user) => active === null || user.active === (active === 'true'))
+      .filter((user) => !keyword || matchesKeyword(user, keyword))
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+
+    return HttpResponse.json({
+      data: matching.slice((page - 1) * limit, page * limit),
+      total: matching.length,
+      page,
+      limit,
+      totalPages: Math.ceil(matching.length / limit),
+    });
   }),
 
   // Leer un usuario es REAL: el mock responde solo por los ids de las cuentas de demo (con los datos

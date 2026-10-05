@@ -4,8 +4,10 @@ import type { components } from './schema';
 type Schemas = components['schemas'];
 
 export type User = Schemas['User'];
+export type PaginatedUsers = Schemas['PaginatedUsersResponseDto'];
 export type Role = User['role'];
 export type Membership = Schemas['Membership'];
 export type MembershipPayment = Schemas['MembershipPayment'];
 export type Coach = Schemas['Coach'];
 export type UserPlanification = Schemas['UserPlanification'];
+export type MembershipStatusSummary = Schemas['MembershipStatusSummaryDto'];

@@ -381,12 +381,22 @@ Los circuitos usan los mismos componentes para el Admin y para el Entrenador. Se
   - Duplicar, sin CU propio: crea una copia con `POST /routine/circuit/create` y el sufijo "(copia)", y abre la copia.
   - Escritura real. Resolver V2.
   - La integración con el editor de rutina (volver a la rutina, sumar el circuito nuevo, reemplazar por la copia) se hace en T22.
-- [ ] **T15 · Mis alumnos (2 h) · CU-E-01, CU-E-02**
+- [x] **T15 · Mis alumnos (2 h) · CU-E-01, CU-E-02**
   - Listado paginado (cargar más) con búsqueda por `keyword` y debounce.
   - Chips Todos, Activos e Inactivos con el parámetro `active`, y sus contadores.
   - Botón de Membresías con badge de "por vencer", desde el summary.
   - Sin adherencia ni última sesión (eso es T45).
   - Puede reutilizar el listado de Usuarios del Admin (T47), filtrado a `role=user`.
+  - Cómo quedó: `StudentsPage` en `/c/alumnos`, con `useStudents` (`GET /users/all?role=user`, de a 20), `StudentCounters`, `StudentList` y `MembershipsButton`. Está explicado en el README, sección "Mis alumnos".
+  - Contadores: los de la fila Activos, Inactivos y Total del prototipo, que son lo que el plan llama "sus contadores" (los chips quedan como en el prototipo, sin número). Salen del `total` de dos requests de un alumno (`active=true` y `active=false`), y el total es la suma. Son de todos los alumnos: la búsqueda no los cambia.
+  - Badge de Membresías: suma los alumnos **por vencer y vencidos** del summary, como el prototipo ("requieren atención"), y no solo los por vencer como dice este plan. Si Fran prefiere solo los por vencer, es una línea en `MembershipsButton`.
+  - Búsqueda: el placeholder dice "por nombre o email" y no "por nombre" como el prototipo, porque CU-E-02 también busca en el email. Espera 300 ms sin teclas y recorta los espacios. La búsqueda y el chip se copian a la URL (`?q=…&estado=activos`) y se leen solo al abrir la pantalla: al volver del detalle con Atrás, la lista queda como estaba.
+  - Se completó el encabezado de Mi cuenta (T13): "Entrenador · N alumnos activos" bajo el nombre, con la misma query que el contador de Activos. Con eso no queda nada pendiente de T13 y T14 en ese encabezado. El avatar de la barra superior de Mis alumnos (que lleva a Mi cuenta) es `AccountLink`, en `features/account`: T38 lo reutiliza.
+  - `/c/alumnos/:id` tiene una pantalla temporal (`TEMPORAL (T16)`), para que tocar una fila no caiga en "Página no encontrada".
+  - Mock: `GET /users/all` y `GET /membership/status/summary` atienden solo a las cuentas de demo (por su token falso) y el resto pasa al backend real. El entrenador de demo ve 29 alumnos (24 activos y 5 inactivos, para tener dos páginas) y 9 que requieren atención. `GET /users/all` imita al backend: filtra por rol, estado y texto, ordena del más nuevo al más viejo y valida la página y el límite.
+  - Verificado contra un doble local que responde como el código del backend (guard, 400 por parámetros de más, filtros, 500, página siguiente que falla y vacío), no contra el backend real.
+  - Para Fran, sobre el backend: `GET /users/all` está con `@Auth()` sin roles, así que cualquier usuario autenticado, también un alumno, puede listar los nombres y emails de todos. No afecta al front, pero conviene limitarlo a entrenador y admin. Además el summary de membresías cuenta a **todos** los alumnos, también a los de cuenta inactiva (`getStudentsWithMembershipStatus` filtra solo por rol): lo tienen que tener en cuenta T17 y T47 si muestran "alumnos activos" junto a esos números.
+  - Para las tareas que siguen: `PageHeader.back` acepta un destino fijo, así que el "Volver" del detalle (T16) lleva a `/c/alumnos` sin la búsqueda; T16 puede volver con `navigate(-1)` si quiere conservarla. T47 puede reutilizar `useStudents` y `StudentList`: hoy tienen `role=user` fijo.
 - [ ] **T16 · Detalle de alumno (1,5 h) · CU-E-03, CU-E-04, CU-E-05**
   - Datos del alumno.
   - RMs agrupados por ejercicio en un modal; los nombres salen de `/exercise/all`.
