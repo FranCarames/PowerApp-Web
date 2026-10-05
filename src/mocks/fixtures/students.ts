@@ -1,4 +1,5 @@
 import type { User } from '@/api/types';
+import type { MembershipStatus } from '@/shared/lib/membershipStatus';
 
 import { demoAccounts } from './users';
 
@@ -82,3 +83,23 @@ export const students: User[] = [
   ),
   ...demoStudents,
 ];
+
+// El estado de membresía de cada alumno de demo, por su posición en `students`. Franco (26) tiene la
+// membresía activa, Lucía Gómez (27) por vencer y Martín Pérez (28) nunca pagó, como en sus pagos
+// (`payments.ts`). Los demás se reparten para que el resumen tenga 4 por vencer, 5 vencidos y 3 sin
+// pagos.
+const EXPIRING_SOON_AT = [3, 8, 14, 27];
+const EXPIRED_AT = [2, 6, 11, 17, 25];
+const NO_PAYMENTS_AT = [5, 13, 28];
+
+/** El estado de membresía de un alumno de demo, o `undefined` si el id no es de ninguno. */
+export function studentMembershipStatus(
+  id: string,
+): MembershipStatus | undefined {
+  const index = students.findIndex((student) => student.id === id);
+  if (index < 0) return undefined;
+  if (EXPIRING_SOON_AT.includes(index)) return 'expiring_soon';
+  if (EXPIRED_AT.includes(index)) return 'expired';
+  if (NO_PAYMENTS_AT.includes(index)) return 'no_payments';
+  return 'active';
+}

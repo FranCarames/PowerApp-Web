@@ -4,7 +4,9 @@ import { HttpResponse } from 'msw/http';
 import type { LoginResponse } from '@/api/pending';
 import type { User } from '@/api/types';
 
+import { staffAccess } from '../access';
 import { mockEndpoint } from '../endpoint';
+import { coachUsers } from '../fixtures/coaches';
 import { students } from '../fixtures/students';
 import {
   DEMO_PASSWORD,
@@ -34,11 +36,22 @@ function userOf(account: DemoAccount): User {
   return editedUsers.get(account.user.id) ?? account.user;
 }
 
-/** Todos los usuarios que conoce el mock: las cuentas de demo que no son alumnos y los alumnos. */
+/** Todos los usuarios que conoce el mock: las cuentas de demo que no son alumnos, los demás entrenadores y los alumnos. */
 const allUsers: User[] = [
   ...demoAccounts.map(({ user }) => user).filter(({ role }) => role !== 'user'),
+  ...coachUsers,
   ...students,
 ];
+
+// Las bajas y reactivaciones de cuentas hechas con `POST /users/set-active/{id}` (id → active). Vive
+// en memoria: al recargar la página vuelven a ser las de la fixture.
+const activeOverrides = new Map<string, boolean>();
+
+/** El usuario con su estado de cuenta al día, según las bajas y reactivaciones hechas. */
+function withActive(user: User): User {
+  const active = activeOverrides.get(user.id);
+  return active === undefined ? user : { ...user, active };
+}
 
 /** Como el backend: coincidencia parcial, sin distinguir mayúsculas, en nombre, apellido, nombre completo y email. */
 function matchesKeyword(user: User, keyword: string): boolean {
@@ -119,6 +132,7 @@ export const userMocks = [
     const active = query.get('active');
     const keyword = query.get('keyword');
     const matching = allUsers
+      .map(withActive)
       .filter((user) => !role || user.role === role)
       .filter((user) => active === null || user.active === (active === 'true'))
       .filter((user) => !keyword || matchesKeyword(user, keyword))
@@ -132,6 +146,31 @@ export const userMocks = [
       totalPages: Math.ceil(matching.length / limit),
     });
   }),
+
+  // Dar de baja o reactivar una cuenta es REAL: el mock atiende solo a las cuentas de demo, por su
+  // token falso, y cambia el estado en memoria. Como el backend, no distingue roles ni se defiende de
+  // que uno se dé de baja a sí mismo: 404 si el id no existe y 400 si `active` no es un booleano.
+  mockEndpoint(
+    'post',
+    '/api/v1/users/set-active/{id}',
+    async ({ request, params }) => {
+      const denied = staffAccess(request);
+      if (denied) return denied;
+
+      const user = allUsers.find(({ id }) => id === params.id);
+      if (!user) return serviceError(404, 'Usuario no encontrado');
+
+      const { active } = await request.clone().json();
+      if (typeof active !== 'boolean') {
+        return guardError(400, ['active must be a boolean value']);
+      }
+      activeOverrides.set(user.id, active);
+      return HttpResponse.json({
+        ...withActive(user),
+        updated_at: new Date().toISOString(),
+      });
+    },
+  ),
 
   // Leer un usuario es REAL: el mock responde solo por los ids de las cuentas de demo (con los datos
   // que se hayan editado). Cualquier otro id va al backend.

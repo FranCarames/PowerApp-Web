@@ -80,7 +80,7 @@ src/
   mocks/          browser.ts, registry.ts, handlers/<dominio>.ts, fixtures/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
-    account/      Mi cuenta, compartida por los tres roles
+    account/      Mi cuenta, compartida por los tres roles, y los hooks de datos de usuarios que usan varios roles
     user/         pantallas del rol Usuario
     coach/        pantallas del rol Entrenador
     admin/        pantallas del rol Admin

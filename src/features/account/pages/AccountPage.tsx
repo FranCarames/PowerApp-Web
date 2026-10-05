@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router';
 
 import type { Role, User } from '@/api/types';
 import { ROLE_AVATAR_TONE, ROLE_LABEL } from '@/features/auth/roles';
-import { useStudentTotal } from '@/features/coach/hooks/useStudentCounts';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import type { IconName } from '@/shared/icons';
 import { formatMonthYear } from '@/shared/lib/dates';
@@ -10,6 +9,7 @@ import { fullName } from '@/shared/lib/fullName';
 import { Avatar, Button, List, ListItem, PageHeader, Tile } from '@/shared/ui';
 
 import { MembershipPill } from '../components/MembershipPill';
+import { useUserCount } from '../hooks/useUserCount';
 import styles from './AccountPage.module.css';
 
 interface MenuItem {
@@ -85,7 +85,7 @@ function subtitleFor(user: User): string {
  * los contadores de Mis alumnos. Es un dato de apoyo: mientras carga o si falla, queda solo el rol.
  */
 function CoachSubtitle() {
-  const { data: activeStudents } = useStudentTotal(true);
+  const { data: activeStudents } = useUserCount({ role: 'user', active: true });
   if (activeStudents === undefined) return ROLE_LABEL.coach;
   return `${ROLE_LABEL.coach} · ${activeStudents} ${activeStudents === 1 ? 'alumno activo' : 'alumnos activos'}`;
 }

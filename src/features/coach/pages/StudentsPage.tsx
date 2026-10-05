@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
-
 import { AccountLink } from '@/features/account/components/AccountLink';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { useDebouncedValue } from '@/shared/lib/useDebouncedValue';
+import {
+  KEYWORD_MAX_LENGTH,
+  useSearchAndFilter,
+} from '@/shared/lib/useSearchAndFilter';
 import { Chip, ChipGroup, PageHeader, SearchInput } from '@/shared/ui';
 
 import { MembershipsButton } from '../components/MembershipsButton';
@@ -18,44 +18,18 @@ const STATUS_FILTERS = [
   { label: 'Inactivos', param: 'inactivos', active: false },
 ] as const;
 
-/** Espera entre la última tecla y el pedido al backend. */
-const SEARCH_DEBOUNCE_MS = 300;
-
-/** El backend rechaza una búsqueda de más de 100 caracteres (`GetUsersQueryDto.keyword`). */
-const SEARCH_MAX_LENGTH = 100;
-
 /**
  * Mis alumnos (CU-E-01 y CU-E-02): contadores, búsqueda por nombre o email, filtro por estado de la
- * cuenta y el listado paginado.
- *
- * La búsqueda y el filtro se copian a la URL (`?q=…&estado=activos`) y se leen de ahí solo al abrir
- * la pantalla: al volver del detalle de un alumno, la lista queda como estaba.
+ * cuenta y el listado paginado. La búsqueda y el filtro quedan en la URL (`?q=…&estado=activos`).
  */
 export function StudentsPage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const { search: urlSearch } = useLocation();
-
-  const [statusParam, setStatusParam] = useState(() =>
-    new URLSearchParams(urlSearch).get('estado'),
+  const { search, setSearch, keyword, filter, setFilter } = useSearchAndFilter(
+    'estado',
+    ['activos', 'inactivos'],
   );
   const status =
-    STATUS_FILTERS.find((filter) => filter.param === statusParam) ??
-    STATUS_FILTERS[0];
-
-  // Lo que se tipea se ve al instante; el backend recibe el texto cuando la mano se detiene.
-  const [search, setSearch] = useState(
-    () => new URLSearchParams(urlSearch).get('q') ?? '',
-  );
-  const keyword = useDebouncedValue(search, SEARCH_DEBOUNCE_MS).trim();
-
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (keyword) params.set('q', keyword);
-    if (status.param) params.set('estado', status.param);
-    const next = params.size > 0 ? `?${params}` : '';
-    if (next !== urlSearch) navigate({ search: next }, { replace: true });
-  }, [keyword, status.param, urlSearch, navigate]);
+    STATUS_FILTERS.find(({ param }) => param === filter) ?? STATUS_FILTERS[0];
 
   return (
     <>
@@ -75,7 +49,7 @@ export function StudentsPage() {
       <SearchInput
         placeholder="Buscar por nombre o email"
         value={search}
-        maxLength={SEARCH_MAX_LENGTH}
+        maxLength={KEYWORD_MAX_LENGTH}
         autoComplete="off"
         onChange={(event) => setSearch(event.target.value)}
       />
@@ -84,7 +58,7 @@ export function StudentsPage() {
           <Chip
             key={label}
             selected={param === status.param}
-            onClick={() => setStatusParam(param)}
+            onClick={() => setFilter(param)}
           >
             {label}
           </Chip>

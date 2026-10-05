@@ -1,6 +1,7 @@
 import type { MembershipPayment } from '@/api/types';
 
 import { memberships } from './memberships';
+import { studentMembershipStatus } from './students';
 import { demoAccounts } from './users';
 
 // Los pagos de las cuentas de demo. Las fechas son relativas a hoy, y no fijas, para que el estado de
@@ -50,7 +51,30 @@ const PAYMENTS_BY_USER: Record<string, MembershipPayment[]> = {
   [lucia.user.id]: [payment(lucia.user.id, 0, 27, monthly.price)],
 };
 
-/** Los pagos de una cuenta de demo, sin ordenar (como los devuelve el backend). */
+/**
+ * Los pagos de un alumno de demo según su estado de membresía (`students.ts`). Franco y Lucía, que
+ * pueden entrar, tienen los suyos: ver arriba.
+ */
+function paymentsForStatus(userId: string): MembershipPayment[] {
+  switch (studentMembershipStatus(userId)) {
+    case 'active':
+      return [
+        payment(userId, 0, 12, monthly.price),
+        payment(userId, 1, 42, monthly.price),
+      ];
+    case 'expiring_soon':
+      return [payment(userId, 0, 27, monthly.price)];
+    case 'expired':
+      return [
+        payment(userId, 0, 50, monthly.price),
+        payment(userId, 1, 80, 18000),
+      ];
+    default:
+      return [];
+  }
+}
+
+/** Los pagos de un alumno de demo, sin ordenar (como los devuelve el backend). */
 export function demoPaymentsFor(userId: string): MembershipPayment[] {
-  return PAYMENTS_BY_USER[userId] ?? [];
+  return PAYMENTS_BY_USER[userId] ?? paymentsForStatus(userId);
 }

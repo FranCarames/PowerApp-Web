@@ -1,0 +1,35 @@
+/*
+ * .trow del prototipo: el nombre a la izquierda y el valor, en negrita, a la derecha. El prototipo
+ * reparte el ancho mitad y mitad; acá el nombre ocupa lo que necesita y el valor, el resto, para que
+ * un email no se parta en dos líneas teniendo lugar.
+ */
+.list {
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.label,
+.value {
+  margin: 0;
+}
+
+.label {
+  flex: 0 0 auto;
+}
+
+.value {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-weight: 700;
+  color: var(--tm);
+  /* Un valor muy largo y sin espacios se parte en lugar de empujar la fila. */
+  overflow-wrap: anywhere;
+}

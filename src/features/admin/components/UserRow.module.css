@@ -1,0 +1,17 @@
+/* Una cuenta dada de baja se ve apagada, como en el prototipo. */
+.inactive {
+  opacity: 0.65;
+}
+
+/* Un email largo y sin espacios no tiene dónde cortarse: sin esto, empuja la fila fuera de la pantalla. */
+.subtitle {
+  overflow-wrap: anywhere;
+}
+
+/* El rol y, debajo, "Inactivo": alineados a la derecha, con 5 px entre sí. */
+.pills {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}

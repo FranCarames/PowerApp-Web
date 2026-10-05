@@ -5,6 +5,7 @@ export const queryKeys = {
   coaches: {
     all: ['coaches'] as const,
     list: () => [...queryKeys.coaches.all, 'list'] as const,
+    detail: (id: string) => [...queryKeys.coaches.all, 'detail', id] as const,
   },
   exercises: {
     all: ['exercises'] as const,
@@ -13,6 +14,9 @@ export const queryKeys = {
   planifications: {
     all: ['planifications'] as const,
     list: () => [...queryKeys.planifications.all, 'list'] as const,
+    /** La planificación vigente de un alumno. */
+    userActive: (userId: string) =>
+      [...queryKeys.planifications.all, 'user-active', userId] as const,
   },
   routines: {
     all: ['routines'] as const,
@@ -26,17 +30,18 @@ export const queryKeys = {
     payments: (userId: string) =>
       [...queryKeys.memberships.all, 'payments', userId] as const,
     summary: () => [...queryKeys.memberships.all, 'summary'] as const,
+    /** Los alumnos cuya membresía está en ese estado. */
+    studentsByStatus: (status: string) =>
+      [...queryKeys.memberships.all, 'students-by-status', status] as const,
   },
   users: {
     all: ['users'] as const,
     detail: (id: string) => [...queryKeys.users.all, 'detail', id] as const,
-    /** El listado paginado de alumnos, con su búsqueda y su filtro de cuenta activa. */
-    students: (filter: { keyword?: string; active?: boolean }) =>
-      [...queryKeys.users.all, 'students', filter] as const,
-    /** Cuántos alumnos hay con ese estado de cuenta (`active` en `undefined`: todos). */
-    studentCount: (active?: boolean) =>
-      [...queryKeys.users.all, 'student-count', { active }] as const,
-    /** Cuántos usuarios hay en total, de cualquier rol. */
-    total: () => [...queryKeys.users.all, 'total'] as const,
+    /** El listado paginado de usuarios, con su rol, su búsqueda y su estado de cuenta. */
+    list: (filter: { role?: string; keyword?: string; active?: boolean }) =>
+      [...queryKeys.users.all, 'list', filter] as const,
+    /** Cuántos usuarios hay con ese rol y ese estado de cuenta. */
+    count: (filter: { role?: string; active?: boolean }) =>
+      [...queryKeys.users.all, 'count', filter] as const,
   },
 };

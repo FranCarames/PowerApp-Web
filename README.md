@@ -135,6 +135,16 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V7) están det
 - **Si algo no carga:** esa tarjeta muestra "–", el dato de apoyo vuelve al texto de la sección y aparece un aviso con "Reintentar", que pide solo lo que falló. Mientras carga, el número es un bloque gris.
 - **Mocks:** con una cuenta de demo, los seis endpoints responden con datos de ejemplo (`src/mocks/fixtures/`); con una cuenta de verdad van al backend. Los públicos (ejercicios y entrenadores) no llevan token, así que el mock mira la sesión (`demoAccountForSession`); los demás, el token falso (`staffAccess`).
 
+## Usuarios del Admin
+
+- **Pantalla** (`/a/usuarios`, `src/features/admin/pages/UsersPage.tsx`): los casos de uso CU-E-01 a CU-E-03 vistos desde el Admin. Contadores, buscador, chips y el listado paginado de `GET /users/all`. Tocar un usuario abre su detalle.
+- **Contadores y chips:** Alumnos (`role=user`), Entrenadores (`role=coach`) e Inactivos (`active=false`, de todos los roles), con el `total` de cada uno; los chips son Todos, Alumnos, Entrenadores e Inactivos. Todos incluye las cuentas de admin. La búsqueda (nombre, apellido o email, con debounce) y el chip quedan en la URL (`?q=…&filtro=alumnos`), como en Mis alumnos.
+- **Fila:** avatar (gris si la cuenta está inactiva, violeta si es entrenador), nombre, email, el rol y, si la cuenta está dada de baja, "Inactivo" y la fila apagada. En los alumnos, el email lleva "· membresía activa", "por vencer" o "vencida". Eso sale de `GET /membership/status/users` (cuatro requests, uno por estado, no uno por alumno); si no cargan, la fila no lo dice.
+- **Detalle** (modal): el alumno, su email, su membresía (la del último pago) y, si el backend la responde, su planificación vigente. Hoy `GET /planification/user/{id}/active` no responde (el request cuelga), así que se corta a los 3,5 s y esa fila no aparece. El entrenador, su email profesional y su CUIL (`GET /coach/get/{id}`); el admin, su email.
+- **Acciones:** "Convertir en entrenador" (alumno activo) abre `/a/convertir?alumno=<id>`, que hasta T36 es una pantalla temporal. "Desactivar cuenta" pide confirmación (es una baja lógica: la cuenta no puede ingresar, pero se conservan sus datos) y "Reactivar cuenta" no. No se ofrece desactivar a un admin ni a la propia cuenta. Después de cada cambio se piden de nuevo los listados y los contadores, también los de Mis alumnos.
+- **Mocks:** `GET /users/all`, `POST /users/set-active/{id}`, `GET /membership/status/users`, `GET /coach/get/{id}`, `GET /planification/user/{id}/active` y los pagos responden con datos de ejemplo a las cuentas de demo; las bajas viven en memoria.
+- **Compartido con Mis alumnos:** los hooks de datos de usuarios (`useUsers`, `useUserCount`, `useSetUserActive`...) viven en `features/account/hooks`; el listado paginado, en `features/account/components/UserList.tsx`; y la búsqueda con chip en la URL, en `shared/lib/useSearchAndFilter.ts`.
+
 ## Login
 
 - **Pantalla:** `/login` (`src/features/auth/pages/LoginPage.tsx`). El formulario usa React Hook Form con el schema `loginSchema` (`features/auth/schemas.ts`), que replica `LoginUserDto`: email de hasta 50 caracteres y contraseña de 6 a 50. El resolver de Zod es propio (`shared/lib/zodResolver.ts`), porque `@hookform/resolvers` no está en el stack.
@@ -209,7 +219,7 @@ src/
   mocks/          browser.ts, registry.ts, endpoint.ts, responses.ts, handlers/<dominio>.ts, fixtures/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
-    account/      Mi cuenta, compartida por los tres roles
+    account/      Mi cuenta, compartida por los tres roles, y los hooks de datos de usuarios que usan varios roles
     user/         pantallas del rol Usuario
     coach/        pantallas del rol Entrenador
     admin/        pantallas del rol Admin

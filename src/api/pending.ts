@@ -1,3 +1,4 @@
+import type { paths } from './schema';
 import type { Coach, User, UserPlanification } from './types';
 
 // Tipos provisionales de lo que el contrato (openapi.json) todavía no tiene: las dependencias B1 a
@@ -34,3 +35,37 @@ export type EditCoachRequest = Pick<Coach, 'coach_email' | 'cuil'>;
  * contraseña común. Mientras el backend no lo mande, solo lo manda el mock de las cuentas de demo.
  */
 export type LoginResponse = User & { password_change_required?: boolean };
+
+// PENDIENTE-CONTRATO: V1 CU-E-27
+/** Los estados que acepta el filtro `status` de `GET /membership/status/users`, los del contrato. */
+export type MembershipStatusFilter = NonNullable<
+  paths['/api/v1/membership/status/users']['get']['parameters']['query']
+>['status'];
+
+// PENDIENTE-CONTRATO: V1 CU-E-27
+/** Un alumno de la respuesta de `GET /membership/status/users` (`StudentMembershipDto` del backend). */
+export interface StudentMembership {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  membership_status: MembershipStatusFilter;
+  /** Vencimiento del último pago; `null` si nunca pagó. */
+  expired_at: string | null;
+  /** Tipo del último pago; `null` si nunca pagó. */
+  membership_name: string | null;
+  membership_id: string | null;
+}
+
+// PENDIENTE-CONTRATO: V1 CU-E-27
+/**
+ * Respuesta de `GET /membership/status/users?status=…`: los alumnos con ese estado de membresía,
+ * ordenados por apellido y nombre. El contrato la declara sin cuerpo; la forma sale del código del
+ * backend (`getStudentsByMembershipStatus`).
+ */
+export interface StudentsByMembershipStatus {
+  status: MembershipStatusFilter;
+  total: number;
+  expiring_soon_days: number;
+  students: StudentMembership[];
+}
