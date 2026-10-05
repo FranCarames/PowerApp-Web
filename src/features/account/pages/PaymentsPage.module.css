@@ -1,0 +1,10 @@
+/* El subtítulo de un pago, en dos líneas fijas: cuándo se pagó y cuándo vence. */
+.line {
+  display: block;
+}
+
+/* El monto, en la tipografía de datos (.data del prototipo). */
+.price {
+  font-family: var(--fM);
+  font-weight: 700;
+}
