@@ -1,6 +1,7 @@
 import { useSearchAndFilter } from '@/shared/lib/useSearchAndFilter';
-import { EmptyState, PageHeader, SearchInput, Segmented } from '@/shared/ui';
+import { PageHeader, SearchInput, Segmented } from '@/shared/ui';
 
+import { GroupsSection } from '../components/GroupsSection';
 import { MusclesSection } from '../components/MusclesSection';
 
 const SECTIONS = ['musculos', 'grupos'] as const;
@@ -48,12 +49,7 @@ export function CatalogPage() {
       {section === 'musculos' ? (
         <MusclesSection search={search} />
       ) : (
-        // TEMPORAL (T33): el segmento Grupos musculares reemplaza este aviso.
-        <EmptyState
-          icon="list"
-          title="Pantalla en construcción"
-          message="Los grupos musculares se arman en la tarea T33."
-        />
+        <GroupsSection search={search} />
       )}
     </>
   );

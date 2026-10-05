@@ -1,0 +1,63 @@
+/*
+ * La fila de un grupo del prototipo: el ícono de 44 px con degradé del color del grupo, el nombre en
+ * la tipografía de títulos y la cantidad de músculos. La zona de la izquierda es un botón que abre el
+ * detalle, sin el aspecto de un botón.
+ */
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.tile {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(135deg, var(--tone), #a78bfa);
+}
+
+.pri {
+  --tone: var(--pri);
+}
+
+.acc {
+  --tone: var(--acc);
+}
+
+.ok {
+  --tone: var(--ok);
+}
+
+.warn {
+  --tone: var(--warn);
+}
+
+.text {
+  min-width: 0;
+}
+
+.name {
+  display: block;
+  font-family: var(--fD);
+  font-size: 20px;
+  font-weight: 700;
+  /* Un nombre largo se corta con puntos suspensivos en lugar de empujar los botones. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub {
+  display: block;
+  font-size: 12px;
+  color: var(--tm);
+  margin-top: 2px;
+}

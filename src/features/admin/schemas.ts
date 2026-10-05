@@ -106,3 +106,19 @@ export const muscleSchema = z.object({
 });
 
 export type MuscleValues = z.input<typeof muscleSchema>;
+
+/**
+ * `CreateMuscleGroupDto` y `EditMuscleGroupDto`, que tienen las mismas reglas: el nombre (hasta 50
+ * caracteres) es obligatorio y los dos links (hasta 150 caracteres) son opcionales.
+ */
+export const muscleGroupSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Poné un nombre al grupo')
+    .max(50, 'El nombre no puede tener más de 50 caracteres'),
+  image_url: optionalUrl,
+  preview_image: optionalUrl,
+});
+
+export type MuscleGroupValues = z.input<typeof muscleGroupSchema>;

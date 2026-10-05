@@ -1,0 +1,4 @@
+/* Un músculo del grupo: una tarjeta compacta con solo el nombre (padding del prototipo). */
+.muscle {
+  padding: 12px 14px;
+}
