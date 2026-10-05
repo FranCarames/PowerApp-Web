@@ -7,20 +7,38 @@ import type { Exercise } from '@/api/types';
 import { adminAccess } from '../access';
 import { mockEndpoint } from '../endpoint';
 import { EXERCISES_IN_USE, exercises } from '../fixtures/exercises';
-import { muscleGroups } from '../fixtures/muscles';
+import { muscleById, toExerciseMuscle } from '../fixtures/muscles';
 import { demoAccountForSession, demoAccountForToken } from '../fixtures/users';
 import { emptyResponse, guardError, serviceError } from '../responses';
 
 // Los ejercicios de demo viven en memoria: lo que el Admin crea, edita o borra se ve en las demás
 // pantallas hasta que se recarga la página.
-const catalog = [...exercises];
+// Cada ejercicio guarda los ids de sus músculos y los resuelve al responder: así un músculo que se
+// edita o se borra desde el Catálogo se ve igual acá (el backend borra el vínculo en cascada).
+type StoredExercise = Omit<ExerciseWithMuscles, 'exercisedMuscles'> & {
+  muscleIds: string[];
+};
 
-const knownMuscleIds = new Set(
-  muscleGroups.flatMap(({ muscles }) => muscles.map(({ id }) => id)),
+const catalog: StoredExercise[] = exercises.map(
+  ({ exercisedMuscles, ...exercise }) => ({
+    ...exercise,
+    muscleIds: exercisedMuscles.map(({ id }) => id),
+  }),
 );
 
+/** Un ejercicio como lo manda `GET /exercise/all`: con sus músculos de ahora. */
+function view({ muscleIds, ...exercise }: StoredExercise): ExerciseWithMuscles {
+  return {
+    ...exercise,
+    exercisedMuscles: muscleIds.flatMap((id) => {
+      const muscle = muscleById(id);
+      return muscle ? [toExerciseMuscle(muscle)] : [];
+    }),
+  };
+}
+
 /** Un `Exercise` sin los músculos, como lo devuelven el alta y la edición. */
-function withoutMuscles(exercise: ExerciseWithMuscles): Exercise {
+function withoutMuscles(exercise: StoredExercise): Exercise {
   return {
     id: exercise.id,
     name: exercise.name,
@@ -35,12 +53,9 @@ function withoutMuscles(exercise: ExerciseWithMuscles): Exercise {
   };
 }
 
-/** Los músculos de una lista de ids, o `null` si alguno no existe (el 404 del backend). */
-function musclesOf(ids: readonly string[]) {
-  if (!ids.every((id) => knownMuscleIds.has(id))) return null;
-  return muscleGroups
-    .flatMap(({ muscles }) => muscles)
-    .filter(({ id }) => ids.includes(id));
+/** Si todos los músculos existen: si no, el backend responde 404. */
+function allMusclesExist(ids: readonly string[]): boolean {
+  return ids.every((id) => muscleById(id) !== undefined);
 }
 
 /** Los errores de validación del DTO (`CreateExerciseDto` y `EditExerciseDto`, que son iguales). */
@@ -64,7 +79,9 @@ export const exerciseMocks = [
   // El listado es REAL y público: no lleva token, así que el mock mira la sesión y responde solo si
   // es la de una cuenta de demo. Con una cuenta de verdad, va al backend.
   mockEndpoint('get', '/api/v1/exercise/all', () =>
-    demoAccountForSession() ? HttpResponse.json(catalog) : passthrough(),
+    demoAccountForSession()
+      ? HttpResponse.json(catalog.map(view))
+      : passthrough(),
   ),
 
   // Leer un ejercicio pide sesión (cualquier rol): responde solo al token de una cuenta de demo.
@@ -74,7 +91,7 @@ export const exerciseMocks = [
     }
     const exercise = catalog.find(({ id }) => id === params.id);
     return exercise
-      ? HttpResponse.json(exercise)
+      ? HttpResponse.json(view(exercise))
       : serviceError(404, 'Ejercicio no encontrado');
   }),
 
@@ -86,9 +103,9 @@ export const exerciseMocks = [
     const body = await request.json();
     const errors = validate(body);
     if (errors.length > 0) return guardError(400, errors);
-    const muscles = musclesOf(body.exercised_muscles_ids);
-    if (!muscles)
+    if (!allMusclesExist(body.exercised_muscles_ids)) {
       return serviceError(404, 'Algunos músculos no fueron encontrados');
+    }
 
     const now = new Date().toISOString();
     const created = {
@@ -102,7 +119,7 @@ export const exerciseMocks = [
       bg_image: body.bg_image,
       created_at: now,
       updated_at: now,
-      exercisedMuscles: muscles,
+      muscleIds: body.exercised_muscles_ids,
     };
     catalog.push(created);
     return HttpResponse.json(withoutMuscles(created), { status: 201 });
@@ -120,9 +137,9 @@ export const exerciseMocks = [
       const body = await request.json();
       const errors = validate(body);
       if (errors.length > 0) return guardError(400, errors);
-      const muscles = musclesOf(body.exercised_muscles_ids);
-      if (!muscles)
+      if (!allMusclesExist(body.exercised_muscles_ids)) {
         return serviceError(404, 'Algunos músculos no fueron encontrados');
+      }
 
       // Como el backend: lo que no viene se conserva, y no hay forma de vaciar un campo.
       const current = catalog[index];
@@ -136,7 +153,7 @@ export const exerciseMocks = [
         preview_image: body.preview_image ?? current.preview_image,
         bg_image: body.bg_image ?? current.bg_image,
         updated_at: new Date().toISOString(),
-        exercisedMuscles: muscles,
+        muscleIds: body.exercised_muscles_ids,
       };
       catalog[index] = edited;
       return HttpResponse.json(withoutMuscles(edited), { status: 201 });

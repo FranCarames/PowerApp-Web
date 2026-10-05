@@ -1,6 +1,6 @@
 import type { ExerciseWithMuscles } from '@/api/pending';
 
-import { muscleGroups } from './muscles';
+import { muscleById, muscleIdByName, toExerciseMuscle } from './muscles';
 
 // Los ejercicios del catálogo de demo: los de la wiki del prototipo y los que usan sus circuitos, cada
 // uno con sus músculos, como los manda `GET /exercise/all`. Los tips los tienen solo algunos.
@@ -108,12 +108,6 @@ const DEMO_EXERCISES: DemoExercise[] = [
   },
 ];
 
-const muscleOf = new Map(
-  muscleGroups.flatMap(({ muscles }) =>
-    muscles.map((muscle) => [muscle.name, muscle] as const),
-  ),
-);
-
 export const exercises: ExerciseWithMuscles[] = DEMO_EXERCISES.map(
   ({ muscles, ...exercise }, index) => ({
     ...exercise,
@@ -121,8 +115,8 @@ export const exercises: ExerciseWithMuscles[] = DEMO_EXERCISES.map(
     created_at: TIMESTAMP,
     updated_at: TIMESTAMP,
     exercisedMuscles: muscles.flatMap((name) => {
-      const muscle = muscleOf.get(name);
-      return muscle ? [muscle] : [];
+      const muscle = muscleById(muscleIdByName(name));
+      return muscle ? [toExerciseMuscle(muscle)] : [];
     }),
   }),
 );
