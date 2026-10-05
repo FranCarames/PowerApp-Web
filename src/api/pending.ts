@@ -122,3 +122,25 @@ export type MuscleWithGroup = Pick<
   Muscle,
   'id' | 'name' | 'description' | 'image_url' | 'preview_image'
 > & { muscle_group: Pick<MuscleGroup, 'id' | 'name'> };
+
+// PENDIENTE-CONTRATO: V1 CU-E-28
+/** Un grupo de la respuesta de `GET /membership/type/users` (`MembershipTypeGroupDto` del backend). */
+export interface StudentsByMembershipTypeGroup {
+  membership_id: string | null;
+  membership_name: string;
+  total: number;
+  students: StudentMembership[];
+}
+
+// PENDIENTE-CONTRATO: V1 CU-E-28
+/**
+ * Respuesta de `GET /membership/type/users` sin `membership_id`: los alumnos agrupados por el tipo de
+ * su último pago. Solo hay grupos de los tipos con alumnos, y los que nunca pagaron no entran en
+ * ninguno (`without_payments`). El contrato la declara sin cuerpo; la forma sale del código del
+ * backend (`getStudentsByMembershipType`). Con `membership_id` responde `{ total, students }`.
+ */
+export interface StudentsByMembershipType {
+  total_students: number;
+  without_payments: number;
+  groups: StudentsByMembershipTypeGroup[];
+}

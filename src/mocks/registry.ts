@@ -56,6 +56,10 @@ export const registry: readonly RegistryEntry[] = [
   },
   // Membresías (tipos)
   { method: 'get', path: '/api/v1/membership/all', mock: true },
+  { method: 'post', path: '/api/v1/membership/create', mock: true },
+  { method: 'post', path: '/api/v1/membership/edit/{id}', mock: true },
+  { method: 'post', path: '/api/v1/membership/set-active/{id}', mock: true },
+  { method: 'get', path: '/api/v1/membership/type/users', mock: true },
   // Resumen de estados: solo las cuentas de demo; las de verdad pasan al backend real (ver handlers/memberships.ts)
   { method: 'get', path: '/api/v1/membership/status/summary', mock: true },
   { method: 'get', path: '/api/v1/membership/status/users', mock: true },
