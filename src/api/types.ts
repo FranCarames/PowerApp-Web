@@ -11,3 +11,7 @@ export type MembershipPayment = Schemas['MembershipPayment'];
 export type Coach = Schemas['Coach'];
 export type UserPlanification = Schemas['UserPlanification'];
 export type MembershipStatusSummary = Schemas['MembershipStatusSummaryDto'];
+export type Exercise = Schemas['Exercise'];
+export type CircuitListItem = Schemas['CircuitListItemResponseDto'];
+export type RoutineListItem = Schemas['RoutineListItemResponseDto'];
+export type PlanificationListItem = Schemas['PlanificationListItemResponseDto'];

@@ -1,11 +1,9 @@
-import { passthrough } from 'msw';
 import { HttpResponse } from 'msw/http';
 
 import { mockEndpoint } from '../endpoint';
 import { memberships } from '../fixtures/memberships';
 import { students } from '../fixtures/students';
-import { demoAccountForToken } from '../fixtures/users';
-import { guardError } from '../responses';
+import { staffAccess } from '../access';
 
 // Cuántos alumnos de demo hay en cada estado de membresía que no es "activa". El resto, hasta
 // completar los alumnos, tiene la membresía activa.
@@ -22,11 +20,8 @@ export const membershipMocks = [
   // El resumen de estados es REAL: el mock atiende solo a las cuentas de demo, por su token falso.
   // Es de entrenadores y admins: con la cuenta de un alumno responde 403, como el guard.
   mockEndpoint('get', '/api/v1/membership/status/summary', ({ request }) => {
-    const account = demoAccountForToken(request.headers.get('Authorization'));
-    if (!account) return passthrough();
-    if (account.user.role === 'user') {
-      return guardError(403, 'Acceso denegado. Permisos insuficientes.');
-    }
+    const denied = staffAccess(request);
+    if (denied) return denied;
 
     return HttpResponse.json({
       counts: {
