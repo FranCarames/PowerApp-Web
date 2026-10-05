@@ -125,7 +125,7 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Entrenador:** la barra lateral tiene Membresías aparte, bajo "Organización". En mobile se entra desde el botón de la barra superior de Mis alumnos, y mientras tanto la tab Alumnos queda marcada.
 - **Admin:** en desktop, tres bloques: Inicio, Usuarios y Entrenadores; "Entrenamiento" (Ejercicios, Circuitos, Rutinas y Planificaciones); y "Configuración" (Catálogo, Membresías y Perfil). En mobile, la tab bar tiene Inicio, Usuarios, Ejercicios, Rutinas y **Más** (`/a/mas`), una pantalla con los accesos que no entran: Planificaciones, Circuitos, Entrenadores, Catálogo, Membresías y Mi cuenta. Más es la entrada `fallback`: queda marcada en toda pantalla que no pertenece a otra tab, incluida Mi cuenta.
 - **Rutinas y Planificaciones del Admin** (`/a/rutinas`, `/a/rutinas/:id`, `/a/planes`, `/a/planes/:id`) muestran `SectionPlaceholder` (`shared/ui`): "Esta sección se habilita cuando el backend de rutinas y planificaciones esté completo". Aparecen en la navegación como cualquier otra. Las reemplazan T21 a T24 en el bloque C2 del PLAN, y el Entrenador reutiliza el mismo componente en T48.
-- **Pantallas temporales:** el resto de las rutas del Admin que todavía no tienen su tarea (Circuitos, el segmento Grupos musculares del Catálogo, Membresías...) abren "Pantalla en construcción" con un comentario `TEMPORAL (Txx)`, para que ningún acceso caiga en "Página no encontrada".
+- **Pantallas temporales:** el resto de las rutas del Admin que todavía no tienen su tarea (Circuitos, Membresías...) abren "Pantalla en construcción" con un comentario `TEMPORAL (Txx)`, para que ningún acceso caiga en "Página no encontrada".
 
 ## Panel del Admin
 
@@ -157,11 +157,19 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 
 ## Catálogo del Admin: músculos
 
-- **Pantalla** (`/a/catalogo`, `src/features/admin/pages/CatalogPage.tsx`): los segmentos Músculos y Grupos musculares (`?seccion=musculos` o `?seccion=grupos`, que son los accesos del panel). Hay un solo buscador para los dos (`?q=…`). El segmento Grupos musculares es una pantalla temporal hasta T33.
+- **Pantalla** (`/a/catalogo`, `src/features/admin/pages/CatalogPage.tsx`): los segmentos Músculos y Grupos musculares (`?seccion=musculos` o `?seccion=grupos`, que son los accesos del panel). Hay un solo buscador para los dos (`?q=…`).
 - **Músculos** (CU-A-07 a CU-A-10, `MusclesSection`): lista con el ícono del color de su grupo, el nombre y el grupo; buscador por nombre sin acentos; botón flotante "Crear músculo"; Editar y Eliminar en cada fila.
 - **Modal de alta y edición:** nombre, grupo muscular, y opcionales la descripción, una imagen y una vista previa (links: no hay endpoint de subida). Al editar, vaciar un dato que ya tenía valor manda `null` para borrarlo.
 - **Eliminar:** pide confirmación y dice cuántos ejercicios lo usan. El backend no rechaza un músculo en uso: lo borra y lo quita de los ejercicios (cascada).
 - **Datos:** `GET /muscles/all` (con el grupo anidado, distinto del contrato: V9) y `GET /muscles/mg/all` para el selector, más `POST /muscles/create`, `POST /muscles/edit/{id}` y `DELETE /muscles/{id}`. Con una cuenta de demo responden los mocks; los músculos viven en memoria y se ven también en Ejercicios.
+
+## Catálogo del Admin: grupos musculares
+
+- **Segmento** (`/a/catalogo?seccion=grupos`, `GroupsSection`): los casos de uso CU-A-11 a CU-A-15. La lista comparte el buscador con Músculos y muestra, por grupo, el ícono con el color del grupo, el nombre y cuántos músculos tiene. Botón flotante "Crear grupo muscular", y Editar y Eliminar en cada fila.
+- **Detalle:** tocar un grupo abre un modal con sus músculos (CU-A-12). Salen de `GET /muscles/mg/all`, que trae los músculos de cada grupo (V9): no hace falta pedir cada grupo.
+- **Modal de alta y edición:** nombre y, opcionales, dos links (imagen y vista previa). Al editar, vaciar un link que ya tenía valor manda `null` para borrarlo.
+- **Eliminar:** el backend rechaza un grupo con músculos (con un `500` sin motivo), así que si el grupo tiene músculos el front no pide confirmación: explica que hay que moverlos o eliminarlos primero. Uno sin músculos pide confirmación.
+- **Mocks:** `POST /muscles/mg/create`, `POST /muscles/mg/edit/{id}` y `DELETE /muscles/mg/{id}` responden con datos de ejemplo al Admin de demo; los grupos viven en memoria y se ven también en Músculos y en Ejercicios.
 
 ## Login
 

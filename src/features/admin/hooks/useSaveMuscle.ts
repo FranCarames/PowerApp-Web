@@ -5,43 +5,31 @@ import type { MuscleWithGroup } from '@/api/pending';
 import { queryKeys } from '@/api/queryKeys';
 import type { Muscle } from '@/api/types';
 
+import { editedValue, filledValue } from '../saveBody';
 import type { MuscleValues } from '../schemas';
-
-type OptionalField = 'description' | 'image_url' | 'preview_image';
 
 /**
  * `POST /muscles/create` (sin `muscle`) y `POST /muscles/edit/{id}` (con el músculo que se edita).
- * Cubren CU-A-08 y CU-A-09. Los campos opcionales vacíos no se mandan: el DTO rechaza el texto vacío
- * (`IsNotEmpty`). Al editar, `editMuscle` asigna lo que viene (y lo que no viene, no lo toca), así que
- * para borrar un dato que ya tenía el front manda `null`, que el DTO deja pasar (`IsOptional`) y la
- * columna acepta: el contrato no lo declara, por eso la edición va con `request`. Después se piden de
- * nuevo los músculos y los ejercicios, que traen sus nombres.
+ * Cubren CU-A-08 y CU-A-09. Los campos opcionales vacíos no se mandan; al editar, vaciar un dato que
+ * ya tenía manda `null` (ver `saveBody.ts`), y por eso la edición va con `request`. Después se piden
+ * de nuevo los músculos y los ejercicios, que traen sus nombres.
  */
 export function useSaveMuscle(muscle?: MuscleWithGroup) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (values: MuscleValues): Promise<Muscle> => {
-      const filled = (field: OptionalField) =>
-        values[field] === '' ? undefined : values[field];
       if (!muscle) {
         return api.post('/api/v1/muscles/create', {
           body: {
             muscle_group_id: values.muscle_group_id,
             name: values.name,
-            description: filled('description'),
-            image_url: filled('image_url'),
-            preview_image: filled('preview_image'),
+            description: filledValue(values.description),
+            image_url: filledValue(values.image_url),
+            preview_image: filledValue(values.preview_image),
           },
         });
       }
-      // Vacío y ya cargado: `null` borra. Vacío y sin dato: no se manda.
-      const edited = (field: OptionalField) =>
-        values[field] === ''
-          ? muscle[field]
-            ? null
-            : undefined
-          : values[field];
       const { data } = await request<Muscle>(
         'post',
         `/api/v1/muscles/edit/${encodeURIComponent(muscle.id)}`,
@@ -49,9 +37,12 @@ export function useSaveMuscle(muscle?: MuscleWithGroup) {
           body: {
             muscle_group_id: values.muscle_group_id,
             name: values.name,
-            description: edited('description'),
-            image_url: edited('image_url'),
-            preview_image: edited('preview_image'),
+            description: editedValue(values.description, muscle.description),
+            image_url: editedValue(values.image_url, muscle.image_url),
+            preview_image: editedValue(
+              values.preview_image,
+              muscle.preview_image,
+            ),
           },
         },
       );

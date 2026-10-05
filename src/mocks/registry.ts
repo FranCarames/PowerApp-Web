@@ -42,6 +42,9 @@ export const registry: readonly RegistryEntry[] = [
   { method: 'post', path: '/api/v1/muscles/create', mock: true },
   { method: 'post', path: '/api/v1/muscles/edit/{id}', mock: true },
   { method: 'delete', path: '/api/v1/muscles/{id}', mock: true },
+  { method: 'post', path: '/api/v1/muscles/mg/create', mock: true },
+  { method: 'post', path: '/api/v1/muscles/mg/edit/{id}', mock: true },
+  { method: 'delete', path: '/api/v1/muscles/mg/{id}', mock: true },
   // Circuitos, rutinas y planificaciones: solo las cuentas de demo; las de verdad pasan al backend real
   { method: 'get', path: '/api/v1/routine/circuit/all', mock: true },
   { method: 'get', path: '/api/v1/routine/all', mock: true },

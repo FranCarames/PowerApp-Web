@@ -102,9 +102,13 @@ export type ExerciseWithMuscles = Exercise & {
 // PENDIENTE-CONTRATO: V9 CU-A-01
 /**
  * Respuesta de `GET /muscles/mg/all`: el `MuscleGroup` del contrato más sus músculos, con el `id`
- * y el `name` (y la `description`). El Swagger no declara `muscles`, pero el backend lo manda.
+ * y el `name` (y la `description`), y sin `created_at` ni `updated_at` (el backend recorta las
+ * columnas con un `select`). El Swagger no declara `muscles`, pero el backend lo manda.
  */
-export type MuscleGroupWithMuscles = MuscleGroup & {
+export type MuscleGroupWithMuscles = Omit<
+  MuscleGroup,
+  'created_at' | 'updated_at'
+> & {
   muscles: Array<Pick<ExerciseMuscle, 'id' | 'name' | 'description'>>;
 };
 
