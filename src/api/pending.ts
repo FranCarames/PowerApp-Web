@@ -31,7 +31,12 @@ export type UserPlanificationRequest = Pick<
 >;
 
 // PENDIENTE-CONTRATO: B8 CU-A-18
-/** Body para editar un entrenador: sus dos campos editables, `coach_email` y `cuil`. */
+/**
+ * Body de `POST /coach/edit/{id}` para editar un entrenador: sus dos campos editables, `coach_email` y
+ * `cuil`. El endpoint no existe en el contrato (ni en el `CoachController` del backend al 6/10): el
+ * path, la forma del body y la respuesta (el `Coach` ya guardado) son una propuesta del front, con el
+ * mismo estilo que `POST /membership/edit/{id}` y `POST /muscles/edit/{id}`.
+ */
 export type EditCoachRequest = Pick<Coach, 'coach_email' | 'cuil'>;
 
 // PENDIENTE-CONTRATO: B9 CU-U-02
