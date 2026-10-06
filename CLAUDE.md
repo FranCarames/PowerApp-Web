@@ -165,6 +165,7 @@ Las rutas de alta usan `nuevo` como id, por ejemplo `/c/circuitos/nuevo`.
 ## Reglas de dominio que no se pueden romper
 
 - **Bajas lógicas:** se hacen con `POST .../set-active/:id` y `{ "active": false }` en usuarios, membresías (tipos), planificaciones, rutinas, circuitos y asignaciones rutina-planificación. Antes de ejecutarlas, pedí confirmación aclarando que es una baja lógica. Donde aplique, ofrecé reactivar.
+- **Entrenadores:** no se dan de baja con `set-active` (solo cambia `User.active`, no el `Coach`) sino con `POST /coach/delete_coach/:id`, que es la baja lógica del `Coach` y además le devuelve a su usuario el rol `user`: el entrenador vuelve a ser alumno y sale del listado. Pedí confirmación aclarándolo. Se lo reactiva volviendo a convertirlo con `POST /coach/promote_user`, que reactiva su `Coach` y pisa el email y el CUIL.
 - **Borrado físico:** `DELETE` existe solo para RMs, ejercicios, músculos y grupos musculares. El backend puede rechazarlo por integridad referencial; en ese caso, mostrá el motivo.
 - **Alumnos:** no existe vínculo entrenador-alumno. "Alumnos" son los usuarios con `role=user`. `GET /users/all` pagina con `{ data, total, page, limit, totalPages }`.
 - **Circuitos:** son piezas independientes y reutilizables. Editar un circuito afecta a todas las rutinas que lo usan, así que avisalo antes de guardar. Un ejercicio no se puede repetir dentro de un circuito. Un circuito sí puede repetirse dentro de una rutina.
