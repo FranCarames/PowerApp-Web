@@ -71,7 +71,7 @@ Para cada uno se indica qué necesita el front. El contrato lo diseña Fran. Has
 
 | Id | Qué | Para cuándo |
 |---|---|---|
-| C1 | CORS habilitado para el dominio del front en Render (`https://powerapp-web.onrender.com`), con `Access-Control-Expose-Headers: Authorization`. Sin esto, el navegador no deja leer el token del login. En local no hace falta, porque el proxy de Vite lo resuelve. Pendiente: T08 no lo pudo comprobar. | Lo antes posible |
+| C1 | CORS habilitado para el dominio del front en Render (`https://powerapp-web.onrender.com`), con `Access-Control-Expose-Headers: Authorization`. Sin esto, el navegador no deja leer el token del login. En local no hace falta, porque el proxy de Vite lo resuelve. Pendiente: T08 no lo pudo comprobar. | Lo antes posible. **Resuelto:** el backend lo habilitó el 5/10 (`app.enableCors` en `main.ts`) y el 6/10 se comprobó contra Render: un preflight `OPTIONS /api/v1/users/login` con el `Origin` del front responde 204 con `Access-Control-Allow-Origin` de ese dominio y `Access-Control-Expose-Headers: Authorization`. Falta probar el login real desde el sitio desplegado |
 | C2 | Backend completo de rutinas y planificaciones: alta, edición y baja de rutinas y planificaciones, asignación de rutinas a planificaciones, rutina puntual (B5) y asignación de planificaciones a alumnos (B7). Hasta entonces, el Admin y el Entrenador muestran un placeholder en esas secciones. Cuando esté, Fran avisa y arranca el bloque C2. | Antes del 31/10 |
 | C3 | Implementación de B1 a B9. | Antes del 31/10 |
 | C4 | Integrar el servicio de email. Hoy el backend imprime la contraseña temporal en su consola, así que CU-U-04 no funciona en producción (lo detectó T11). | Antes del 20/11 |
