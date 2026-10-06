@@ -9,6 +9,11 @@ export function normalizeText(text: string): string {
     .toLowerCase();
 }
 
+/** La primera letra en mayúscula: "principal" → "Principal". Para mostrar valores de texto libre del backend. */
+export function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 /** Si `text` contiene lo buscado, sin distinguir mayúsculas ni acentos. Una búsqueda vacía coincide con todo. */
 export function matchesSearch(text: string, search: string): boolean {
   const needle = normalizeText(search.trim());

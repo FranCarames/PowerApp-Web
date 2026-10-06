@@ -125,7 +125,7 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Entrenador:** la barra lateral tiene Membresías aparte, bajo "Organización". En mobile se entra desde el botón de la barra superior de Mis alumnos, y mientras tanto la tab Alumnos queda marcada.
 - **Admin:** en desktop, tres bloques: Inicio, Usuarios y Entrenadores; "Entrenamiento" (Ejercicios, Circuitos, Rutinas y Planificaciones); y "Configuración" (Catálogo, Membresías y Perfil). En mobile, la tab bar tiene Inicio, Usuarios, Ejercicios, Rutinas y **Más** (`/a/mas`), una pantalla con los accesos que no entran: Planificaciones, Circuitos, Entrenadores, Catálogo, Membresías y Mi cuenta. Más es la entrada `fallback`: queda marcada en toda pantalla que no pertenece a otra tab, incluida Mi cuenta.
 - **Rutinas y Planificaciones del Admin** (`/a/rutinas`, `/a/rutinas/:id`, `/a/planes`, `/a/planes/:id`) muestran `SectionPlaceholder` (`shared/ui`): "Esta sección se habilita cuando el backend de rutinas y planificaciones esté completo". Aparecen en la navegación como cualquier otra. Las reemplazan T21 a T24 en el bloque C2 del PLAN, y el Entrenador reutiliza el mismo componente en T48.
-- **Pantallas temporales:** el resto de las rutas del Admin que todavía no tienen su tarea (Circuitos...) abren "Pantalla en construcción" con un comentario `TEMPORAL (Txx)`, para que ningún acceso caiga en "Página no encontrada".
+- **Pantallas temporales:** el resto de las rutas del Admin que todavía no tienen su tarea (el editor de circuito...) abren "Pantalla en construcción" con un comentario `TEMPORAL (Txx)`, para que ningún acceso caiga en "Página no encontrada".
 
 ## Panel del Admin
 
@@ -198,6 +198,13 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **`POST /coach/promote_user`:** solo el Admin. Si el alumno ya fue entrenador, reactiva su registro y le pisa el email y el CUIL: el formulario arranca con los que tenía y un aviso lo explica. Es la forma de reactivar a un entrenador eliminado.
 - **Email repetido:** el email profesional es único y el backend cambia el rol antes de guardar los datos, así que un repetido da un 500 que deja a la cuenta con el rol y sin datos. Por eso, antes de mandar, se compara con `GET /coach/all` y se avisa sin llamar al backend. Si igual falla, el aviso manda a revisar Entrenadores, el alumno sigue elegido y se puede reintentar con otro email.
 - **Mocks:** `POST /coach/promote_user` responde con datos de ejemplo solo al Admin de demo (valida como el DTO, crea o reactiva, y reproduce el 500 del email repetido con el rol ya cambiado) y `GET /users/get/{id}` también responde por los alumnos y entrenadores de demo.
+
+## Circuitos del Admin
+
+- **Pantalla** (`/a/circuitos`, `src/features/admin/pages/CircuitsPage.tsx`): el caso de uso CU-E-21. El aviso de que un circuito se usa en varias rutinas y los cambios valen para todas, el buscador (por nombre, sin acentos), los chips Activos, Inactivos y Todos y las tarjetas de a dos columnas desde 960 px. Un botón flotante abre `/a/circuitos/nuevo`. La búsqueda y el chip quedan en la URL (`?q=…&filtro=inactivos`).
+- **Tarjeta** (`CircuitCard`): el nombre, el tipo y cuántos ejercicios tiene, en cuántas rutinas se usa (píldora "N rutinas") y los nombres de sus ejercicios, en orden. Un circuito dado de baja se ve apagado, con "Inactivo". Tocarla abre su editor (`/a/circuitos/:id`, T20), donde se lo da de baja o se lo reactiva. No muestra las series (como el prototipo) porque `all-plus` no las trae.
+- **Datos:** `GET /routine/circuit/all-plus?include_inactive=true` (`useCircuits`, en `src/features/catalog/hooks`): una sola lista con los dados de baja incluidos, y los chips la filtran sin volver a pedirla. **En cuántas rutinas se usa** cada circuito no lo devuelve ningún endpoint: `useCircuitUsage` lo calcula con `GET /routine/all-plus` (solo las rutinas vigentes, y una rutina que repite el circuito cuenta una vez). Si ese pedido falla, las tarjetas no dicen la cantidad.
+- **Mocks:** `GET /routine/circuit/all-plus` y `GET /routine/all-plus` responden con los circuitos y las rutinas del prototipo a las cuentas de coach y admin de demo (el alumno recibe el 403 de un guard), con `include_inactive` como el backend.
 
 ## Login
 
@@ -274,7 +281,7 @@ src/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
     account/      Mi cuenta, compartida por los tres roles, y los hooks de datos de usuarios que usan varios roles
-    catalog/      Ejercicios y músculos que leen varios roles (hooks); lo propio de cada rol vive en su feature
+    catalog/      Ejercicios, músculos y circuitos que leen varios roles (hooks); lo propio de cada rol vive en su feature
     user/         pantallas del rol Usuario
     coach/        pantallas del rol Entrenador
     admin/        pantallas del rol Admin

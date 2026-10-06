@@ -15,5 +15,7 @@ export type Exercise = Schemas['Exercise'];
 export type Muscle = Schemas['Muscle'];
 export type MuscleGroup = Schemas['MuscleGroup'];
 export type CircuitListItem = Schemas['CircuitListItemResponseDto'];
+export type CircuitListItemPlus = Schemas['CircuitListItemPlusResponseDto'];
 export type RoutineListItem = Schemas['RoutineListItemResponseDto'];
+export type RoutineListItemPlus = Schemas['RoutineListItemPlusResponseDto'];
 export type PlanificationListItem = Schemas['PlanificationListItemResponseDto'];
