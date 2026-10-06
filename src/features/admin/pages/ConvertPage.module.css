@@ -1,0 +1,19 @@
+/* .narrow del prototipo: los formularios de una columna no se estiran en pantallas anchas. */
+.narrow {
+  max-width: 540px;
+}
+
+.intro {
+  margin-bottom: 16px;
+  line-height: 1.6;
+  color: var(--ts);
+}
+
+.note {
+  margin-bottom: 14px;
+}
+
+/* La lista de alumnos, 18 px sobre los campos. */
+.students {
+  margin-bottom: 18px;
+}

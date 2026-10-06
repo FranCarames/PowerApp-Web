@@ -192,11 +192,13 @@ export const userMocks = [
     },
   ),
 
-  // Leer un usuario es REAL: el mock responde solo por los ids de las cuentas de demo (con los datos
-  // que se hayan editado). Cualquier otro id va al backend.
+  // Leer un usuario es REAL: el mock responde solo por los ids que conoce (las cuentas de demo, con los
+  // datos que se hayan editado, y los alumnos y entrenadores de demo). Cualquier otro id va al backend.
   mockEndpoint('get', '/api/v1/users/get/{id}', ({ params }) => {
     const account = demoAccounts.find(({ user }) => user.id === params.id);
-    return account ? HttpResponse.json(userOf(account)) : passthrough();
+    if (account) return HttpResponse.json(userOf(account));
+    const known = findMockUser(params.id);
+    return known ? HttpResponse.json(known) : passthrough();
   }),
 
   // Editar los datos personales es REAL: el mock atiende solo a las cuentas de demo, por su token.

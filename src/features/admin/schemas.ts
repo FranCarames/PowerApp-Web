@@ -123,6 +123,35 @@ export const muscleGroupSchema = z.object({
 
 export type MuscleGroupValues = z.input<typeof muscleGroupSchema>;
 
+/**
+ * Los datos profesionales de un entrenador: `PromoteCoachDto` (CU-A-17, junto con el id del alumno) y,
+ * con las mismas reglas, su edición (CU-A-18, T37). El email llega a 50 caracteres y el backend lo pasa a
+ * minúsculas. El CUIL se envía con 11 dígitos y sin guiones, aunque se escriba con la máscara
+ * "27-12345678-4".
+ */
+export const coachDataSchema = z.object({
+  coach_email: z
+    .string()
+    .trim()
+    .min(1, 'Ingresá el email profesional')
+    .max(50, 'El email no puede tener más de 50 caracteres')
+    .pipe(z.email('Ingresá un email válido'))
+    .transform((value) => value.toLowerCase()),
+  cuil: z
+    .string()
+    .trim()
+    .min(1, 'Ingresá el CUIL')
+    .refine(
+      (value) =>
+        /^[\d\s-]+$/.test(value) && value.replace(/\D/g, '').length === 11,
+      'El CUIL tiene 11 dígitos',
+    )
+    .transform((value) => value.replace(/\D/g, '')),
+});
+
+export type CoachDataInput = z.input<typeof coachDataSchema>;
+export type CoachDataValues = z.output<typeof coachDataSchema>;
+
 /** El precio más alto que entra en la columna del backend: `decimal(10, 2)`. */
 const MAX_PRICE = 99_999_999.99;
 

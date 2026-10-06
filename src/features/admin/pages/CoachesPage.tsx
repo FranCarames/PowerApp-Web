@@ -27,7 +27,7 @@ const NO_COACH_RECORD = 'Coach no encontrado';
 
 /**
  * Entrenadores del Admin (CU-A-16 y CU-A-19): el listado con nombre, email profesional y estado, el
- * acceso a convertir un alumno (T36) y eliminar, que es una baja lógica con confirmación. Editar los
+ * acceso a convertir un alumno y eliminar, que es una baja lógica con confirmación. Editar los
  * datos del entrenador lo suma T37.
  */
 export function CoachesPage() {

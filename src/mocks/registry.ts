@@ -45,7 +45,8 @@ export const registry: readonly RegistryEntry[] = [
   { method: 'post', path: '/api/v1/muscles/mg/create', mock: true },
   { method: 'post', path: '/api/v1/muscles/mg/edit/{id}', mock: true },
   { method: 'delete', path: '/api/v1/muscles/mg/{id}', mock: true },
-  // Baja de un entrenador: solo el Admin de demo, por su token falso (ver handlers/coaches.ts)
+  // Alta y baja de un entrenador: solo el Admin de demo, por su token falso (ver handlers/coaches.ts)
+  { method: 'post', path: '/api/v1/coach/promote_user', mock: true },
   { method: 'post', path: '/api/v1/coach/delete_coach/{id}', mock: true },
   // Circuitos, rutinas y planificaciones: solo las cuentas de demo; las de verdad pasan al backend real
   { method: 'get', path: '/api/v1/routine/circuit/all', mock: true },
