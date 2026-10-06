@@ -1,5 +1,7 @@
 import type { paths } from './schema';
 import type {
+  CircuitDetailResponse,
+  CircuitExerciseResponse,
   Coach,
   Exercise,
   Muscle,
@@ -29,6 +31,34 @@ export type UserPlanificationRequest = Pick<
   UserPlanification,
   'user_id' | 'planification_id' | 'start_date' | 'end_date' | 'coach_note'
 >;
+
+// PENDIENTE-CONTRATO: V2 CU-E-22
+/**
+ * El ejercicio dentro de un circuito (`exercise` de `CircuitExerciseResponseDto`): el contrato lo declara
+ * como un objeto vacío, pero el backend manda la ficha del catálogo (`buildCircuitDetailResponse`).
+ */
+export interface CircuitExerciseRef {
+  id: string;
+  name: string;
+  description: string;
+  safety_tips?: string;
+  activation_tips?: string;
+  video_url?: string;
+  preview_image?: string;
+  bg_image?: string;
+}
+
+// PENDIENTE-CONTRATO: V2 CU-E-22
+/**
+ * Respuesta de `GET /routine/circuit/{id}` y de `POST /routine/circuit/create` y `edit/{id}`: el
+ * `CircuitDetailResponseDto` del contrato con el `exercise` de cada ejercicio tipado. Trae solo los
+ * ejercicios activos, en orden, cada uno con sus bloques de series.
+ */
+export type CircuitDetail = Omit<CircuitDetailResponse, 'exercises'> & {
+  exercises: Array<
+    Omit<CircuitExerciseResponse, 'exercise'> & { exercise: CircuitExerciseRef }
+  >;
+};
 
 // PENDIENTE-CONTRATO: B8 CU-A-18
 /**
