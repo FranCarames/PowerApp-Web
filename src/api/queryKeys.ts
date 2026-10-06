@@ -53,5 +53,7 @@ export const queryKeys = {
     /** Cuántos usuarios hay con ese rol y ese estado de cuenta. */
     count: (filter: { role?: string; active?: boolean }) =>
       [...queryKeys.users.all, 'count', filter] as const,
+    /** Todos los usuarios con rol de entrenador, sin paginar (el nombre de cada uno en el listado de Entrenadores). */
+    coaches: () => [...queryKeys.users.all, 'coaches'] as const,
   },
 };

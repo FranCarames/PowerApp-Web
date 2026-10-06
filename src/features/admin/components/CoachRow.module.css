@@ -1,0 +1,22 @@
+/* El nombre de un entrenador va en 700, como el prototipo (el de las demás filas, en 600). */
+.name {
+  font-weight: 700;
+}
+
+/* Un email largo y sin espacios no tiene dónde cortarse: sin esto, empuja la fila fuera de la pantalla. */
+.subtitle {
+  overflow-wrap: anywhere;
+}
+
+/* El estado y, debajo, las acciones: alineados a la derecha, con 6 px entre sí. */
+.trailing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.actions {
+  display: flex;
+  gap: 2px;
+}
