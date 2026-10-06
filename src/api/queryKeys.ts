@@ -14,6 +14,7 @@ export const queryKeys = {
   },
   muscles: {
     all: ['muscles'] as const,
+    list: () => [...queryKeys.muscles.all, 'list'] as const,
     /** Los grupos musculares, cada uno con sus músculos. */
     groups: () => [...queryKeys.muscles.all, 'groups'] as const,
   },
@@ -36,6 +37,9 @@ export const queryKeys = {
     payments: (userId: string) =>
       [...queryKeys.memberships.all, 'payments', userId] as const,
     summary: () => [...queryKeys.memberships.all, 'summary'] as const,
+    /** Cuántos alumnos tiene cada tipo de membresía (el del último pago). */
+    studentsByType: () =>
+      [...queryKeys.memberships.all, 'students-by-type'] as const,
     /** Los alumnos cuya membresía está en ese estado. */
     studentsByStatus: (status: string) =>
       [...queryKeys.memberships.all, 'students-by-status', status] as const,

@@ -37,7 +37,14 @@ export const registry: readonly RegistryEntry[] = [
   { method: 'post', path: '/api/v1/exercise/create', mock: true },
   { method: 'post', path: '/api/v1/exercise/edit/{id}', mock: true },
   { method: 'delete', path: '/api/v1/exercise/{id}', mock: true },
+  { method: 'get', path: '/api/v1/muscles/all', mock: true },
   { method: 'get', path: '/api/v1/muscles/mg/all', mock: true },
+  { method: 'post', path: '/api/v1/muscles/create', mock: true },
+  { method: 'post', path: '/api/v1/muscles/edit/{id}', mock: true },
+  { method: 'delete', path: '/api/v1/muscles/{id}', mock: true },
+  { method: 'post', path: '/api/v1/muscles/mg/create', mock: true },
+  { method: 'post', path: '/api/v1/muscles/mg/edit/{id}', mock: true },
+  { method: 'delete', path: '/api/v1/muscles/mg/{id}', mock: true },
   // Circuitos, rutinas y planificaciones: solo las cuentas de demo; las de verdad pasan al backend real
   { method: 'get', path: '/api/v1/routine/circuit/all', mock: true },
   { method: 'get', path: '/api/v1/routine/all', mock: true },
@@ -49,6 +56,10 @@ export const registry: readonly RegistryEntry[] = [
   },
   // Membresías (tipos)
   { method: 'get', path: '/api/v1/membership/all', mock: true },
+  { method: 'post', path: '/api/v1/membership/create', mock: true },
+  { method: 'post', path: '/api/v1/membership/edit/{id}', mock: true },
+  { method: 'post', path: '/api/v1/membership/set-active/{id}', mock: true },
+  { method: 'get', path: '/api/v1/membership/type/users', mock: true },
   // Resumen de estados: solo las cuentas de demo; las de verdad pasan al backend real (ver handlers/memberships.ts)
   { method: 'get', path: '/api/v1/membership/status/summary', mock: true },
   { method: 'get', path: '/api/v1/membership/status/users', mock: true },
