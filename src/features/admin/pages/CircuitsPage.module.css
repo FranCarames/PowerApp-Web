@@ -1,0 +1,6 @@
+/* El aviso bajo el título: el prototipo lo sube 6 px (margin-top -6) y lo separa 16 px del buscador. */
+.intro {
+  margin: -6px 0 16px;
+  line-height: 1.6;
+  color: var(--ts);
+}

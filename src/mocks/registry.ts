@@ -57,7 +57,9 @@ export const registry: readonly RegistryEntry[] = [
   },
   // Circuitos, rutinas y planificaciones: solo las cuentas de demo; las de verdad pasan al backend real
   { method: 'get', path: '/api/v1/routine/circuit/all', mock: true },
+  { method: 'get', path: '/api/v1/routine/circuit/all-plus', mock: true },
   { method: 'get', path: '/api/v1/routine/all', mock: true },
+  { method: 'get', path: '/api/v1/routine/all-plus', mock: true },
   { method: 'get', path: '/api/v1/planification/all', mock: true },
   {
     method: 'get',
