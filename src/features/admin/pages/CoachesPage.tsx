@@ -1,14 +1,127 @@
-import { EmptyState, PageHeader } from '@/shared/ui';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 
-// TEMPORAL (T35): el listado de entrenadores reemplaza esta pantalla.
+import { getErrorMessage, isApiError } from '@/api/errors';
+import type { User } from '@/api/types';
+import { fullName } from '@/shared/lib/fullName';
+import {
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  ErrorState,
+  List,
+  ListSkeleton,
+  PageHeader,
+  useToast,
+} from '@/shared/ui';
+
+import { CoachEditModal } from '../components/CoachEditModal';
+import { CoachRow } from '../components/CoachRow';
+import { useCoaches, type CoachEntry } from '../hooks/useCoaches';
+import { useDeleteCoach } from '../hooks/useDeleteCoach';
+import styles from './CoachesPage.module.css';
+
+/**
+ * Lo que responde `deleteCoach` (404) cuando el usuario existe pero no tiene registro de Coach: un alta
+ * que falló a la mitad le dejó el rol sin los datos. Con ese 404 no hay forma de darlo de baja.
+ */
+const NO_COACH_RECORD = 'Coach no encontrado';
+
+/**
+ * Entrenadores del Admin (CU-A-16 y CU-A-19): el listado con nombre, email profesional y estado, el
+ * acceso a convertir un alumno, editar los datos profesionales (CU-A-18, en un modal) y eliminar, que
+ * es una baja lógica con confirmación.
+ */
 export function CoachesPage() {
+  const navigate = useNavigate();
+  const toast = useToast();
+  const coaches = useCoaches();
+  const remove = useDeleteCoach();
+  const [toDelete, setToDelete] = useState<CoachEntry | null>(null);
+  const [editing, setEditing] = useState<User | null>(null);
+
+  function confirmDelete({ user }: CoachEntry) {
+    remove.mutate(user.id, {
+      onSuccess: () => {
+        toast.success(`${fullName(user)} ya no es entrenador`);
+        setToDelete(null);
+      },
+      onError: (error) => {
+        toast.error(
+          isApiError(error) && error.serverMessage === NO_COACH_RECORD
+            ? 'No se pudo eliminar: la cuenta tiene el rol de entrenador, pero no sus datos profesionales.'
+            : getErrorMessage(error, {
+                404: 'No encontramos al entrenador. Puede que ya lo hayan eliminado.',
+                // No hay rechazo por integridad (V7): el único 500 es una falla del servidor sin motivo.
+                500: 'No se pudo eliminar al entrenador. Intentá de nuevo en unos minutos.',
+              }),
+        );
+        setToDelete(null);
+      },
+    });
+  }
+
   return (
     <>
       <PageHeader eyebrow="Gestión" title="Entrenadores" />
-      <EmptyState
-        icon="shield"
-        title="Pantalla en construcción"
-        message="Los entrenadores se arman en la tarea T35."
+      <Button
+        variant="sec"
+        icon="plus"
+        className={styles.convert}
+        onClick={() => navigate('/a/convertir')}
+      >
+        Convertir alumno en entrenador
+      </Button>
+      {coaches.data ? (
+        coaches.data.length === 0 ? (
+          <EmptyState
+            icon="shield"
+            title="Todavía no hay entrenadores"
+            message="Convertí a un alumno para que tenga acceso al panel de entrenador."
+          />
+        ) : (
+          <List columns={2}>
+            {coaches.data.map((entry) => (
+              <CoachRow
+                key={entry.user.id}
+                entry={entry}
+                // Sin su registro de Coach no hay nada que editar.
+                onEdit={
+                  entry.coach ? ({ user }) => setEditing(user) : undefined
+                }
+                onDelete={setToDelete}
+              />
+            ))}
+          </List>
+        )
+      ) : coaches.isError ? (
+        <ErrorState
+          message={getErrorMessage(coaches.error)}
+          onRetry={coaches.retry}
+          retrying={coaches.retrying}
+        />
+      ) : (
+        <ListSkeleton columns={2} rows={3} />
+      )}
+      <CoachEditModal user={editing} onClose={() => setEditing(null)} />
+      <ConfirmDialog
+        open={toDelete !== null}
+        destructive
+        title="Eliminar entrenador"
+        message={
+          toDelete && (
+            <>
+              ¿Eliminar a <b>{fullName(toDelete.user)}</b> de los entrenadores?
+              Es una baja lógica: pierde el acceso al panel de entrenador y su
+              cuenta vuelve a ser la de un alumno, con sus datos intactos. Podés
+              volver a convertirla en entrenador cuando quieras.
+            </>
+          )
+        }
+        confirmLabel="Eliminar"
+        loading={remove.isPending}
+        onConfirm={() => toDelete && confirmDelete(toDelete)}
+        onCancel={() => setToDelete(null)}
       />
     </>
   );

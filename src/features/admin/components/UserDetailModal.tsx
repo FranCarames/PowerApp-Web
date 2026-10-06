@@ -16,6 +16,7 @@ import {
 } from '@/shared/ui';
 
 import { CoachDetails } from './CoachDetails';
+import { CoachEditModal } from './CoachEditModal';
 import { StudentDetails } from './StudentDetails';
 
 interface UserDetailModalProps {
@@ -26,9 +27,9 @@ interface UserDetailModalProps {
 
 /**
  * El detalle de un usuario (CU-E-03 desde el Admin): sus datos según su rol y las acciones sobre la
- * cuenta. Convertir a un alumno en entrenador abre T36 con el alumno elegido. Desactivar la cuenta es
- * una baja lógica y pide confirmación; reactivarla, no. Los admins no se desactivan desde acá, ni
- * uno mismo.
+ * cuenta. Convertir a un alumno en entrenador abre la pantalla de conversión con el alumno elegido y
+ * editar los datos de un entrenador abre su modal de edición. Desactivar la cuenta es una baja lógica y
+ * pide confirmación; reactivarla, no. Los admins no se desactivan desde acá, ni uno mismo.
  */
 export function UserDetailModal({ user, onClose }: UserDetailModalProps) {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ export function UserDetailModal({ user, onClose }: UserDetailModalProps) {
   const { user: me } = useAuth();
   const setActive = useSetUserActive();
   const [confirming, setConfirming] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   function changeActive(target: User, active: boolean) {
     setActive.mutate(
@@ -60,7 +62,7 @@ export function UserDetailModal({ user, onClose }: UserDetailModalProps) {
   return (
     <>
       <Modal
-        open={user !== null && !confirming}
+        open={user !== null && !confirming && !editing}
         onClose={onClose}
         title={user ? fullName(user) : ''}
         description={
@@ -76,6 +78,11 @@ export function UserDetailModal({ user, onClose }: UserDetailModalProps) {
                   onClick={() => navigate(`/a/convertir?alumno=${user.id}`)}
                 >
                   Convertir en entrenador
+                </Button>
+              )}
+              {user.role === 'coach' && (
+                <Button variant="sec" onClick={() => setEditing(true)}>
+                  Editar datos
                 </Button>
               )}
               {canManage &&
@@ -105,6 +112,10 @@ export function UserDetailModal({ user, onClose }: UserDetailModalProps) {
           <DetailList items={[{ label: 'Email', value: user.email }]} />
         )}
       </Modal>
+      <CoachEditModal
+        user={editing && user?.role === 'coach' ? user : null}
+        onClose={() => setEditing(false)}
+      />
       <ConfirmDialog
         open={user !== null && confirming}
         destructive

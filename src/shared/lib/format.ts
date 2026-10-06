@@ -13,3 +13,8 @@ export function formatCuil(cuil: string): string {
 export function formatPrice(amount: number): string {
   return `$${amount.toLocaleString('es-AR', { maximumFractionDigits: 2 })}`;
 }
+
+/** "80 kg" o "82,5 kg": un peso en kilos, con hasta dos decimales y coma decimal (es-AR). */
+export function formatWeight(kg: number): string {
+  return `${kg.toLocaleString('es-AR', { maximumFractionDigits: 2 })} kg`;
+}

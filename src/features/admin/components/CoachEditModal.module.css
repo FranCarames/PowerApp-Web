@@ -1,0 +1,11 @@
+/* El aviso de error, con la misma separación que un <Field>. */
+.error {
+  margin-bottom: 14px;
+}
+
+/* Una etiqueta y un campo en gris, con la misma separación que un <Field>. */
+.skeletonField {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}

@@ -30,6 +30,19 @@ export const queryKeys = {
     list: () => [...queryKeys.routines.all, 'list'] as const,
     /** Los circuitos son parte de las rutinas en el backend (`/routine/circuit/*`). */
     circuits: () => [...queryKeys.routines.all, 'circuits'] as const,
+    /** Un circuito con sus ejercicios y series (el detalle). */
+    circuit: (id: string) =>
+      [...queryKeys.routines.all, 'circuit', id] as const,
+    /** Los circuitos con sus ejercicios (`all-plus`), con o sin los dados de baja. */
+    circuitsPlus: (includeInactive: boolean) =>
+      [
+        ...queryKeys.routines.all,
+        'circuits-plus',
+        { includeInactive },
+      ] as const,
+    /** Las rutinas con sus circuitos (`all-plus`), con o sin las dadas de baja. */
+    listPlus: (includeInactive: boolean) =>
+      [...queryKeys.routines.all, 'list-plus', { includeInactive }] as const,
   },
   memberships: {
     all: ['memberships'] as const,
@@ -53,5 +66,7 @@ export const queryKeys = {
     /** Cuántos usuarios hay con ese rol y ese estado de cuenta. */
     count: (filter: { role?: string; active?: boolean }) =>
       [...queryKeys.users.all, 'count', filter] as const,
+    /** Todos los usuarios con rol de entrenador, sin paginar (el nombre de cada uno en el listado de Entrenadores). */
+    coaches: () => [...queryKeys.users.all, 'coaches'] as const,
   },
 };

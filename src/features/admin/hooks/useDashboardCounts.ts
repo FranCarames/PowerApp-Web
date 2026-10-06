@@ -5,6 +5,8 @@ import { queryKeys } from '@/api/queryKeys';
 import { useUserCount } from '@/features/account/hooks/useUserCount';
 import { exercisesQuery } from '@/features/catalog/hooks/useExercises';
 
+import { coachesQuery } from './useCoaches';
+
 // Los números del panel del Admin. Cada uno es una query con su `select`: el panel no necesita las
 // listas, solo cuántos hay. Las listas completas las piden después las pantallas de cada sección (con
 // la misma query key, así que comparten el caché).
@@ -44,11 +46,10 @@ function usePlanificationCount() {
   });
 }
 
-/** `GET /coach/all`: cuántos entrenadores tienen la cuenta activa. */
+/** `GET /coach/all`: cuántos registros de Coach están activos (`Coach.active`, que baja `delete_coach`; `set-active` no lo toca). */
 function useActiveCoachCount() {
   return useQuery({
-    queryKey: queryKeys.coaches.list(),
-    queryFn: ({ signal }) => api.get('/api/v1/coach/all', { signal }),
+    ...coachesQuery(),
     select: (coaches) => coaches.filter((coach) => coach.active).length,
   });
 }

@@ -2,7 +2,7 @@ import { passthrough } from 'msw';
 import { HttpResponse } from 'msw/http';
 
 import type { LoginResponse } from '@/api/pending';
-import type { User } from '@/api/types';
+import type { Role, User } from '@/api/types';
 
 import { staffAccess } from '../access';
 import { mockEndpoint } from '../endpoint';
@@ -47,10 +47,30 @@ const allUsers: User[] = [
 // en memoria: al recargar la página vuelven a ser las de la fixture.
 const activeOverrides = new Map<string, boolean>();
 
-/** El usuario con su estado de cuenta al día, según las bajas y reactivaciones hechas. */
-function withActive(user: User): User {
+// Los roles que cambiaron: eliminar a un entrenador (`POST /coach/delete_coach/{id}`) le devuelve el rol
+// `user` (id → rol). También en memoria.
+const roleOverrides = new Map<string, Role>();
+
+/** El usuario con su estado de cuenta y su rol al día, según lo hecho desde que se cargó la página. */
+function withChanges(user: User): User {
   const active = activeOverrides.get(user.id);
-  return active === undefined ? user : { ...user, active };
+  const role = roleOverrides.get(user.id);
+  return {
+    ...user,
+    ...(active !== undefined && { active }),
+    ...(role !== undefined && { role }),
+  };
+}
+
+/** El usuario que conoce el mock con ese id, con sus cambios al día. Lo usan los mocks de otros dominios. */
+export function findMockUser(id: string): User | undefined {
+  const user = allUsers.find((candidate) => candidate.id === id);
+  return user && withChanges(user);
+}
+
+/** Cambia el rol de un usuario del mock. */
+export function setMockUserRole(id: string, role: Role): void {
+  roleOverrides.set(id, role);
 }
 
 /** Como el backend: coincidencia parcial, sin distinguir mayúsculas, en nombre, apellido, nombre completo y email. */
@@ -132,7 +152,7 @@ export const userMocks = [
     const active = query.get('active');
     const keyword = query.get('keyword');
     const matching = allUsers
-      .map(withActive)
+      .map(withChanges)
       .filter((user) => !role || user.role === role)
       .filter((user) => active === null || user.active === (active === 'true'))
       .filter((user) => !keyword || matchesKeyword(user, keyword))
@@ -166,17 +186,19 @@ export const userMocks = [
       }
       activeOverrides.set(user.id, active);
       return HttpResponse.json({
-        ...withActive(user),
+        ...withChanges(user),
         updated_at: new Date().toISOString(),
       });
     },
   ),
 
-  // Leer un usuario es REAL: el mock responde solo por los ids de las cuentas de demo (con los datos
-  // que se hayan editado). Cualquier otro id va al backend.
+  // Leer un usuario es REAL: el mock responde solo por los ids que conoce (las cuentas de demo, con los
+  // datos que se hayan editado, y los alumnos y entrenadores de demo). Cualquier otro id va al backend.
   mockEndpoint('get', '/api/v1/users/get/{id}', ({ params }) => {
     const account = demoAccounts.find(({ user }) => user.id === params.id);
-    return account ? HttpResponse.json(userOf(account)) : passthrough();
+    if (account) return HttpResponse.json(userOf(account));
+    const known = findMockUser(params.id);
+    return known ? HttpResponse.json(known) : passthrough();
   }),
 
   // Editar los datos personales es REAL: el mock atiende solo a las cuentas de demo, por su token.

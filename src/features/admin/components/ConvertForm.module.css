@@ -1,0 +1,20 @@
+/* A quién se convierte, con el email al lado en gris, antes de los campos. */
+.target {
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: var(--ts);
+  overflow-wrap: anywhere;
+}
+
+.target b {
+  color: var(--tp);
+}
+
+.email {
+  margin-left: 6px;
+  color: var(--tm);
+}
+
+.note {
+  margin-bottom: 14px;
+}

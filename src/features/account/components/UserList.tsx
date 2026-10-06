@@ -14,6 +14,10 @@ interface UserListProps {
   empty: ReactNode;
   /** La fila de cada usuario. Cada pantalla arma la suya. */
   renderRow: (user: User) => ReactNode;
+  /** `2` pasa a dos columnas desde 960 px. Por defecto 2. */
+  columns?: 1 | 2;
+  /** Separación entre filas en px. Sin definir, la de `List`. */
+  gap?: number;
 }
 
 /**
@@ -21,7 +25,13 @@ interface UserListProps {
  * vista el resultado anterior, apagado, hasta que llega el suyo. Lo usan Mis alumnos y los Usuarios
  * del Admin.
  */
-export function UserList({ filter, empty, renderRow }: UserListProps) {
+export function UserList({
+  filter,
+  empty,
+  renderRow,
+  columns = 2,
+  gap,
+}: UserListProps) {
   const query = useUsers(filter);
   const { data } = query;
 
@@ -33,7 +43,7 @@ export function UserList({ filter, empty, renderRow }: UserListProps) {
         retrying={query.isRefetching}
       />
     ) : (
-      <ListSkeleton columns={2} rows={6} />
+      <ListSkeleton columns={columns} rows={6} />
     );
   }
 
@@ -44,7 +54,9 @@ export function UserList({ filter, empty, renderRow }: UserListProps) {
       aria-busy={query.isPlaceholderData || undefined}
       className={cx(query.isPlaceholderData && styles.stale)}
     >
-      <List columns={2}>{data.users.map(renderRow)}</List>
+      <List columns={columns} gap={gap}>
+        {data.users.map(renderRow)}
+      </List>
       {query.hasNextPage && (
         <div className={styles.more}>
           {query.isFetchNextPageError && (

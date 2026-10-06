@@ -1,0 +1,29 @@
+/* El <fieldset> solo agrupa los campos para apagarlos juntos: sin borde ni relleno propios. */
+.fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+/* Las tarjetas de los ejercicios, de a una y con 8 px entre sí (el prototipo usa 8 en las listas de editores). */
+.list {
+  display: grid;
+  gap: 8px;
+}
+
+.exercisesError {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--err);
+}
+
+/* "Agregar ejercicio": 10 px bajo la lista y 18 sobre el botón de guardar, como el prototipo. */
+.add {
+  margin: 10px 0 18px;
+}
+
+/* Duplicar y Desactivar, bajo "Guardar circuito". */
+.secondary {
+  margin-top: 10px;
+}
