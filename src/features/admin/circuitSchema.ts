@@ -106,7 +106,7 @@ const setBlockSchema = z
     });
 
     if (values.amrap) {
-      checkInteger(context, 'amrap_time', values.amrap_time, [1, 86_400], {
+      checkInteger(context, 'amrap_time', values.amrap_time, [1, 99_999], {
         range: 'Segundos, de 1 en adelante',
       });
     }

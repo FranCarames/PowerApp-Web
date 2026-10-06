@@ -55,19 +55,23 @@ export const registry: readonly RegistryEntry[] = [
     pending: 'B8',
     mock: true,
   },
-  // Circuitos, rutinas y planificaciones: solo las cuentas de demo; las de verdad pasan al backend real
-  { method: 'get', path: '/api/v1/routine/circuit/all', mock: true },
-  { method: 'get', path: '/api/v1/routine/circuit/all-plus', mock: true },
-  { method: 'get', path: '/api/v1/routine/circuit/{id}', mock: true },
-  { method: 'post', path: '/api/v1/routine/circuit/create', mock: true },
-  { method: 'post', path: '/api/v1/routine/circuit/edit/{id}', mock: true },
+  // Circuitos: apagados el 6/10, el backend ya los tiene completos y probados (T44, primer tramo). Van al backend
+  // real también con las cuentas de demo, cuyo token falso el backend rechaza. Los handlers quedan hasta que T44
+  // los borre. `routine/all-plus` es de rutinas, pero lo necesita el listado de circuitos para contar en cuántas
+  // rutinas se usa cada uno.
+  { method: 'get', path: '/api/v1/routine/circuit/all', mock: false },
+  { method: 'get', path: '/api/v1/routine/circuit/all-plus', mock: false },
+  { method: 'get', path: '/api/v1/routine/circuit/{id}', mock: false },
+  { method: 'post', path: '/api/v1/routine/circuit/create', mock: false },
+  { method: 'post', path: '/api/v1/routine/circuit/edit/{id}', mock: false },
   {
     method: 'post',
     path: '/api/v1/routine/circuit/set-active/{id}',
-    mock: true,
+    mock: false,
   },
+  { method: 'get', path: '/api/v1/routine/all-plus', mock: false },
+  // Rutinas y planificaciones: solo las cuentas de demo; las de verdad pasan al backend real
   { method: 'get', path: '/api/v1/routine/all', mock: true },
-  { method: 'get', path: '/api/v1/routine/all-plus', mock: true },
   { method: 'get', path: '/api/v1/planification/all', mock: true },
   {
     method: 'get',
