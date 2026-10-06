@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { getErrorMessage, isApiError } from '@/api/errors';
+import type { User } from '@/api/types';
 import { fullName } from '@/shared/lib/fullName';
 import {
   Button,
@@ -14,6 +15,7 @@ import {
   useToast,
 } from '@/shared/ui';
 
+import { CoachEditModal } from '../components/CoachEditModal';
 import { CoachRow } from '../components/CoachRow';
 import { useCoaches, type CoachEntry } from '../hooks/useCoaches';
 import { useDeleteCoach } from '../hooks/useDeleteCoach';
@@ -27,8 +29,8 @@ const NO_COACH_RECORD = 'Coach no encontrado';
 
 /**
  * Entrenadores del Admin (CU-A-16 y CU-A-19): el listado con nombre, email profesional y estado, el
- * acceso a convertir un alumno y eliminar, que es una baja lógica con confirmación. Editar los
- * datos del entrenador lo suma T37.
+ * acceso a convertir un alumno, editar los datos profesionales (CU-A-18, en un modal) y eliminar, que
+ * es una baja lógica con confirmación.
  */
 export function CoachesPage() {
   const navigate = useNavigate();
@@ -36,6 +38,7 @@ export function CoachesPage() {
   const coaches = useCoaches();
   const remove = useDeleteCoach();
   const [toDelete, setToDelete] = useState<CoachEntry | null>(null);
+  const [editing, setEditing] = useState<User | null>(null);
 
   function confirmDelete({ user }: CoachEntry) {
     remove.mutate(user.id, {
@@ -82,6 +85,10 @@ export function CoachesPage() {
               <CoachRow
                 key={entry.user.id}
                 entry={entry}
+                // Sin su registro de Coach no hay nada que editar.
+                onEdit={
+                  entry.coach ? ({ user }) => setEditing(user) : undefined
+                }
                 onDelete={setToDelete}
               />
             ))}
@@ -96,6 +103,7 @@ export function CoachesPage() {
       ) : (
         <ListSkeleton columns={2} rows={3} />
       )}
+      <CoachEditModal user={editing} onClose={() => setEditing(null)} />
       <ConfirmDialog
         open={toDelete !== null}
         destructive

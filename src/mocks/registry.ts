@@ -48,6 +48,13 @@ export const registry: readonly RegistryEntry[] = [
   // Alta y baja de un entrenador: solo el Admin de demo, por su token falso (ver handlers/coaches.ts)
   { method: 'post', path: '/api/v1/coach/promote_user', mock: true },
   { method: 'post', path: '/api/v1/coach/delete_coach/{id}', mock: true },
+  // Editar un entrenador no está en el contrato: es un mock pendiente (B8, T37)
+  {
+    method: 'post',
+    path: '/api/v1/coach/edit/{id}',
+    pending: 'B8',
+    mock: true,
+  },
   // Circuitos, rutinas y planificaciones: solo las cuentas de demo; las de verdad pasan al backend real
   { method: 'get', path: '/api/v1/routine/circuit/all', mock: true },
   { method: 'get', path: '/api/v1/routine/all', mock: true },
