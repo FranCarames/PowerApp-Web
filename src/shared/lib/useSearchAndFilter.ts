@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router';
 import { useDebouncedValue } from './useDebouncedValue';
 
 /** Espera entre la última tecla y el pedido al backend. */
-const SEARCH_DEBOUNCE_MS = 300;
+export const SEARCH_DEBOUNCE_MS = 300;
 
 /** El backend rechaza una búsqueda de más de 100 caracteres (`keyword` de `GetUsersQueryDto`). */
 export const KEYWORD_MAX_LENGTH = 100;

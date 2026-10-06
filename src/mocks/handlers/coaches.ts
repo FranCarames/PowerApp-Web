@@ -7,23 +7,49 @@ import { adminAccess } from '../access';
 import { mockEndpoint } from '../endpoint';
 import { coaches } from '../fixtures/coaches';
 import { demoAccountForSession } from '../fixtures/users';
-import { serviceError } from '../responses';
+import { guardError, serviceError } from '../responses';
 import { findMockUser, setMockUserRole } from './users';
 
-// Los entrenadores dados de baja con `POST /coach/delete_coach/{id}` (ids). Vive en memoria: al
-// recargar la página vuelven a ser los de la fixture.
-const removedCoaches = new Set<string>();
+// Los registros de Coach, con las altas y las bajas hechas con `POST /coach/promote_user` y
+// `POST /coach/delete_coach/{id}` (id → Coach). Vive en memoria: al recargar la página vuelve a ser la
+// de la fixture. El backend no saca de la lista a un entrenador dado de baja: queda con `active: false`.
+const records = new Map<string, Coach>(
+  coaches.map((coach) => [coach.id, coach]),
+);
 
-/** Los registros de Coach con las bajas hechas al día. El backend no los saca de la lista: quedan con `active: false`. */
 function currentCoaches(): Coach[] {
-  return coaches.map((coach) =>
-    removedCoaches.has(coach.id) ? { ...coach, active: false } : coach,
-  );
+  return [...records.values()];
 }
 
 // El backend de verdad responde 500 por cualquier falla al dar de baja. Con este entrenador de demo
 // (Martín) el mock lo hace, para ver cómo la pantalla lo muestra.
 const FAILING_COACH_ID = coaches[2].id;
+
+const MAX_EMAIL_LENGTH = 50;
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Los errores de `PromoteCoachDto` (el id no se valida como UUID: los de demo no lo son). */
+function promoteErrors(body: unknown): string[] {
+  const { user_id, coach_email, cuil, ...extra } = (body ?? {}) as Record<
+    string,
+    unknown
+  >;
+  return [
+    ...Object.keys(extra).map((key) => `property ${key} should not exist`),
+    ...(typeof user_id === 'string' && user_id !== ''
+      ? []
+      : ['user_id should not be empty']),
+    ...(typeof coach_email === 'string' &&
+    coach_email !== '' &&
+    coach_email.length <= MAX_EMAIL_LENGTH &&
+    EMAIL.test(coach_email)
+      ? []
+      : ['coach_email must be an email']),
+    ...(typeof cuil === 'string' && cuil.length === 11
+      ? []
+      : ['El CUIL debe tener exactamente 11 caracteres']),
+  ];
+}
 
 /** Los mocks de entrenadores. Cuáles están encendidos lo dice `registry.ts`. */
 export const coachMocks = [
@@ -38,10 +64,47 @@ export const coachMocks = [
   // Leer un entrenador es REAL y público: igual, responde solo a la sesión de una cuenta de demo.
   mockEndpoint('get', '/api/v1/coach/get/{id}', ({ params }) => {
     if (!demoAccountForSession()) return passthrough();
-    const coach = currentCoaches().find(({ id }) => id === params.id);
+    const coach = records.get(params.id);
     return coach
       ? HttpResponse.json(coach)
       : serviceError(404, 'Entrenador no encontrado');
+  }),
+
+  // Convertir a un usuario en entrenador es REAL y solo del Admin (el entrenador de demo recibe el 403
+  // de un guard). Como el backend: valida el body, crea el Coach o reactiva el que ya tenía (y le pisa el
+  // email y el CUIL) y le pone el rol `coach` al usuario. No mira el rol ni el estado de la cuenta. El
+  // rol cambia ANTES de guardar el Coach: un email que ya usa otro entrenador es un 500 que deja al
+  // usuario con el rol y sin sus datos.
+  mockEndpoint('post', '/api/v1/coach/promote_user', async ({ request }) => {
+    const denied = adminAccess(request);
+    if (denied) return denied;
+
+    const body = await request.clone().json();
+    const errors = promoteErrors(body);
+    if (errors.length > 0) return guardError(400, errors);
+
+    const user = findMockUser(body.user_id);
+    if (!user) return serviceError(404, 'Usuario no encontrado');
+
+    const coach_email = body.coach_email.toLowerCase();
+    setMockUserRole(user.id, 'coach');
+    const taken = currentCoaches().some(
+      (other) => other.id !== user.id && other.coach_email === coach_email,
+    );
+    if (taken) return serviceError(500, 'Error al promover al entrenador');
+
+    const now = new Date().toISOString();
+    const coach: Coach = {
+      created_at: now,
+      ...records.get(user.id),
+      id: user.id,
+      coach_email,
+      cuil: body.cuil,
+      active: true,
+      updated_at: now,
+    };
+    records.set(user.id, coach);
+    return HttpResponse.json({ ...user, role: 'coach', coach });
   }),
 
   // Dar de baja a un entrenador es REAL y solo del Admin (el entrenador de demo recibe el 403 de un
@@ -56,19 +119,16 @@ export const coachMocks = [
 
       const user = findMockUser(params.id);
       if (!user) return serviceError(404, 'Usuario no encontrado');
-      const coach = coaches.find(({ id }) => id === params.id);
+      const coach = records.get(params.id);
       if (!coach) return serviceError(404, 'Coach no encontrado');
       if (params.id === FAILING_COACH_ID) {
         return serviceError(500, 'Error al eliminar al entrenador');
       }
 
-      removedCoaches.add(coach.id);
+      const removed = { ...coach, active: false };
+      records.set(coach.id, removed);
       setMockUserRole(user.id, 'user');
-      return HttpResponse.json({
-        ...user,
-        role: 'user',
-        coach: { ...coach, active: false },
-      });
+      return HttpResponse.json({ ...user, role: 'user', coach: removed });
     },
   ),
 ];
