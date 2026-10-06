@@ -1,6 +1,6 @@
 import type { RoutineListItem, RoutineListItemPlus } from '@/api/types';
 
-import { circuitsPlus } from './circuits';
+import { circuitDetails } from './circuits';
 
 // Las rutinas sistémicas de demo: las del prototipo, más una dada de baja. Cada una trae sus circuitos
 // (los vínculos activos, en orden), como los manda `GET /routine/all-plus`: de ahí sale en cuántas
@@ -27,7 +27,7 @@ function routine(
         name: circuitName,
         type,
         active: circuitActive,
-      } = circuitsPlus[circuitIndex];
+      } = circuitDetails[circuitIndex];
       return {
         id: `${id}-circuit-${position + 1}`,
         order: position + 1,

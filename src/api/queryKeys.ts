@@ -30,6 +30,9 @@ export const queryKeys = {
     list: () => [...queryKeys.routines.all, 'list'] as const,
     /** Los circuitos son parte de las rutinas en el backend (`/routine/circuit/*`). */
     circuits: () => [...queryKeys.routines.all, 'circuits'] as const,
+    /** Un circuito con sus ejercicios y series (el detalle). */
+    circuit: (id: string) =>
+      [...queryKeys.routines.all, 'circuit', id] as const,
     /** Los circuitos con sus ejercicios (`all-plus`), con o sin los dados de baja. */
     circuitsPlus: (includeInactive: boolean) =>
       [

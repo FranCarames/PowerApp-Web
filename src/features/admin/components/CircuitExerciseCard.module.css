@@ -1,0 +1,51 @@
+.card {
+  padding: 12px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.sub {
+  font-size: 12px;
+  color: var(--tm);
+  margin-top: 2px;
+}
+
+.actions {
+  display: flex;
+  flex-shrink: 0;
+}
+
+/* Subir y bajar son la misma flecha girada. */
+.up {
+  transform: rotate(-90deg);
+}
+
+.down {
+  transform: rotate(90deg);
+}
+
+.error {
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--err);
+}
+
+.add {
+  margin-top: 10px;
+}

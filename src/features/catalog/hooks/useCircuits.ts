@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { api } from '@/api/client';
+import { api, request } from '@/api/client';
+import type { CircuitDetail } from '@/api/pending';
 import { queryKeys } from '@/api/queryKeys';
 
 /**
@@ -18,6 +19,31 @@ export function useCircuits({ includeInactive }: { includeInactive: boolean }) {
         query: includeInactive ? { include_inactive: true } : undefined,
         signal,
       }),
+  });
+}
+
+/**
+ * `GET /routine/circuit/{id}`: un circuito con sus ejercicios activos, en orden, cada uno con su ficha del
+ * catálogo y sus bloques de series. Responde también por uno dado de baja y 404 si no existe. Se llama
+ * con `request` porque el contrato declara el `exercise` de cada ejercicio como un objeto vacío (V2).
+ * Con `id` `null` no pide nada.
+ *
+ * No se guarda en el caché sin quien lo mire (`gcTime: 0`): el editor llena el formulario con estos
+ * datos al abrirse, y con unos viejos se guardaría encima de una edición hecha en el medio.
+ */
+export function useCircuit(id: string | null) {
+  return useQuery({
+    queryKey: queryKeys.routines.circuit(id ?? ''),
+    queryFn: async ({ signal }) =>
+      (
+        await request<CircuitDetail>(
+          'get',
+          `/api/v1/routine/circuit/${encodeURIComponent(id ?? '')}`,
+          { signal },
+        )
+      ).data,
+    enabled: id !== null,
+    gcTime: 0,
   });
 }
 
