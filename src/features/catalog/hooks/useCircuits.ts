@@ -8,7 +8,7 @@ import { queryKeys } from '@/api/queryKeys';
  * `GET /routine/circuit/all-plus`: los circuitos con sus ejercicios (el `id` y el nombre de cada uno,
  * en orden) y la cantidad de ejercicios, ordenados por nombre. Con `includeInactive` trae también los
  * dados de baja, que el backend deja afuera si no. Es de entrenador y admin. Los usan el listado de
- * circuitos del Admin (T19) y, después, el del Entrenador (T48).
+ * circuitos (`CircuitList`), el del Admin (T19) y el del Entrenador (T48).
  */
 export function useCircuits({ includeInactive }: { includeInactive: boolean }) {
   return useQuery({
