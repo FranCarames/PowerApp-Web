@@ -15,13 +15,23 @@ type StatusResult = QueryObserverResult<StudentsByMembershipStatus>;
 /**
  * Junta lo de cada estado en una sola lista. Es todo o nada: con un estado que falló, la lista
  * quedaría sin esos alumnos y parecería completa, así que se informa el error y no se muestra nada.
+ *
+ * Un alumno está en un solo estado, pero las cuatro consultas se actualizan por separado: después de
+ * registrar un pago, la de "activas" puede traerlo antes de que la de "vencidas" lo suelte. En ese
+ * instante vale la consulta más reciente, y la lista nunca lo repite (la fila usa su id de `key`).
  */
 function combineStudents(results: StatusResult[]) {
   const failed = results.filter((result) => result.isError);
+  const byId = new Map<string, StudentMembership>();
+  for (const result of [...results].sort(
+    (a, b) => a.dataUpdatedAt - b.dataUpdatedAt,
+  )) {
+    for (const student of result.data?.students ?? []) {
+      byId.set(student.id, student);
+    }
+  }
   return {
-    students: results.flatMap(
-      (result): StudentMembership[] => result.data?.students ?? [],
-    ),
+    students: [...byId.values()],
     isPending: results.some((result) => result.isPending),
     error: failed[0]?.error ?? null,
     isRefetching: results.some((result) => result.isRefetching),

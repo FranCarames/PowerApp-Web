@@ -186,7 +186,7 @@ Las rutas de alta usan `nuevo` como id, por ejemplo `/c/circuitos/nuevo`.
 - **RM potencial:** se calcula con `POST /user_rm/potential` (Epley, tabla de 1RM a 12RM) y nunca se guarda. Mostrá ese aviso. Los RM registrados se guardan en `User_RM` (alta, edición, lectura y borrado).
 - **Membresías:**
   - Los estados son `active`, `expiring_soon`, `expired` y `no_payments`. La ventana de "por vencer" la define `expiring_soon_days` en el summary.
-  - Registrar un pago manda solo `user_id` y `membership_id`; el vencimiento lo calcula el backend.
+  - Registrar un pago manda solo `user_id` y `membership_id`; el vencimiento lo calcula el backend (hoy más la duración, al final del día) y no suma los días que le quedaban a una membresía vigente. Un pago no se puede anular.
   - "Eliminar" un tipo de membresía es una baja lógica.
 - **Recuperar contraseña:** mostrá el mismo mensaje de confirmación exista o no el email.
 - **Contraseña temporal:** si el login indica que se usó la temporal, forzá el cambio de contraseña antes de cualquier otra pantalla. El flag está pendiente de contrato (B9 en PLAN).
