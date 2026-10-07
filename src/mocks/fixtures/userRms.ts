@@ -1,10 +1,11 @@
-import type { UserRm } from '@/api/types';
+import type { UserRmWithExercise } from '@/api/pending';
 
 import { exercises } from './exercises';
 import { students } from './students';
 
-// Los RMs de los alumnos de demo. Las fechas son relativas a hoy, para que el historial se vea igual
-// sin importar el día en que se mire.
+// Los RMs de los alumnos de demo, con la forma que manda el backend (cada uno con su ejercicio y su
+// alumno anidados, sin `exercise_id` ni `user_id`: V10). Las fechas son relativas a hoy, para que el
+// historial se vea igual sin importar el día en que se mire.
 //
 // Todos parten del mismo perfil (el de Franco, con cinco ejercicios) escalado por alumno y con menos
 // ejercicios para los demás. Franco tiene los cinco, Lucía Gómez dos y Martín Pérez ninguno (es el
@@ -54,47 +55,49 @@ function calendarDay(daysAgo: number): string {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
-function exerciseIdOf(name: string): string {
+function exerciseOf(name: string): { id: string; name: string } {
   const exercise = exercises.find((candidate) => candidate.name === name);
   if (!exercise) throw new Error(`Falta el ejercicio de demo "${name}"`);
-  return exercise.id;
+  return { id: exercise.id, name: exercise.name };
 }
 
 function rmsFor(
-  userId: string,
+  student: { id: string; first_name: string; last_name: string },
   exerciseCount: number,
   scale: number,
-): UserRm[] {
+): UserRmWithExercise[] {
+  const { id, first_name, last_name } = student;
   return PROFILE.slice(0, exerciseCount).flatMap(([name, entries]) =>
     entries.map(([weight, reps, daysAgo], index) => {
       const created = new Date(Date.now() - daysAgo * DAY).toISOString();
       return {
-        id: `demo-rm-${userId}-${name}-${index}`,
-        user_id: userId,
-        exercise_id: exerciseIdOf(name),
+        id: `demo-rm-${id}-${name}-${index}`,
         // En saltos de 2,5 kg, como se cargan los discos.
         weight: Math.round((weight * scale) / 2.5) * 2.5,
         reps,
         date: calendarDay(daysAgo),
         created_at: created,
         updated_at: created,
+        exercise: exerciseOf(name),
+        user: { id, first_name, last_name },
       };
     }),
   );
 }
 
 /** Los RMs de un alumno de demo, sin ordenar (como los devuelve el backend). Un id desconocido no tiene ninguno. */
-export function demoRmsFor(userId: string): UserRm[] {
+export function demoRmsFor(userId: string): UserRmWithExercise[] {
   const position = students.findIndex(({ id }) => id === userId);
   if (position < 0) return [];
+  const student = students[position];
 
   // Franco, Lucía y Martín, las tres cuentas de demo, son los últimos de `students`.
   const last = students.length - 1;
-  if (position === last - 2) return rmsFor(userId, PROFILE.length, 1);
-  if (position === last - 1) return rmsFor(userId, 2, 0.6);
+  if (position === last - 2) return rmsFor(student, PROFILE.length, 1);
+  if (position === last - 1) return rmsFor(student, 2, 0.6);
   if (position === last) return [];
 
   // Los demás: de 1 a 5 ejercicios y entre el 60 % y el 110 % del perfil. Cada 6.º no cargó ninguno.
   if (position % 6 === 5) return [];
-  return rmsFor(userId, 1 + (position % 5), 0.6 + (position % 6) * 0.1);
+  return rmsFor(student, 1 + (position % 5), 0.6 + (position % 6) * 0.1);
 }

@@ -1,9 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { getErrorMessage } from '@/api/errors';
 import { useUserRms } from '@/features/account/hooks/useUserRms';
-import { exercisesQuery } from '@/features/catalog/hooks/useExercises';
 import { formatDate } from '@/shared/lib/dates';
 import { formatWeight } from '@/shared/lib/format';
 import { groupRmsByExercise } from '@/shared/lib/rms';
@@ -27,9 +25,8 @@ interface StudentRmsModalProps {
 }
 
 /**
- * Los RMs registrados de un alumno, agrupados por ejercicio (CU-E-04), en un modal. El backend los
- * manda con el id del ejercicio, así que los nombres salen del catálogo. Es de solo lectura: los RMs
- * los carga el propio alumno.
+ * Los RMs registrados de un alumno, agrupados por ejercicio (CU-E-04), en un modal. Cada RM trae su
+ * ejercicio, con el nombre. Es de solo lectura: los RMs los carga el propio alumno.
  */
 export function StudentRmsModal({
   studentId,
@@ -38,33 +35,22 @@ export function StudentRmsModal({
   onClose,
 }: StudentRmsModalProps) {
   // Se piden al abrir el modal, no al entrar al detalle.
-  const rms = useUserRms(studentId, open);
-  const exercises = useQuery({ ...exercisesQuery(), enabled: open });
-
-  const groups = useMemo(() => {
-    if (!rms.data || !exercises.data) return [];
-    const names = new Map(
-      exercises.data.map((exercise) => [exercise.id, exercise.name]),
-    );
-    return groupRmsByExercise(rms.data, names);
-  }, [rms.data, exercises.data]);
-
-  const error = rms.error ?? exercises.error;
-  const retrying = rms.isRefetching || exercises.isRefetching;
+  const query = useUserRms(studentId, open);
+  const groups = useMemo(
+    () => (query.data ? groupRmsByExercise(query.data) : []),
+    [query.data],
+  );
 
   let content;
-  if (error) {
+  if (query.isError) {
     content = (
       <ErrorState
-        message={getErrorMessage(error)}
-        onRetry={() => {
-          if (rms.isError) void rms.refetch();
-          if (exercises.isError) void exercises.refetch();
-        }}
-        retrying={retrying}
+        message={getErrorMessage(query.error)}
+        onRetry={() => void query.refetch()}
+        retrying={query.isRefetching}
       />
     );
-  } else if (rms.isPending || exercises.isPending) {
+  } else if (query.isPending) {
     content = (
       <div aria-busy="true">
         <VisuallyHidden role="status">Cargando los RMs…</VisuallyHidden>
@@ -82,11 +68,11 @@ export function StudentRmsModal({
       />
     );
   } else {
-    content = groups.map(({ exerciseId, name, rms: exerciseRms }) => (
+    content = groups.map(({ exerciseId, name, rms }) => (
       <section key={exerciseId} className={styles.group}>
         <SectionHeader title={name} level={3} />
         <ul className={styles.rows}>
-          {exerciseRms.map((rm) => (
+          {rms.map((rm) => (
             <li key={rm.id} className={styles.row}>
               <span className={styles.value}>
                 {formatWeight(rm.weight)} · {rm.reps}{' '}
