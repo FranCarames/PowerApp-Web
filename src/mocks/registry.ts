@@ -89,6 +89,8 @@ export const registry: readonly RegistryEntry[] = [
   { method: 'get', path: '/api/v1/membership/status/users', mock: true },
   // Pagos: solo los de las cuentas de demo; los demás ids pasan al backend real (ver handlers/payments.ts)
   { method: 'get', path: '/api/v1/membership/payment/user/{id}', mock: true },
+  // RMs de un usuario: solo las cuentas de demo; los de verdad pasan al backend real (ver handlers/userRms.ts)
+  { method: 'get', path: '/api/v1/user_rm/user/{id}', mock: true },
   // Usuarios: solo las cuentas de demo; los demás emails pasan al backend real (ver handlers/users.ts)
   { method: 'get', path: '/api/v1/users/all', mock: true },
   { method: 'post', path: '/api/v1/users/set-active/{id}', mock: true },

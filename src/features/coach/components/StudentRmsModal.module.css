@@ -1,0 +1,33 @@
+/* Los RMs de un ejercicio: filas como el .trow del prototipo, con el peso a la izquierda y la fecha a la derecha. */
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+/* El peso y las repeticiones, en la tipografía de datos (.data del prototipo). */
+.value {
+  font-family: var(--fM);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.date {
+  color: var(--tm);
+  text-align: right;
+}
+
+/* El título de cada ejercicio trae su margen de sección; el del primero ya lo da el modal. */
+.group:first-child > :first-child {
+  margin-top: 0;
+}

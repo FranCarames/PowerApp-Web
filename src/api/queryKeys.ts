@@ -57,6 +57,12 @@ export const queryKeys = {
     studentsByStatus: (status: string) =>
       [...queryKeys.memberships.all, 'students-by-status', status] as const,
   },
+  userRms: {
+    all: ['user-rms'] as const,
+    /** Los RMs registrados de un usuario, de todos sus ejercicios. */
+    byUser: (userId: string) =>
+      [...queryKeys.userRms.all, 'user', userId] as const,
+  },
   users: {
     all: ['users'] as const,
     detail: (id: string) => [...queryKeys.users.all, 'detail', id] as const,

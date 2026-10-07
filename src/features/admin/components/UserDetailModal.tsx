@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 
 import { getErrorMessage } from '@/api/errors';
 import type { User } from '@/api/types';
+import { StudentDetails } from '@/features/account/components/StudentDetails';
 import { useSetUserActive } from '@/features/account/hooks/useSetUserActive';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { ROLE_LABEL } from '@/features/auth/roles';
@@ -17,7 +18,6 @@ import {
 
 import { CoachDetails } from './CoachDetails';
 import { CoachEditModal } from './CoachEditModal';
-import { StudentDetails } from './StudentDetails';
 
 interface UserDetailModalProps {
   /** El usuario a mostrar. Con `null` el modal está cerrado. */

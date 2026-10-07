@@ -1,0 +1,28 @@
+/* El bloque de arriba (.row del prototipo): avatar de 64 px, el estado de la cuenta y desde cuándo es alumno, con 18 px hasta lo que sigue. */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+/* .sub del prototipo. */
+.sub {
+  font-size: 12px;
+  color: var(--tm);
+  margin-top: 6px;
+}
+
+/* Los datos del alumno, en una tarjeta, con 18 px hasta el menú. */
+.details {
+  margin-bottom: 18px;
+}
+
+/* La tarjeta ya tiene su borde: la última fila de datos no lleva el suyo. */
+.fields > div:last-child {
+  border-bottom: none;
+}
+
+.account {
+  margin-top: 16px;
+}
