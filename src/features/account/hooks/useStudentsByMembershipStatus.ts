@@ -8,14 +8,16 @@ import type {
 import { queryKeys } from '@/api/queryKeys';
 import type { MembershipStatus } from '@/shared/lib/membershipStatus';
 
-const STATUSES: readonly MembershipStatusFilter[] = [
+/** Los cuatro estados de membresía, en el orden del contrato. */
+export const MEMBERSHIP_STATUSES: readonly MembershipStatusFilter[] = [
   'active',
   'expiring_soon',
   'expired',
   'no_payments',
 ];
 
-function studentsByStatusQuery(status: MembershipStatusFilter) {
+/** La query de `GET /membership/status/users?status=…`, para quien combina varios estados. */
+export function studentsByStatusQuery(status: MembershipStatusFilter) {
   return {
     queryKey: queryKeys.memberships.studentsByStatus(status),
     queryFn: async ({ signal }: { signal: AbortSignal }) =>
@@ -57,7 +59,7 @@ function combineStatuses(
  */
 export function useMembershipStatusByStudent() {
   return useQueries({
-    queries: STATUSES.map(studentsByStatusQuery),
+    queries: MEMBERSHIP_STATUSES.map(studentsByStatusQuery),
     combine: combineStatuses,
   });
 }
