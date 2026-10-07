@@ -138,7 +138,7 @@ Tokens, copiados del prototipo. Van en `src/shared/styles/tokens.css`:
 - **Safe areas:** el `index.html` declara `viewport-fit=cover`. El layout respeta `env(safe-area-inset-*)`.
 - **Accesibilidad:** `:focus-visible` visible, `aria-label` en los botones de ícono, `prefers-reduced-motion` respetado y contraste de texto como en el prototipo.
 - **Textos:** español rioplatense con voseo ("Ingresá", "Guardá"), como en el prototipo.
-- **Formatos:** números en formato es-AR, montos en pesos argentinos y pesos en kg con hasta 2 decimales.
+- **Formatos:** números en formato es-AR, montos en pesos argentinos y pesos en kg con hasta 2 decimales. Una fecha sin hora (`YYYY-MM-DD`: RMs, planificaciones, entrenamientos) es un día de calendario y se muestra con `formatDate` tal cual, sin pasarla por `new Date()`: en UTC caería un día antes.
 - **Estados:** toda pantalla con datos tiene estado de carga, vacío y error.
 - **Imágenes:** se cargan como campos de URL, porque el backend no tiene endpoint de subida.
 

@@ -6,6 +6,7 @@ import { muscleMocks } from './muscles';
 import { paymentMocks } from './payments';
 import { planificationMocks } from './planifications';
 import { routineMocks } from './routines';
+import { userRmMocks } from './userRms';
 import { userMocks } from './users';
 
 /**
@@ -21,4 +22,5 @@ export const mocks: readonly MockEndpoint[] = [
   ...planificationMocks,
   ...routineMocks,
   ...userMocks,
+  ...userRmMocks,
 ];

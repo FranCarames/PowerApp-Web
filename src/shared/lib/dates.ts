@@ -29,9 +29,22 @@ const SHORT_MONTHS = [
   'Dic',
 ];
 
-/** "15 Jul 2026", a partir de una fecha ISO, en el día local de quien la mira. */
+// Una fecha sin hora ("2026-07-15", como la de un RM): JavaScript la lee en UTC y, en Argentina, caería en el día anterior.
+const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/**
+ * "15 Jul 2026", a partir de una fecha ISO, en el día local de quien la mira. Una fecha sin hora es
+ * un día del calendario y se muestra tal cual, sin correrla por la zona horaria.
+ */
 export function formatDate(iso: string): string {
-  const date = new Date(iso);
+  const dateOnly = DATE_ONLY.exec(iso);
+  const date = dateOnly
+    ? new Date(
+        Number(dateOnly[1]),
+        Number(dateOnly[2]) - 1,
+        Number(dateOnly[3]),
+      )
+    : new Date(iso);
   if (Number.isNaN(date.getTime())) return '';
   return `${date.getDate()} ${SHORT_MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 }

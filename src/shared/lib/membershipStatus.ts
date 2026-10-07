@@ -26,6 +26,16 @@ export const MEMBERSHIP_STATUS_TONE = {
   no_payments: 'mut',
 } as const satisfies Record<MembershipStatus, string>;
 
+/** Del más reciente al más antiguo, por la fecha en que se registró el pago. Los pagos llegan sin ordenar. */
+export function newestPaymentsFirst(
+  payments: readonly MembershipPayment[],
+): MembershipPayment[] {
+  return [...payments].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+}
+
 /** De todos los pagos, el de vencimiento más lejano es el que manda (igual que en el backend). */
 export function latestPayment(
   payments: readonly MembershipPayment[],
