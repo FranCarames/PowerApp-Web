@@ -1,0 +1,41 @@
+/* Los avisos y los bloques del formulario, 14 px entre sí (lo que el prototipo da a cada campo). */
+.note {
+  margin-bottom: 14px;
+}
+
+/* El resumen del prototipo: una tarjeta con 6 px sobre ella y 18 px hasta el botón, y 10 px entre sus líneas. */
+.summary {
+  display: grid;
+  gap: 10px;
+  margin: 6px 0 18px;
+}
+
+.line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.muted {
+  color: var(--ts);
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+}
+
+/* El total, en la tipografía de datos y el color de marca (.data del prototipo). */
+.total {
+  font-family: var(--fM);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--pri);
+}
+
+/* Monto y fecha de pago: solo se muestran, no se editan. */
+.readonly {
+  font-family: var(--fM);
+  color: var(--ts);
+}

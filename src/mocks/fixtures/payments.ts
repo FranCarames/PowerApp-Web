@@ -1,4 +1,9 @@
 import type { Membership, MembershipPayment } from '@/api/types';
+import {
+  latestPayment,
+  membershipStatusOf,
+  type MembershipStatus,
+} from '@/shared/lib/membershipStatus';
 
 import { memberships } from './memberships';
 import { studentMembershipStatus, students } from './students';
@@ -62,7 +67,7 @@ function paymentsForStatus(userId: string): MembershipPayment[] {
   const status = studentMembershipStatus(userId);
   if (status === undefined || status === 'no_payments') return [];
 
-  const type = membershipTypeOfStudent(userId) ?? monthly;
+  const type = baseTypeOfStudent(userId) ?? monthly;
   const position = students.findIndex(({ id }) => id === userId);
   // Días que le quedan al último pago; negativo si ya venció. "Por vencer" empieza en 1: un pago que
   // vence hoy a esta misma hora ya estaría vencido cuando se lo mire.
@@ -87,10 +92,8 @@ function paymentsForStatus(userId: string): MembershipPayment[] {
 // anteriores siguen ahí). Franco y Lucía, que tienen sus pagos aparte, pagan el mensual.
 const TYPE_AT_POSITION = [0, 0, 1, 3, 0, 2] as const;
 
-/** El tipo del último pago de un alumno de demo, o `undefined` si nunca pagó (o no es de demo). */
-export function membershipTypeOfStudent(
-  userId: string,
-): Membership | undefined {
+/** El tipo del último pago que traen las fixtures de un alumno de demo, o `undefined` si nunca pagó (o no es de demo). */
+function baseTypeOfStudent(userId: string): Membership | undefined {
   if (userId in PAYMENTS_BY_USER) return monthly;
   const status = studentMembershipStatus(userId);
   if (status === undefined || status === 'no_payments') return undefined;
@@ -98,7 +101,74 @@ export function membershipTypeOfStudent(
   return memberships[TYPE_AT_POSITION[position % TYPE_AT_POSITION.length]];
 }
 
+// Los pagos registrados con `POST /membership/payment/register` (id del alumno → sus pagos nuevos). Viven
+// en memoria: al recargar la página se pierden y el alumno vuelve a los de las fixtures.
+const registered = new Map<string, MembershipPayment[]>();
+
+/**
+ * Registra un pago de un alumno de demo, como el backend: copia el nombre, la duración y el precio del
+ * tipo y vence al final del día, `duration` días después de hoy (no suma lo que le quedaba).
+ */
+export function registerDemoPayment(
+  userId: string,
+  type: Membership,
+): MembershipPayment {
+  const now = new Date();
+  const expiredAt = new Date(now);
+  expiredAt.setDate(expiredAt.getDate() + type.duration);
+  expiredAt.setHours(23, 59, 59, 999);
+
+  const paid: MembershipPayment = {
+    id: `demo-payment-${userId}-new-${(registered.get(userId)?.length ?? 0) + 1}`,
+    user_id: userId,
+    membership_id: type.id,
+    name: type.name,
+    duration: type.duration,
+    active: true,
+    price: type.price,
+    created_at: now.toISOString(),
+    updated_at: now.toISOString(),
+    expired_at: expiredAt.toISOString(),
+  };
+  registered.set(userId, [...(registered.get(userId) ?? []), paid]);
+  return paid;
+}
+
 /** Los pagos de un alumno de demo, sin ordenar (como los devuelve el backend). */
 export function demoPaymentsFor(userId: string): MembershipPayment[] {
-  return PAYMENTS_BY_USER[userId] ?? paymentsForStatus(userId);
+  return [
+    ...(PAYMENTS_BY_USER[userId] ?? paymentsForStatus(userId)),
+    ...(registered.get(userId) ?? []),
+  ];
+}
+
+/**
+ * El estado de membresía de un alumno de demo: el de las fixtures o, si se le registró un pago, el que
+ * dan sus pagos. `undefined` si no es un alumno de demo.
+ */
+export function currentMembershipStatus(
+  userId: string,
+): MembershipStatus | undefined {
+  return registered.has(userId)
+    ? membershipStatusOf(latestPayment(demoPaymentsFor(userId)))
+    : studentMembershipStatus(userId);
+}
+
+/** El tipo del último pago de un alumno de demo, o `undefined` si nunca pagó (o no es de demo). */
+export function membershipTypeOfStudent(
+  userId: string,
+): Membership | undefined {
+  const last = registered.has(userId)
+    ? latestPayment(demoPaymentsFor(userId))
+    : null;
+  if (!last) return baseTypeOfStudent(userId);
+  return {
+    id: last.membership_id,
+    name: last.name,
+    duration: last.duration,
+    price: last.price,
+    active: true,
+    created_at: last.created_at,
+    updated_at: last.updated_at,
+  };
 }
