@@ -53,28 +53,33 @@ const PAYMENTS_BY_USER: Record<string, MembershipPayment[]> = {
 
 /**
  * Los pagos de un alumno de demo según su estado de membresía (`students.ts`). Franco y Lucía, que
- * pueden entrar, tienen los suyos: ver arriba.
+ * pueden entrar, tienen los suyos: ver arriba. A cada alumno le quedan (o hace cuántos días se le
+ * vencieron) distintos días, para que el control de membresías no muestre a todos con la misma fecha:
+ * el último pago se fecha según la duración de su tipo, así que el estado que dan sus fechas es el
+ * mismo de `students.ts`.
  */
 function paymentsForStatus(userId: string): MembershipPayment[] {
+  const status = studentMembershipStatus(userId);
+  if (status === undefined || status === 'no_payments') return [];
+
   const type = membershipTypeOfStudent(userId) ?? monthly;
+  const position = students.findIndex(({ id }) => id === userId);
+  // Días que le quedan al último pago; negativo si ya venció. "Por vencer" empieza en 1: un pago que
+  // vence hoy a esta misma hora ya estaría vencido cuando se lo mire.
+  const left = {
+    active: 8 + ((position * 7) % 50),
+    expiring_soon: 1 + (position % 7),
+    expired: -(1 + ((position * 5) % 60)),
+  }[status];
+  const paidDaysAgo = type.duration - left;
   // Un pago anterior, de antes de la última suba de precios.
   const before = type.price - 1500;
-  switch (studentMembershipStatus(userId)) {
-    case 'active':
-      return [
-        payment(userId, 0, 12, type.price, type),
-        payment(userId, 1, 42, type.price, type),
+  return status === 'expiring_soon'
+    ? [payment(userId, 0, paidDaysAgo, type.price, type)]
+    : [
+        payment(userId, 0, paidDaysAgo, type.price, type),
+        payment(userId, 1, paidDaysAgo + type.duration, before, type),
       ];
-    case 'expiring_soon':
-      return [payment(userId, 0, 27, type.price, type)];
-    case 'expired':
-      return [
-        payment(userId, 0, 50, type.price, type),
-        payment(userId, 1, 80, before, type),
-      ];
-    default:
-      return [];
-  }
 }
 
 // El tipo del último pago de los alumnos de demo, por su posición en `students`: casi todos pagan el
