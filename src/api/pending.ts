@@ -8,6 +8,7 @@ import type {
   MuscleGroup,
   User,
   UserPlanification,
+  UserRm,
 } from './types';
 
 // Tipos provisionales de lo que el contrato (openapi.json) todavía no tiene: las dependencias B1 a
@@ -111,6 +112,21 @@ export interface StudentsByMembershipStatus {
   expiring_soon_days: number;
   students: StudentMembership[];
 }
+
+// PENDIENTE-CONTRATO: V10 CU-E-04
+/**
+ * Un RM tal como lo manda `GET /user_rm/user/{id}`: el `UserRM` del contrato pero sin `user_id` ni
+ * `exercise_id`, con el ejercicio (`id` y `name`) y el usuario (`id`, `first_name` y `last_name`)
+ * anidados. El backend recorta las columnas con un `select` (`getAllUserRmsByUserId`) y el Swagger no
+ * lo refleja. `date` es un día sin hora ("2026-10-01").
+ */
+export type UserRmWithExercise = Pick<
+  UserRm,
+  'id' | 'weight' | 'reps' | 'date' | 'created_at' | 'updated_at'
+> & {
+  exercise: { id: string; name: string };
+  user: { id: string; first_name: string; last_name: string };
+};
 
 // PENDIENTE-CONTRATO: V9 CU-A-01
 /**

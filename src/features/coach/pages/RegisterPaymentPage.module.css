@@ -1,0 +1,27 @@
+/* .narrow del prototipo: los formularios de una columna no se estiran en pantallas anchas. */
+.narrow {
+  max-width: 540px;
+}
+
+.note {
+  margin-bottom: 14px;
+}
+
+/* "Alumno" como un campo más: la etiqueta de los formularios y 14 px hasta el siguiente. */
+.student {
+  margin-bottom: 14px;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ts);
+  margin-bottom: 6px;
+}
+
+/* Hasta elegir un alumno, el resto del formulario espera. */
+.hint {
+  font-size: 13px;
+  color: var(--tm);
+}

@@ -8,6 +8,7 @@ import { formatPrice } from '@/shared/lib/format';
 import {
   latestPayment,
   membershipStatusOf,
+  newestPaymentsFirst,
 } from '@/shared/lib/membershipStatus';
 import {
   EmptyState,
@@ -25,14 +26,6 @@ import { MembershipCard } from '../components/MembershipCard';
 import { useUserPayments } from '../hooks/useUserPayments';
 import styles from './PaymentsPage.module.css';
 
-/** Del más reciente al más antiguo, por la fecha en que se registró el pago. */
-function newestFirst(payments: MembershipPayment[]): MembershipPayment[] {
-  return [...payments].sort(
-    (a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-  );
-}
-
 /** Historial de pagos (CU-U-07): la membresía actual y todos los pagos del alumno. */
 export function PaymentsPage() {
   const { user } = useAuth();
@@ -44,7 +37,7 @@ export function PaymentsPage() {
 function Payments({ userId }: { userId: string }) {
   const query = useUserPayments(userId);
   const payments = useMemo(
-    () => (query.data ? newestFirst(query.data) : []),
+    () => (query.data ? newestPaymentsFirst(query.data) : []),
     [query.data],
   );
 

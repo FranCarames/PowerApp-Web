@@ -81,7 +81,7 @@ src/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
     account/      Mi cuenta, compartida por los tres roles, y los hooks de datos de usuarios que usan varios roles
-    catalog/      Ejercicios, músculos y circuitos que leen varios roles (hooks); lo propio de cada rol vive en su feature
+    catalog/      Ejercicios, músculos y circuitos que usan varios roles (hooks y, de los circuitos, el listado, el editor y su formulario); lo propio de cada rol vive en su feature
     user/         pantallas del rol Usuario
     coach/        pantallas del rol Entrenador
     admin/        pantallas del rol Admin
@@ -138,7 +138,7 @@ Tokens, copiados del prototipo. Van en `src/shared/styles/tokens.css`:
 - **Safe areas:** el `index.html` declara `viewport-fit=cover`. El layout respeta `env(safe-area-inset-*)`.
 - **Accesibilidad:** `:focus-visible` visible, `aria-label` en los botones de ícono, `prefers-reduced-motion` respetado y contraste de texto como en el prototipo.
 - **Textos:** español rioplatense con voseo ("Ingresá", "Guardá"), como en el prototipo.
-- **Formatos:** números en formato es-AR, montos en pesos argentinos y pesos en kg con hasta 2 decimales.
+- **Formatos:** números en formato es-AR, montos en pesos argentinos y pesos en kg con hasta 2 decimales. Una fecha sin hora (`YYYY-MM-DD`: RMs, planificaciones, entrenamientos) es un día de calendario y se muestra con `formatDate` tal cual, sin pasarla por `new Date()`: en UTC caería un día antes.
 - **Estados:** toda pantalla con datos tiene estado de carga, vacío y error.
 - **Imágenes:** se cargan como campos de URL, porque el backend no tiene endpoint de subida.
 
@@ -147,14 +147,14 @@ Tokens, copiados del prototipo. Van en `src/shared/styles/tokens.css`:
 | Rol | Tabs | Notas |
 |---|---|---|
 | Usuario | Rutina, RMs, Timer, Perfil | Progreso se suma solo si sobra tiempo (T45). |
-| Entrenador | Alumnos, Planes, Rutinas, Perfil | Rutinas tiene segmentos Rutinas \| Circuitos. Se entra a Membresías desde un botón con badge en la top bar de Mis Alumnos. |
+| Entrenador | Alumnos, Planes, Rutinas, Perfil | Rutinas tiene segmentos Rutinas \| Circuitos, que son dos rutas (`/c/rutinas` y `/c/circuitos`) y dejan la tab marcada. Se entra a Membresías desde un botón con badge en la top bar de Mis Alumnos. |
 | Admin | Inicio, Usuarios, Ejercicios, Rutinas, Más (tab bar de mobile) | En desktop, la barra lateral tiene tres grupos: Inicio, Usuarios y Entrenadores; "Entrenamiento" (Ejercicios, Circuitos, Rutinas y Planificaciones); y "Configuración" (Catálogo, Membresías y Perfil). "Más" (`/a/mas`) lleva a Planificaciones, Circuitos, Entrenadores, Catálogo, Membresías y Mi cuenta, y queda marcada en toda pantalla que no esté en la tab bar. Catálogo tiene segmentos Músculos \| Grupos musculares. Músculos, grupos, tipos de membresía (alta y edición) y la edición de entrenadores van en modales, sin ruta propia. Rutinas y Planificaciones muestran un placeholder hasta el bloque C2. |
 
 Rutas:
 
 - **Auth:** `/login`, `/registro`, `/recuperar`, `/cambiar-contrasena`.
 - **Usuario:** `/u/plan`, `/u/rutina/:id`, `/u/ejercicio/:id`, `/u/rms`, `/u/calculadora`, `/u/wiki`, `/u/wiki/:id`, `/u/timer`.
-- **Entrenador:** `/c/alumnos`, `/c/alumnos/:id`, `/c/membresias`, `/c/pago`, `/c/planes`, `/c/planes/:id`, `/c/rutinas`, `/c/rutinas/:id`, `/c/circuitos/:id`.
+- **Entrenador:** `/c/alumnos`, `/c/alumnos/:id`, `/c/membresias`, `/c/pago`, `/c/planes`, `/c/planes/:id`, `/c/rutinas`, `/c/rutinas/:id`, `/c/circuitos`, `/c/circuitos/:id`.
 - **Admin:** `/a/inicio`, `/a/usuarios`, `/a/entrenadores`, `/a/convertir`, `/a/ejercicios`, `/a/ejercicios/:id`, `/a/circuitos`, `/a/circuitos/:id`, `/a/rutinas`, `/a/rutinas/:id`, `/a/planes`, `/a/planes/:id`, `/a/catalogo`, `/a/membresias`, `/a/mas`.
 - **Cuenta (los tres roles):** `/cuenta`, `/cuenta/datos`, `/cuenta/pagos`. El historial de pagos solo se muestra para el rol Usuario.
 
@@ -186,7 +186,7 @@ Las rutas de alta usan `nuevo` como id, por ejemplo `/c/circuitos/nuevo`.
 - **RM potencial:** se calcula con `POST /user_rm/potential` (Epley, tabla de 1RM a 12RM) y nunca se guarda. Mostrá ese aviso. Los RM registrados se guardan en `User_RM` (alta, edición, lectura y borrado).
 - **Membresías:**
   - Los estados son `active`, `expiring_soon`, `expired` y `no_payments`. La ventana de "por vencer" la define `expiring_soon_days` en el summary.
-  - Registrar un pago manda solo `user_id` y `membership_id`; el vencimiento lo calcula el backend.
+  - Registrar un pago manda solo `user_id` y `membership_id`; el vencimiento lo calcula el backend (hoy más la duración, al final del día) y no suma los días que le quedaban a una membresía vigente. Un pago no se puede anular.
   - "Eliminar" un tipo de membresía es una baja lógica.
 - **Recuperar contraseña:** mostrá el mismo mensaje de confirmación exista o no el email.
 - **Contraseña temporal:** si el login indica que se usó la temporal, forzá el cambio de contraseña antes de cualquier otra pantalla. El flag está pendiente de contrato (B9 en PLAN).

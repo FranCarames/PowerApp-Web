@@ -7,16 +7,23 @@ import type {
   StudentsByMembershipTypeGroup,
 } from '@/api/pending';
 import type { Membership } from '@/api/types';
-import type { MembershipStatus } from '@/shared/lib/membershipStatus';
+import {
+  latestPayment,
+  type MembershipStatus,
+} from '@/shared/lib/membershipStatus';
 
 import { adminAccess, staffAccess } from '../access';
 import { mockEndpoint, mockPendingEndpoint } from '../endpoint';
 import { memberships } from '../fixtures/memberships';
-import { membershipTypeOfStudent } from '../fixtures/payments';
-import { studentMembershipStatus, students } from '../fixtures/students';
+import {
+  currentMembershipStatus,
+  demoPaymentsFor,
+  membershipTypeOfStudent,
+  registerDemoPayment,
+} from '../fixtures/payments';
+import { students } from '../fixtures/students';
 import { guardError, serviceError } from '../responses';
-
-const DAY = 24 * 60 * 60 * 1000;
+import { findMockUser } from './users';
 
 const STATUSES: readonly MembershipStatus[] = [
   'active',
@@ -33,20 +40,14 @@ function isMembershipStatus(value: string | null): value is MembershipStatus {
 function countsByStatus() {
   const counts = { active: 0, expiring_soon: 0, expired: 0, no_payments: 0 };
   for (const { id } of students) {
-    counts[studentMembershipStatus(id) ?? 'active']++;
+    counts[currentMembershipStatus(id) ?? 'active']++;
   }
   return counts;
 }
 
-/** Cuándo vence el último pago de un alumno según su estado, relativo a hoy; `null` si nunca pagó. */
-function expiryFor(status: MembershipStatus): string | null {
-  const days = {
-    active: 18,
-    expiring_soon: 3,
-    expired: -30,
-    no_payments: null,
-  }[status];
-  return days === null ? null : new Date(Date.now() + days * DAY).toISOString();
+/** Cuándo vence el último pago de un alumno de demo (el de vencimiento más lejano); `null` si nunca pagó. */
+function expiryOf(studentId: string): string | null {
+  return latestPayment(demoPaymentsFor(studentId))?.expired_at ?? null;
 }
 
 // Los tipos de membresía de demo viven en memoria: lo que el Admin crea, edita o da de baja se ve en
@@ -82,7 +83,7 @@ function validate(body: {
 
 /** Un alumno de demo con su estado y el tipo de su último pago, como lo manda el backend. */
 function studentMembership(student: (typeof students)[number]) {
-  const status = studentMembershipStatus(student.id) ?? 'active';
+  const status = currentMembershipStatus(student.id) ?? 'active';
   const type = membershipTypeOfStudent(student.id);
   return {
     id: student.id,
@@ -90,7 +91,7 @@ function studentMembership(student: (typeof students)[number]) {
     last_name: student.last_name,
     email: student.email,
     membership_status: status,
-    expired_at: expiryFor(status),
+    expired_at: expiryOf(student.id),
     membership_name: type?.name ?? null,
     membership_id: type?.id ?? null,
   } satisfies StudentMembership;
@@ -206,6 +207,37 @@ export const membershipMocks = [
     },
   ),
 
+  // Registrar un pago es REAL: el mock atiende solo a las cuentas de demo, por su token falso, y
+  // guarda el pago en memoria. Como el backend (coach y admin): no mira el rol del usuario ni si el tipo
+  // está activo, responde 404 si el usuario no existe y 400 si el tipo no existe, y el pago vence al
+  // final del día, `duration` días después de hoy. Como los demás mocks de demo, no valida que los ids
+  // sean UUID (los de demo no lo son).
+  mockEndpoint(
+    'post',
+    '/api/v1/membership/payment/register',
+    async ({ request }) => {
+      const denied = staffAccess(request);
+      if (denied) return denied;
+
+      const body = await request.json();
+      const errors = [
+        ...(body.user_id ? [] : ['user_id should not be empty']),
+        ...(body.membership_id ? [] : ['membership_id should not be empty']),
+      ];
+      if (errors.length > 0) return guardError(400, errors);
+
+      if (!findMockUser(body.user_id)) {
+        return serviceError(404, 'Usuario no encontrado');
+      }
+      const type = types.find(({ id }) => id === body.membership_id);
+      if (!type) return serviceError(400, 'Membresía no encontrada');
+
+      return HttpResponse.json(registerDemoPayment(body.user_id, type), {
+        status: 201,
+      });
+    },
+  ),
+
   // El resumen de estados es REAL: el mock atiende solo a las cuentas de demo, por su token falso.
   // Es de entrenadores y admins: con la cuenta de un alumno responde 403, como el guard.
   mockEndpoint('get', '/api/v1/membership/status/summary', ({ request }) => {
@@ -237,22 +269,13 @@ export const membershipMocks = [
       }
 
       const matching = students
-        .filter(({ id }) => studentMembershipStatus(id) === status)
+        .filter(({ id }) => currentMembershipStatus(id) === status)
         .sort(
           (a, b) =>
             a.last_name.localeCompare(b.last_name) ||
             a.first_name.localeCompare(b.first_name),
         )
-        .map((student) => ({
-          id: student.id,
-          first_name: student.first_name,
-          last_name: student.last_name,
-          email: student.email,
-          membership_status: status,
-          expired_at: expiryFor(status),
-          membership_name: membershipTypeOfStudent(student.id)?.name ?? null,
-          membership_id: membershipTypeOfStudent(student.id)?.id ?? null,
-        }));
+        .map(studentMembership);
       return HttpResponse.json({
         status,
         total: matching.length,

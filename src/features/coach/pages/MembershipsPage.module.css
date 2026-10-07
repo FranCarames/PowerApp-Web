@@ -1,0 +1,14 @@
+/* Los contadores, 16 px sobre el botón. */
+.counters {
+  margin-bottom: 16px;
+}
+
+/* "Registrar nuevo pago", 18 px sobre el buscador. */
+.register {
+  margin-bottom: 18px;
+}
+
+/* El filtro por tipo, entre los chips y la lista. */
+.type {
+  margin-bottom: 16px;
+}

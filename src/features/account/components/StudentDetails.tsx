@@ -1,6 +1,4 @@
 import type { User } from '@/api/types';
-import { useActiveUserPlanification } from '@/features/account/hooks/useActiveUserPlanification';
-import { useUserPayments } from '@/features/account/hooks/useUserPayments';
 import { formatDate } from '@/shared/lib/dates';
 import {
   latestPayment,
@@ -8,6 +6,9 @@ import {
   membershipStatusOf,
 } from '@/shared/lib/membershipStatus';
 import { DetailList, Skeleton } from '@/shared/ui';
+
+import { useActiveUserPlanification } from '../hooks/useActiveUserPlanification';
+import { useUserPayments } from '../hooks/useUserPayments';
 
 /** "Fuerza · vigente hasta 12 Dic 2026". */
 function planificationText(type: string | undefined, endDate: string) {
@@ -18,11 +19,17 @@ function planificationText(type: string | undefined, endDate: string) {
 }
 
 /**
- * Los datos de un alumno en su detalle: el email, la membresía (la del último pago, la misma query
- * que el historial) y la planificación vigente. Esta última se muestra solo si el backend la
- * respondió: hasta el bloque C2 no lo hace, y entonces se omite.
+ * Los datos de un alumno en su detalle, el del Admin y el del Entrenador: el email, la membresía (la
+ * del último pago, la misma query que el historial) y la planificación vigente. Esta última se
+ * muestra solo si el backend la respondió: hasta el bloque C2 no lo hace, y entonces se omite.
  */
-export function StudentDetails({ user }: { user: User }) {
+export function StudentDetails({
+  user,
+  className,
+}: {
+  user: User;
+  className?: string;
+}) {
   const payments = useUserPayments(user.id);
   const planification = useActiveUserPlanification(user.id);
 
@@ -42,6 +49,7 @@ export function StudentDetails({ user }: { user: User }) {
 
   return (
     <DetailList
+      className={className}
       items={[
         { label: 'Email', value: user.email },
         { label: 'Membresía', value: membership },
