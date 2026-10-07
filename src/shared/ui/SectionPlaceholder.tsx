@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { To } from 'react-router';
 
 import type { IconName } from '@/shared/icons';
@@ -14,6 +15,8 @@ interface SectionPlaceholderProps {
   icon: IconName;
   /** Destino del "Volver", en las pantallas de detalle. */
   back?: To;
+  /** Entre el encabezado y el aviso: por ejemplo, los segmentos de una pantalla que ya tiene uno que anda. */
+  children?: ReactNode;
 }
 
 /**
@@ -26,10 +29,12 @@ export function SectionPlaceholder({
   eyebrow,
   icon,
   back,
+  children,
 }: SectionPlaceholderProps) {
   return (
     <>
       <PageHeader eyebrow={eyebrow} title={title} back={back} />
+      {children}
       <EmptyState
         icon={icon}
         title="Sección en construcción"

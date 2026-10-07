@@ -1,5 +1,7 @@
 import { redirect, type RouteObject } from 'react-router';
 
+import { CircuitEditorPage } from './pages/CircuitEditorPage';
+import { CircuitsPage } from './pages/CircuitsPage';
 import { MembershipsPage } from './pages/MembershipsPage';
 import { PlansPage } from './pages/PlansPage';
 import { RegisterPaymentPage } from './pages/RegisterPaymentPage';
@@ -16,4 +18,6 @@ export const coachRoutes: RouteObject[] = [
   { path: 'pago', Component: RegisterPaymentPage },
   { path: 'planes', Component: PlansPage },
   { path: 'rutinas', Component: RoutinesPage },
+  { path: 'circuitos', Component: CircuitsPage },
+  { path: 'circuitos/:id', Component: CircuitEditorPage },
 ];

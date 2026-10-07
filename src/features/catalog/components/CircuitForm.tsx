@@ -40,8 +40,6 @@ import { CircuitExerciseCard } from './CircuitExerciseCard';
 import styles from './CircuitForm.module.css';
 import { ExercisePickerModal } from './ExercisePickerModal';
 
-const BACK = '/a/circuitos';
-
 /** Lo que agrega `copyName` al nombre. El nombre del circuito llega a 100 caracteres. */
 const COPY_SUFFIX = ' (copia)';
 const NAME_MAX_LENGTH = 100;
@@ -55,6 +53,8 @@ function copyName(name: string): string {
 const INACTIVE_MESSAGE = 'está dado de baja';
 
 interface CircuitFormProps {
+  /** La ruta del listado de circuitos del rol (`/a/circuitos` o `/c/circuitos`): a donde se vuelve y de donde cuelga el editor. */
+  basePath: string;
   /** El circuito a editar. Sin él, el formulario da de alta uno nuevo. */
   circuit?: CircuitDetail;
   /** Las rutinas vigentes que lo usan, si ya se sabe: para avisar que los cambios se aplican en todas. */
@@ -62,12 +62,12 @@ interface CircuitFormProps {
 }
 
 /**
- * El formulario de un circuito (CU-E-22, CU-E-23 y CU-E-24): nombre, tipo y descripción; los ejercicios
+ * El formulario de un circuito, el mismo del Admin y del Entrenador (CU-E-22, CU-E-23 y CU-E-24): nombre, tipo y descripción; los ejercicios
  * en orden, cada uno con su nota y sus bloques de series; y, al editar, duplicar y dar de baja o
  * reactivar. Editar un circuito cambia todas las rutinas que lo usan, y uno dado de baja no se puede
  * editar: primero se lo reactiva.
  */
-export function CircuitForm({ circuit, routines }: CircuitFormProps) {
+export function CircuitForm({ basePath, circuit, routines }: CircuitFormProps) {
   const navigate = useNavigate();
   const toast = useToast();
   const typesId = useId();
@@ -120,7 +120,7 @@ export function CircuitForm({ circuit, routines }: CircuitFormProps) {
       {
         onSuccess: () => {
           toast.success(circuit ? 'Circuito guardado' : 'Circuito creado');
-          navigate(BACK);
+          navigate(basePath);
         },
       },
     );
@@ -131,7 +131,7 @@ export function CircuitForm({ circuit, routines }: CircuitFormProps) {
     duplicate.mutate(circuitCopyBody(original, copyName(original.name)), {
       onSuccess: (copy) => {
         toast.success('Circuito duplicado: estás editando la copia');
-        navigate(`${BACK}/${copy.id}`);
+        navigate(`${basePath}/${copy.id}`);
       },
       onError: (error) => toast.error(getErrorMessage(error)),
     });
@@ -147,7 +147,7 @@ export function CircuitForm({ circuit, routines }: CircuitFormProps) {
           );
           setConfirming(null);
           // Dar de baja lo saca de la edición; reactivarlo lo deja editable en la misma pantalla.
-          if (!active) navigate(BACK);
+          if (!active) navigate(basePath);
         },
         onError: (error) => {
           toast.error(

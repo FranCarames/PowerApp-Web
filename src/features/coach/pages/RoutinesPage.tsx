@@ -1,15 +1,12 @@
-import { EmptyState, PageHeader } from '@/shared/ui';
+import { SectionPlaceholder } from '@/shared/ui';
 
-// TEMPORAL (T21 y T19): los listados de rutinas y de circuitos reemplazan esta pantalla.
+import { RoutinesSegments } from '../components/RoutinesSegments';
+
+// PLACEHOLDER hasta el bloque C2: T21 (listado de rutinas) reemplaza el aviso. El segmento Circuitos ya anda (T48).
 export function RoutinesPage() {
   return (
-    <>
-      <PageHeader title="Rutinas" />
-      <EmptyState
-        icon="list"
-        title="Pantalla en construcción"
-        message="Las rutinas y los circuitos se arman en las tareas T21 y T19."
-      />
-    </>
+    <SectionPlaceholder eyebrow="Sistémicas" title="Rutinas" icon="list">
+      <RoutinesSegments value="rutinas" />
+    </SectionPlaceholder>
   );
 }

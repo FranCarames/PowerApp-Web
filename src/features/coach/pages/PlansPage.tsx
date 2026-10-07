@@ -1,15 +1,12 @@
-import { EmptyState, PageHeader } from '@/shared/ui';
+import { SectionPlaceholder } from '@/shared/ui';
 
-// TEMPORAL (T23): el listado de planificaciones reemplaza esta pantalla.
+// PLACEHOLDER hasta el bloque C2: T23 (listado de planificaciones) lo reemplaza.
 export function PlansPage() {
   return (
-    <>
-      <PageHeader title="Planificaciones" />
-      <EmptyState
-        icon="calendar"
-        title="Pantalla en construcción"
-        message="Las planificaciones se arman en la tarea T23."
-      />
-    </>
+    <SectionPlaceholder
+      eyebrow="Sistémicas"
+      title="Planificaciones"
+      icon="calendar"
+    />
   );
 }
