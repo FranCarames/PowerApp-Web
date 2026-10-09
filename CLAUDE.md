@@ -183,7 +183,7 @@ Las rutas de alta usan `nuevo` como id, por ejemplo `/c/circuitos/nuevo`.
   - Quitar una rutina le borra el `order` y no renumera al resto.
   - Al reincorporarla, el `order` es opcional; sin `order`, va al final.
   - Mandar `order` con `active: false` devuelve 400.
-- **RM potencial:** se calcula con `POST /user_rm/potential` (Epley, tabla de 1RM a 12RM) y nunca se guarda. Mostrá ese aviso. Los RM registrados se guardan en `User_RM` (alta, edición, lectura y borrado).
+- **RM potencial:** se calcula con `POST /user_rm/potential` (Epley, tabla de 1RM a 12RM) y nunca se guarda. Mostrá ese aviso. Los RM registrados se guardan en `User_RM` (alta, edición, lectura y borrado). Al crear o editar un RM, la fecha va como `YYYY-MM-DDT12:00:00` (mediodía, sin zona) y no pelada: el backend toma el día con la zona horaria de su servidor, y un día pelado cae uno antes en un servidor al oeste de UTC.
 - **Membresías:**
   - Los estados son `active`, `expiring_soon`, `expired` y `no_payments`. La ventana de "por vencer" la define `expiring_soon_days` en el summary.
   - Registrar un pago manda solo `user_id` y `membership_id`; el vencimiento lo calcula el backend (hoy más la duración, al final del día) y no suma los días que le quedaban a una membresía vigente. Un pago no se puede anular.
