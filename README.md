@@ -321,7 +321,7 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Abre al instante:** si la lista ya se cargó, la ficha muestra el ejercicio del caché del listado (`useExercise(id, { placeholderFromList: true })`) y lo confirma con `GET /exercise/{id}`. Con un link directo, muestra un esqueleto hasta que llega.
 - **"Volver":** desde la lista va al plan (`/u/plan`, como el prototipo); desde la ficha vuelve a la lista con su búsqueda y su chip (la lista le pasa su `location.search` por el `state` de la navegación, `wikiState.ts`).
 - **Estados:** carga (esqueleto), error con reintento, catálogo vacío, sin coincidencias ("No hay ejercicios con ese nombre. Probá con otra búsqueda o categoría.") y, en la ficha, "No encontramos el ejercicio" (404 o 400) sin reintento.
-- **Mocks:** los ejercicios de demo son los de T31 (los mismos que ve el Admin, en memoria); Press de banca, Sentadilla y Peso muerto traen un video (una búsqueda en YouTube) y algunos traen tips. No hay imágenes de demo: el Admin de demo puede cargar los links desde el editor.
+- **Mocks:** los ejercicios de demo son los de T31 (los mismos que ve el Admin, en memoria); Press de banca, Sentadilla y Peso muerto traen un video (una búsqueda en YouTube) y algunos traen tips. No hay imágenes de demo: los links de imagen se cargan desde el editor del Admin.
 
 ## Calculadora de RM del Usuario
 

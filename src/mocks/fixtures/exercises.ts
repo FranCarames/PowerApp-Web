@@ -4,8 +4,8 @@ import { muscleById, muscleIdByName, toExerciseMuscle } from './muscles';
 
 // Los ejercicios del catálogo de demo: los de la wiki del prototipo y los que usan sus circuitos, cada
 // uno con sus músculos, como los manda `GET /exercise/all`. Los tips y el video los tienen solo algunos
-// (el video es una búsqueda en YouTube: no hay imágenes ni videos propios, y el Admin de demo puede
-// cargar los links desde el editor).
+// (el video es una búsqueda en YouTube: no hay imágenes ni videos propios, los links se cargan desde
+// el editor del Admin).
 const TIMESTAMP = '2026-03-02T15:00:00.000Z';
 
 interface DemoExercise {
