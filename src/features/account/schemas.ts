@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { isHttpUrl } from '@/shared/lib/url';
 import {
   emailField,
   firstNameField,
@@ -7,15 +8,6 @@ import {
   phoneNumberField,
   phonePrefixField,
 } from '@/shared/lib/userFields';
-
-function isHttpUrl(value: string): boolean {
-  try {
-    const { protocol } = new URL(value);
-    return protocol === 'http:' || protocol === 'https:';
-  } catch {
-    return false;
-  }
-}
 
 /**
  * `EditUserDto`. En el DTO todo es opcional y se guarda solo lo que viene; en el formulario son

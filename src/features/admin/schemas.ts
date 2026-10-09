@@ -1,13 +1,6 @@
 import { z } from 'zod';
 
-function isHttpUrl(value: string): boolean {
-  try {
-    const { protocol } = new URL(value);
-    return protocol === 'http:' || protocol === 'https:';
-  } catch {
-    return false;
-  }
-}
+import { isHttpUrl } from '@/shared/lib/url';
 
 /** Un texto opcional: vacío o hasta `max` caracteres. */
 function optionalText(max: number, label: string) {

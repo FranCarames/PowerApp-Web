@@ -1,0 +1,110 @@
+/* El texto de la ficha se lee mejor en una columna angosta: en desktop no se estira a los 940 px. */
+.sheet {
+  max-width: 640px;
+}
+
+/* .hero y .hero-ic del prototipo (la pantalla de un ejercicio). */
+.hero {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  padding: 20px;
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(232, 69, 10, 0.28), rgba(139, 92, 246, 0.28)),
+    var(--card);
+  min-height: 150px;
+  overflow: hidden;
+}
+
+/* La imagen de fondo del ejercicio (`bg_image`), con un velo para que se lean los músculos encima. */
+.cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(11, 13, 22, 0.9) 0%,
+    rgba(11, 13, 22, 0.2) 75%
+  );
+}
+
+.heroBody {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  width: 100%;
+  min-width: 0;
+}
+
+.icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
+  background: rgba(11, 13, 22, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tp);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.iconImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.muscles {
+  min-width: 0;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ts);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  list-style: none;
+}
+
+.none {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--ts);
+}
+
+.text {
+  font-size: 14px;
+  line-height: 1.6;
+  /* La descripción y los tips se escriben en un cuadro de texto: se respetan sus saltos de línea. */
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.tip {
+  margin-bottom: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 960px) {
+  .hero {
+    min-height: 200px;
+  }
+}
