@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { queryOptions, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { request } from '@/api/client';
 import type { ExerciseWithMuscles } from '@/api/pending';
@@ -30,10 +30,25 @@ export function useExercises() {
 /**
  * `GET /exercise/{id}`: un ejercicio con sus músculos. Pide sesión (cualquier rol) y responde 404 si
  * no existe.
+ *
+ * Con `placeholderFromList`, mientras llega la respuesta se muestra el ejercicio que ya está en el
+ * caché del listado (trae los mismos datos), así la ficha de la wiki abre al instante. No es para un
+ * formulario: este dato no es el confirmado y no puede precargar campos.
  */
-export function useExercise(id: string) {
-  return useQuery({
+export function useExercise(
+  id: string,
+  { placeholderFromList = false }: { placeholderFromList?: boolean } = {},
+) {
+  const queryClient = useQueryClient();
+
+  return useQuery<ExerciseWithMuscles>({
     queryKey: queryKeys.exercises.detail(id),
+    placeholderData: () =>
+      placeholderFromList
+        ? queryClient
+            .getQueryData(exercisesQuery().queryKey)
+            ?.find((exercise) => exercise.id === id)
+        : undefined,
     queryFn: async ({ signal }) =>
       (
         await request<ExerciseWithMuscles>(

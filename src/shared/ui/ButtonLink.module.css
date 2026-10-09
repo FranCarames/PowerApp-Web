@@ -1,0 +1,4 @@
+/* Un <a> no trae el reset de los botones: se le saca el subrayado. El resto es la forma de <Button>. */
+.link {
+  text-decoration: none;
+}

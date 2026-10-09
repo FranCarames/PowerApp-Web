@@ -3,7 +3,9 @@ import type { ExerciseWithMuscles } from '@/api/pending';
 import { muscleById, muscleIdByName, toExerciseMuscle } from './muscles';
 
 // Los ejercicios del catálogo de demo: los de la wiki del prototipo y los que usan sus circuitos, cada
-// uno con sus músculos, como los manda `GET /exercise/all`. Los tips los tienen solo algunos.
+// uno con sus músculos, como los manda `GET /exercise/all`. Los tips y el video los tienen solo algunos
+// (el video es una búsqueda en YouTube: no hay imágenes ni videos propios, y el Admin de demo puede
+// cargar los links desde el editor).
 const TIMESTAMP = '2026-03-02T15:00:00.000Z';
 
 interface DemoExercise {
@@ -12,6 +14,7 @@ interface DemoExercise {
   muscles: string[];
   safety_tips?: string;
   activation_tips?: string;
+  video_url?: string;
 }
 
 const DEMO_EXERCISES: DemoExercise[] = [
@@ -22,6 +25,8 @@ const DEMO_EXERCISES: DemoExercise[] = [
     safety_tips:
       'Mantené los codos a 45° del torso y los pies firmes en el piso. Pedí un spotter con cargas altas.',
     activation_tips: 'Apretá el pecho al subir y no rebotes la barra.',
+    video_url:
+      'https://www.youtube.com/results?search_query=press+de+banca+tecnica',
   },
   {
     name: 'Press inclinado mancuernas',
@@ -42,6 +47,8 @@ const DEMO_EXERCISES: DemoExercise[] = [
     safety_tips:
       'Espalda neutra y rodillas alineadas con los pies. No dejes que se junten al subir.',
     activation_tips: 'Empujá el piso con todo el pie y abrí las rodillas.',
+    video_url:
+      'https://www.youtube.com/results?search_query=sentadilla+tecnica',
   },
   {
     name: 'Prensa',
@@ -60,6 +67,8 @@ const DEMO_EXERCISES: DemoExercise[] = [
     muscles: ['Dorsal ancho', 'Trapecio', 'Bíceps femoral', 'Glúteo mayor'],
     safety_tips:
       'Espalda recta durante todo el movimiento. La barra va pegada a las piernas.',
+    video_url:
+      'https://www.youtube.com/results?search_query=peso+muerto+tecnica',
   },
   {
     name: 'Dominadas',
