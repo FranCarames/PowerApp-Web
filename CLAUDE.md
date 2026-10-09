@@ -81,7 +81,7 @@ src/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
     account/      Mi cuenta, compartida por los tres roles, y los hooks de datos de usuarios que usan varios roles
-    catalog/      Ejercicios, músculos y circuitos que usan varios roles (hooks y, de los circuitos, el listado, el editor y su formulario); lo propio de cada rol vive en su feature
+    catalog/      Ejercicios, músculos y circuitos que usan varios roles (hooks; el buscador de ejercicios y, de los circuitos, el listado, el editor y su formulario); lo propio de cada rol vive en su feature
     user/         pantallas del rol Usuario
     coach/        pantallas del rol Entrenador
     admin/        pantallas del rol Admin

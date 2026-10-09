@@ -313,6 +313,16 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Calculadora:** el botón abre `/u/calculadora` (ver "Calculadora de RM del Usuario").
 - **Mocks:** la lista, el alta, la edición y la baja atienden solo a las cuentas de demo, por su token falso (`userAccess`, en `mocks/access.ts`); con un token de verdad van al backend. Lo que hace la cuenta de demo del Usuario queda en memoria hasta recargar y también lo ve el Entrenador en el detalle de ese alumno (`fixtures/userRms.ts`). Siguen las reglas del service: un usuario solo toca lo suyo (403), el ejercicio y el RM tienen que existir (404) y editar responde 201.
 
+## Wiki de ejercicios del Usuario
+
+- **Lista** (`/u/wiki`, `src/features/user/pages/WikiPage.tsx`): se entra desde Mi cuenta ("Biblioteca de ejercicios"), y la tab Rutina queda marcada. De arriba hacia abajo: "Biblioteca / Ejercicios", el buscador por nombre (sin mayúsculas ni acentos), los chips por grupo muscular y las filas (CU-U-15). Cada fila trae la miniatura (la `preview_image`, o un ícono), el nombre y los músculos en una línea, y abre la ficha. La búsqueda y el grupo quedan en la URL (`?q=…&grupo=<id>`).
+- **Datos** (reales, solo lectura): `GET /exercise/all` (público) cruzado con `GET /muscles/mg/all` (`useExerciseCatalog`: cada ejercicio es de los grupos a los que pertenecen sus músculos, como en el listado del Admin) y `GET /exercise/{id}` para la ficha (pide sesión de cualquier rol, `useExercise`). El buscador y los chips son los mismos que los del Admin (`useExerciseSearch` y `ExerciseFilters`, en `src/features/catalog`).
+- **Ficha** (`/u/wiki/:id`, `WikiExercisePage` y `ExerciseSheet`): el nombre, la cabecera del ejercicio (la imagen de fondo `bg_image` con un velo, la miniatura `preview_image` y los músculos que trabaja) y, solo si el ejercicio los tiene, la descripción, los tips de seguridad, los tips de activación y el video. El video es un link (`ButtonLink`, "Ver video") que se abre en otra pestaña. Una imagen que no carga no se muestra y un link que no es http o https no se abre (`isHttpUrl`, en `shared/lib/url.ts`): los links los carga el Admin como texto libre.
+- **Abre al instante:** si la lista ya se cargó, la ficha muestra el ejercicio del caché del listado (`useExercise(id, { placeholderFromList: true })`) y lo confirma con `GET /exercise/{id}`. Con un link directo, muestra un esqueleto hasta que llega.
+- **"Volver":** desde la lista va al plan (`/u/plan`, como el prototipo); desde la ficha vuelve a la lista con su búsqueda y su chip (la lista le pasa su `location.search` por el `state` de la navegación, `wikiState.ts`).
+- **Estados:** carga (esqueleto), error con reintento, catálogo vacío, sin coincidencias ("No hay ejercicios con ese nombre. Probá con otra búsqueda o categoría.") y, en la ficha, "No encontramos el ejercicio" (404 o 400) sin reintento.
+- **Mocks:** los ejercicios de demo son los de T31 (los mismos que ve el Admin, en memoria); Press de banca, Sentadilla y Peso muerto traen un video (una búsqueda en YouTube) y algunos traen tips. No hay imágenes de demo: los links de imagen se cargan desde el editor del Admin.
+
 ## Calculadora de RM del Usuario
 
 - **Pantalla** (`/u/calculadora`, `src/features/user/pages/CalculatorPage.tsx`): se entra desde el botón Calculadora de Mis RMs, y la tab RMs queda marcada. De arriba hacia abajo: la explicación (con el aviso de que es una estimación y no se guarda en los RMs), el ejercicio, el peso y las repeticiones, la tarjeta del 1RM estimado y la tabla de 1RM a 12RM (CU-U-16).
@@ -321,6 +331,15 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Resultado:** el 1RM con hasta dos decimales (los que calcula el backend) y la tabla con el porcentaje del 1RM, el peso y las repeticiones de cada fila. La fila de las repeticiones ingresadas muestra el mismo peso ingresado, con el peso en violeta. Los números no se redondean a enteros como en el prototipo, justamente para que esa fila coincida.
 - **Estados:** "Calculando…" mientras llega el primer resultado, el cálculo anterior apagado mientras llega el siguiente, y los errores: el servidor, con reintento, y un ejercicio que ya no existe (404), sin reintento.
 - **Mocks:** `POST /user_rm/potential` atiende solo a las cuentas de demo, por su token falso (cualquier rol), y hace la misma cuenta que el backend; con un token de verdad va al backend.
+
+## Temporizador del Usuario
+
+- **Pantalla** (`/u/timer`, `src/features/user/pages/TimerPage.tsx`): la tab Timer. De arriba hacia abajo: "Descanso entre series / Temporizador", el reloj (el anillo que se vacía y, en el centro, lo que queda y el estado), las duraciones (30 s, 60 s, 90 s, 2:00 y 3:00) y "Reiniciar" con el botón principal (CU-U-14). Es solo del Usuario y no usa la API.
+- **Estados:** arranca en 90 s, detenido ("listo", botón "Iniciar"). Elegir una duración arranca el conteo desde ahí. Corriendo dice "restante" y el botón "Pausar"; en pausa, "en pausa" y "Reanudar"; al llegar a cero, "Descanso terminado" y "Repetir". "Reiniciar" vuelve al principio de la duración elegida, sin correr.
+- **Sigue corriendo si cambiás de pantalla:** el estado no es de la pantalla sino de `restTimerStore.ts` (un módulo fuera de React, como la sesión, que `useRestTimer` lee con `useSyncExternalStore`). Por eso también sigue al ir a Perfil, que es otro shell. No persiste nada: al recargar la página arranca de cero, y al cerrar la sesión vuelve a su estado inicial.
+- **Cuenta contra el reloj**, no contando ticks: guarda cuándo termina y recalcula cada 250 ms y al volver a la pestaña, porque los navegadores frenan los timers en segundo plano. Una pausa guarda lo que quedaba y el tiempo parado no cuenta.
+- **Al llegar a cero** (`RestTimerWatcher`, montado en `Providers`): un toast "Descanso terminado" en la pantalla que sea y vibración (`navigator.vibrate`) si el dispositivo la tiene. No hay notificación del sistema ni sonido: con el celular bloqueado o la app en segundo plano el aviso puede pasar sin que se lo vea, y al volver el reloj ya dice "Descanso terminado".
+- **Accesibilidad:** el reloj es `role="timer"` (no anuncia cada segundo; el final lo anuncia el toast), los chips dicen "30 segundos", "2 minutos"…, y la animación del anillo se apaga con `prefers-reduced-motion` (regla global).
 
 ## Cambiar contraseña
 
@@ -349,7 +368,7 @@ src/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
     account/      Mi cuenta, compartida por los tres roles, y los hooks de datos de usuarios que usan varios roles
-    catalog/      Ejercicios, músculos y circuitos que leen varios roles (hooks); lo propio de cada rol vive en su feature
+    catalog/      Ejercicios, músculos y circuitos que leen varios roles (hooks y, de los ejercicios, el buscador); lo propio de cada rol vive en su feature
     user/         pantallas del rol Usuario
     coach/        pantallas del rol Entrenador
     admin/        pantallas del rol Admin

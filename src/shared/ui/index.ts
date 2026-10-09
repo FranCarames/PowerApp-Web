@@ -1,5 +1,6 @@
 export { Avatar } from './Avatar';
 export { Button } from './Button';
+export { ButtonLink } from './ButtonLink';
 export { Card } from './Card';
 export { Chip } from './Chip';
 export { ChipGroup } from './ChipGroup';

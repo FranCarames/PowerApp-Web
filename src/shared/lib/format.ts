@@ -23,3 +23,10 @@ export function formatDecimal(value: number): string {
 export function formatWeight(kg: number): string {
   return `${formatDecimal(kg)} kg`;
 }
+
+/** "01:30": segundos como minutos y segundos, con dos dígitos cada uno (el reloj del temporizador). */
+export function formatClock(totalSeconds: number): string {
+  const seconds = Math.max(0, Math.floor(totalSeconds));
+  const minutes = Math.floor(seconds / 60);
+  return `${String(minutes).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+}

@@ -1,0 +1,8 @@
+/* "Reiniciar" a un tercio y el botón principal a dos tercios, como el prototipo. */
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 10px;
+  max-width: 440px;
+  margin: 6px auto 0;
+}

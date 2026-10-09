@@ -2,16 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { getErrorMessage } from '@/api/errors';
-import {
-  useExerciseCatalog,
-  type CatalogExercise,
-} from '@/features/catalog/hooks/useExerciseCatalog';
-import { matchesSearch } from '@/shared/lib/text';
-import { useSearchAndFilter } from '@/shared/lib/useSearchAndFilter';
+import { ExerciseFilters } from '@/features/catalog/components/ExerciseFilters';
+import type { CatalogExercise } from '@/features/catalog/hooks/useExerciseCatalog';
+import { useExerciseSearch } from '@/features/catalog/hooks/useExerciseSearch';
 import {
   Button,
-  Chip,
-  ChipGroup,
   ConfirmDialog,
   EmptyState,
   ErrorState,
@@ -19,7 +14,6 @@ import {
   List,
   ListSkeleton,
   PageHeader,
-  SearchInput,
   useToast,
 } from '@/shared/ui';
 
@@ -71,18 +65,10 @@ function EmptyExercises({
 export function ExercisesPage() {
   const navigate = useNavigate();
   const toast = useToast();
-  const catalog = useExerciseCatalog();
+  const { catalog, search, setSearch, group, setGroup, visible, searching } =
+    useExerciseSearch();
   const remove = useDeleteExercise();
-  const { search, setSearch, filter, setFilter } = useSearchAndFilter('grupo');
   const [toDelete, setToDelete] = useState<CatalogExercise | null>(null);
-
-  // Un grupo de la URL que ya no existe se trata como "Todos".
-  const group = catalog.groups?.find(({ id }) => id === filter) ?? null;
-  const visible = catalog.exercises?.filter(
-    (exercise) =>
-      (group === null || exercise.groups.some(({ id }) => id === group.id)) &&
-      matchesSearch(exercise.name, search),
-  );
 
   function confirmDelete(exercise: CatalogExercise) {
     remove.mutate(exercise.id, {
@@ -106,31 +92,18 @@ export function ExercisesPage() {
   return (
     <>
       <PageHeader eyebrow="Entrenamiento" title="Ejercicios" />
-      <SearchInput
-        placeholder="Buscar ejercicio"
-        value={search}
-        autoComplete="off"
-        onChange={(event) => setSearch(event.target.value)}
+      <ExerciseFilters
+        search={search}
+        onSearch={setSearch}
+        groups={catalog.groups}
+        group={group}
+        onGroup={setGroup}
       />
-      <ChipGroup aria-label="Filtrar por grupo muscular">
-        <Chip selected={group === null} onClick={() => setFilter(null)}>
-          Todos
-        </Chip>
-        {catalog.groups?.map(({ id, name }) => (
-          <Chip
-            key={id}
-            selected={group?.id === id}
-            onClick={() => setFilter(id)}
-          >
-            {name}
-          </Chip>
-        ))}
-      </ChipGroup>
       {visible ? (
         visible.length === 0 ? (
           <EmptyExercises
             catalogIsEmpty={catalog.exercises?.length === 0}
-            searching={search.trim() !== ''}
+            searching={searching}
             onCreate={() => navigate('/a/ejercicios/nuevo')}
           />
         ) : (

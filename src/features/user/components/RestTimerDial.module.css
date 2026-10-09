@@ -1,0 +1,51 @@
+/* .timer, .tr-bg, .tr-fg, .tm-c y #tm-val del prototipo. */
+.timer {
+  position: relative;
+  width: min(270px, 74vw);
+  aspect-ratio: 1;
+  margin: 12px auto 26px;
+}
+
+/* El anillo arranca arriba, no a la derecha. */
+.timer svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.track {
+  fill: none;
+  stroke: var(--el);
+  stroke-width: 10;
+}
+
+.progress {
+  fill: none;
+  stroke: var(--pri);
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.value {
+  font-family: var(--fM);
+  font-size: clamp(44px, 15vw, 62px);
+  font-weight: 800;
+  letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ts);
+}

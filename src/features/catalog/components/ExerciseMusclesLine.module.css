@@ -1,0 +1,7 @@
+/* Va en el subtítulo de una fila: una sola línea, y el resto se corta. */
+.line {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Button } from '@/shared/ui';
+import { Button, ButtonLink } from '@/shared/ui';
 
 import { GalleryDemo } from '../GalleryDemo';
 import { GallerySection } from '../GallerySection';
@@ -44,6 +44,17 @@ export function ButtonsSection() {
         <Button sm variant="danger">
           Quitar
         </Button>
+      </GalleryDemo>
+
+      <GalleryDemo label="Como link (ButtonLink)" layout="stack">
+        <ButtonLink
+          variant="sec"
+          icon="play"
+          href="https://www.youtube.com/"
+          external
+        >
+          Ver video
+        </ButtonLink>
       </GalleryDemo>
 
       <GalleryDemo label="Estados" layout="stack">

@@ -1,0 +1,10 @@
+.sheet {
+  max-width: 640px;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+}
