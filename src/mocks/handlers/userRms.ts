@@ -12,6 +12,7 @@ import {
   editDemoRm,
   findDemoExercise,
   findDemoRm,
+  potentialRmsFor,
   type RmBody,
 } from '../fixtures/userRms';
 import { demoAccountForToken } from '../fixtures/users';
@@ -44,6 +45,36 @@ function validate(body: Partial<RmBody>): string[] {
   return errors;
 }
 
+/** Los errores de validación de `CalculatePotentialRmDto`. */
+function validatePotential(body: {
+  exercise_id?: string;
+  weight?: number;
+  max_reps?: number;
+}): string[] {
+  const errors: string[] = [];
+  const { weight, max_reps: maxReps } = body;
+  if (!body.exercise_id) errors.push('exercise_id should not be empty');
+  if (
+    typeof weight !== 'number' ||
+    !Number.isFinite(weight) ||
+    Math.abs(weight * 100 - Math.round(weight * 100)) > 1e-6
+  ) {
+    errors.push('El peso debe ser numérico');
+  } else if (weight <= 0) {
+    errors.push('El peso tiene que ser mayor a cero');
+  } else if (weight > 1000) {
+    errors.push('weight must not be greater than 1000');
+  }
+  if (typeof maxReps !== 'number' || !Number.isInteger(maxReps)) {
+    errors.push('Las repeticiones deben ser un número entero');
+  } else if (maxReps < 1) {
+    errors.push('Las repeticiones tienen que ser al menos 1');
+  } else if (maxReps > 100) {
+    errors.push('max_reps must not be greater than 100');
+  }
+  return errors;
+}
+
 /** Los mocks de los RMs. Cuáles están encendidos lo dice `registry.ts`. */
 export const userRmMocks = [
   // Leer los RMs de un usuario es REAL: el mock atiende solo a las cuentas de demo, por su token
@@ -59,6 +90,25 @@ export const userRmMocks = [
         ? HttpResponse.json(demoRmsFor(params.id))
         : passthrough(),
   ),
+
+  // Calcular los RMs potenciales (CU-U-16) es REAL y lo puede pedir cualquier rol: el mock atiende solo
+  // a las cuentas de demo, por su token falso, y hace la misma cuenta que el backend. Con un token de
+  // verdad va al backend. Como él, responde 404 si el ejercicio no existe. No guarda nada.
+  mockEndpoint('post', '/api/v1/user_rm/potential', async ({ request }) => {
+    if (!demoAccountForToken(request.headers.get('Authorization'))) {
+      return passthrough();
+    }
+
+    const body = await request.json();
+    const errors = validatePotential(body);
+    if (errors.length > 0) return guardError(400, errors);
+
+    const exercise = findDemoExercise(body.exercise_id);
+    if (!exercise) return serviceError(404, 'Ejercicio no encontrado');
+    return HttpResponse.json(
+      potentialRmsFor(exercise, body.weight, body.max_reps),
+    );
+  }),
 
   // Alta, edición y baja de un RM: son solo del Usuario (CU-U-17, CU-U-18 y CU-U-20). El mock atiende
   // a las cuentas de demo y lo que hacen se ve en la lista hasta recargar. Las reglas son las del

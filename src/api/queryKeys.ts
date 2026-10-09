@@ -63,6 +63,13 @@ export const queryKeys = {
     byUser: (userId: string) =>
       [...queryKeys.userRms.all, 'user', userId] as const,
   },
+  rmPotential: {
+    all: ['rm-potential'] as const,
+    /** El cálculo de RMs potenciales de un ejercicio, un peso y un máximo de repeticiones. Nunca se guarda. */
+    calc: (
+      input: { exercise_id: string; weight: number; max_reps: number } | null,
+    ) => [...queryKeys.rmPotential.all, input] as const,
+  },
   users: {
     all: ['users'] as const,
     detail: (id: string) => [...queryKeys.users.all, 'detail', id] as const,

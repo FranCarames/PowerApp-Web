@@ -310,8 +310,17 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **La fecha viaja con el mediodía** (`2026-10-06T12:00:00`): el backend la lee con `new Date(date)` y toma el día con la zona horaria de su servidor, así que un día pelado (medianoche UTC) cae un día antes en un servidor al oeste de UTC, y cada edición lo corre otro más. En Render (UTC) no se nota; en un backend local en Argentina sí.
 - **Eliminar** (CU-U-20): `DELETE /user_rm/{id}` (real, `useDeleteRm`), un borrado físico con confirmación ("No se puede deshacer"). Si el RM ya no existe (404), avisa y actualiza la lista; lo mismo pasa al editarlo.
 - **Estados:** carga (esqueleto), error con reintento, vacío, y los errores del guardado dentro del modal (el ejercicio o el RM ya no existe, o el aviso por defecto).
-- **Calculadora:** el botón abre `/u/calculadora`, que hasta T27 es una pantalla en construcción.
+- **Calculadora:** el botón abre `/u/calculadora` (ver "Calculadora de RM del Usuario").
 - **Mocks:** la lista, el alta, la edición y la baja atienden solo a las cuentas de demo, por su token falso (`userAccess`, en `mocks/access.ts`); con un token de verdad van al backend. Lo que hace la cuenta de demo del Usuario queda en memoria hasta recargar y también lo ve el Entrenador en el detalle de ese alumno (`fixtures/userRms.ts`). Siguen las reglas del service: un usuario solo toca lo suyo (403), el ejercicio y el RM tienen que existir (404) y editar responde 201.
+
+## Calculadora de RM del Usuario
+
+- **Pantalla** (`/u/calculadora`, `src/features/user/pages/CalculatorPage.tsx`): se entra desde el botón Calculadora de Mis RMs, y la tab RMs queda marcada. De arriba hacia abajo: la explicación (con el aviso de que es una estimación y no se guarda en los RMs), el ejercicio, el peso y las repeticiones, la tarjeta del 1RM estimado y la tabla de 1RM a 12RM (CU-U-16).
+- **El cálculo lo hace el backend** (`POST /user_rm/potential`, real, `usePotentialRms`): Epley, con el 1RM directo y la tabla de 1 a 12 repeticiones, sin guardar nada. El front no repite la cuenta. No hay botón: se calcula solo 400 ms después del último cambio, cuando los tres datos son válidos, como el prototipo (que calcula al escribir). Es una query (`queryKeys.rmPotential`) con `staleTime: Infinity`: el mismo ejercicio, peso y repeticiones dan el mismo resultado y vuelven del caché sin pedir de nuevo. Mientras se calcula otra cosa queda el resultado anterior, apagado; si un dato deja de ser válido, el resultado se vacía.
+- **Campos** (`potentialRmSchema`, en `features/user/schemas.ts`): el ejercicio, que el endpoint pide aunque la cuenta no dependa de él (responde 404 si no existe); el peso, mayor a cero, con hasta dos decimales y hasta 1.000 kg; y las repeticiones, enteras de 1 a 100. Los avisos aparecen al escribir. Con más de 12 repeticiones, un aviso dice que la estimación pierde precisión (la tabla del backend llega a 12).
+- **Resultado:** el 1RM con hasta dos decimales (los que calcula el backend) y la tabla con el porcentaje del 1RM, el peso y las repeticiones de cada fila. La fila de las repeticiones ingresadas muestra el mismo peso ingresado, con el peso en violeta. Los números no se redondean a enteros como en el prototipo, justamente para que esa fila coincida.
+- **Estados:** "Calculando…" mientras llega el primer resultado, el cálculo anterior apagado mientras llega el siguiente, y los errores: el servidor, con reintento, y un ejercicio que ya no existe (404), sin reintento.
+- **Mocks:** `POST /user_rm/potential` atiende solo a las cuentas de demo, por su token falso (cualquier rol), y hace la misma cuenta que el backend; con un token de verdad va al backend.
 
 ## Cambiar contraseña
 

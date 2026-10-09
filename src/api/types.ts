@@ -13,6 +13,7 @@ export type UserPlanification = Schemas['UserPlanification'];
 export type MembershipStatusSummary = Schemas['MembershipStatusSummaryDto'];
 export type Exercise = Schemas['Exercise'];
 export type UserRm = Schemas['UserRM'];
+export type PotentialRmResponse = Schemas['PotentialRmResponseDto'];
 export type Muscle = Schemas['Muscle'];
 export type MuscleGroup = Schemas['MuscleGroup'];
 export type CircuitListItem = Schemas['CircuitListItemResponseDto'];

@@ -1,0 +1,11 @@
+/* .narrow del prototipo: los formularios de una columna no se estiran en pantallas anchas. */
+.narrow {
+  max-width: 540px;
+}
+
+/* La explicación bajo el título: gris, con aire entre líneas y 18 px hasta el primer campo. */
+.intro {
+  margin: 0 0 18px;
+  line-height: 1.6;
+  color: var(--ts);
+}

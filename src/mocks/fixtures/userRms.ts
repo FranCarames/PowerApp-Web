@@ -1,5 +1,5 @@
 import type { UserRmWithExercise } from '@/api/pending';
-import type { UserRm } from '@/api/types';
+import type { PotentialRmResponse, UserRm } from '@/api/types';
 
 import { exercises } from './exercises';
 import { students } from './students';
@@ -210,6 +210,39 @@ export function editDemoRm(
   };
   rms[index] = edited;
   return toUserRm(edited);
+}
+
+/** Redondea a 2 decimales, como el backend. */
+function roundToTwo(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+/**
+ * Los RMs potenciales de un peso y unas repeticiones, con la cuenta del backend (`calculatePotentialRms`):
+ * Epley directo para el 1RM (con 1 repetición, el mismo peso) y Epley inverso para cada nRM de la
+ * tabla de 1 a 12 repeticiones.
+ */
+export function potentialRmsFor(
+  exercise: { id: string; name: string },
+  weight: number,
+  maxReps: number,
+): PotentialRmResponse {
+  const estimated1Rm = maxReps === 1 ? weight : weight * (1 + maxReps / 30);
+  return {
+    exercise,
+    input: { weight, max_reps: maxReps },
+    formula: 'Epley',
+    estimated_1rm: roundToTwo(estimated1Rm),
+    potential_rms: Array.from({ length: 12 }, (_, index) => {
+      const reps = index + 1;
+      return {
+        reps,
+        weight: roundToTwo(
+          reps === 1 ? estimated1Rm : estimated1Rm / (1 + reps / 30),
+        ),
+      };
+    }),
+  };
 }
 
 /** Borra un RM de demo. */
