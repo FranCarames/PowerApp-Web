@@ -1,0 +1,77 @@
+/* La tarjeta del 1RM estimado: el tinte violeta, centrada y con el número grande (calculadora del prototipo). */
+.result {
+  text-align: center;
+  padding: 20px;
+  margin-top: 4px;
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ts);
+}
+
+.value {
+  font-family: var(--fM);
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  color: var(--acc);
+  font-variant-numeric: tabular-nums;
+  transition: opacity 0.15s;
+}
+
+.unit {
+  font-size: 18px;
+}
+
+.formula {
+  font-size: 12px;
+  color: var(--tm);
+  margin-top: 2px;
+}
+
+/* Lo que se ve es el cálculo anterior: se apaga hasta que llega el nuevo. */
+.dim {
+  opacity: 0.5;
+}
+
+/* .trow del prototipo: tres columnas iguales, el peso al centro y en negrita, y las repeticiones a la derecha. */
+.table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  transition: opacity 0.15s;
+}
+
+.table td {
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.table td:nth-child(2) {
+  text-align: center;
+  font-weight: 700;
+}
+
+.table td:last-child {
+  text-align: right;
+  color: var(--tm);
+}
+
+/* La fila de las repeticiones que ingresó el usuario: su peso, en violeta. */
+.mine td:nth-child(2) {
+  color: var(--acc);
+}
+
+/* El encabezado de la tabla es para los lectores de pantalla. */
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
