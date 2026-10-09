@@ -1,6 +1,6 @@
 import { passthrough } from 'msw';
 
-import { demoAccountForToken } from './fixtures/users';
+import { demoAccountForToken, type DemoAccount } from './fixtures/users';
 import { guardError } from './responses';
 
 /**
@@ -44,4 +44,28 @@ export function adminAccess(request: Request) {
     return guardError(403, 'Acceso denegado. Permisos insuficientes.');
   }
   return null;
+}
+
+/**
+ * Lo mismo que `staffAccess`, para los endpoints que son solo del Usuario (`@Auth(UserRole.user)`): un
+ * entrenador o un admin de demo recibe el 403 de un guard. Devuelve la cuenta de demo, para saber de
+ * quién es el pedido, o la respuesta con la que cortar el mock.
+ *
+ * @example
+ * const access = userAccess(request);
+ * if ('denied' in access) return access.denied;
+ */
+export function userAccess(
+  request: Request,
+):
+  | { account: DemoAccount }
+  | { denied: ReturnType<typeof passthrough> | ReturnType<typeof guardError> } {
+  const account = demoAccountForToken(request.headers.get('Authorization'));
+  if (!account) return { denied: passthrough() };
+  if (account.user.role !== 'user') {
+    return {
+      denied: guardError(403, 'Acceso denegado. Permisos insuficientes.'),
+    };
+  }
+  return { account };
 }
