@@ -54,6 +54,13 @@ export function formatDate(iso: string): string {
   return `${date.getDate()} ${SHORT_MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 }
 
+/** El día de calendario local de un instante, como lo manda y lo guarda el backend en una fecha sin hora: "2026-10-08". */
+export function toCalendarDay(date: Date = new Date()): string {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
 /**
  * Cuántos días de calendario hay de hoy a la fecha, en el día local de quien mira: 0 es hoy, 1 es
  * mañana y -1 es ayer. Cuenta días enteros: un vencimiento de hoy a las 23:59 es 0, no "11 horas".

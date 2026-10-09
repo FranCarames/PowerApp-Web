@@ -1,0 +1,13 @@
+/* El peso: la tipografía de datos del prototipo (.data a 17 px y 800) con la unidad chica y apagada, sin partirse en dos líneas. */
+.weight {
+  font-family: var(--fM);
+  font-size: 17px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.unit {
+  font-size: 12px;
+  color: var(--tm);
+}

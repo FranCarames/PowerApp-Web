@@ -18,6 +18,12 @@
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
 }
 
+/* El campo de fecha nativo es 2 px más alto que uno de texto con el mismo padding. */
+.input[type='date'] {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
 .input::placeholder {
   color: var(--tm);
 }
