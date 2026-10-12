@@ -9,7 +9,11 @@ import type { Exercise } from '@/api/types';
 
 import { adminAccess } from '../access';
 import { mockEndpoint } from '../endpoint';
-import { EXERCISES_IN_USE, exercises } from '../fixtures/exercises';
+import {
+  EXERCISES_IN_USE,
+  exercises,
+  type ExerciseUse,
+} from '../fixtures/exercises';
 import { muscleById, toExerciseMuscle } from '../fixtures/muscles';
 import { demoAccountForSession, demoAccountForToken } from '../fixtures/users';
 import { emptyResponse, guardError, serviceError } from '../responses';
@@ -70,6 +74,13 @@ function withoutMuscles(exercise: StoredExercise): Exercise {
     updated_at: exercise.updated_at,
   };
 }
+
+/** Lo que dice el backend (en `error`, con un 409) al rechazar el borrado, según el motivo. */
+const IN_USE_MESSAGES: Record<ExerciseUse, string> = {
+  circuits: 'No se puede eliminar el ejercicio: está en uso en circuitos',
+  trained: 'No se puede eliminar el ejercicio: ya se entrenó con él',
+  rms: 'No se puede eliminar el ejercicio: hay alumnos con RMs registrados',
+};
 
 /** Si todos los músculos existen: si no, el backend responde 404. */
 function allMusclesExist(ids: readonly string[]): boolean {
@@ -184,11 +195,9 @@ export const exerciseMocks = [
 
     const index = catalog.findIndex(({ id }) => id === params.id);
     if (index === -1) return serviceError(404, 'Ejercicio no encontrado');
-    // El backend no distingue el motivo: un RM o un entrenamiento hecho con el ejercicio rompe la
-    // integridad y la respuesta es siempre este 500 (V7).
-    if (EXERCISES_IN_USE.includes(params.id)) {
-      return serviceError(500, 'Error al eliminar el ejercicio');
-    }
+    // Un ejercicio en uso no se borra y no se toca nada: el backend responde 409 con el motivo.
+    const use = EXERCISES_IN_USE[params.id];
+    if (use) return serviceError(409, IN_USE_MESSAGES[use]);
     catalog.splice(index, 1);
     return emptyResponse();
   }),

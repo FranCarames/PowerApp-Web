@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
-import { getErrorMessage } from '@/api/errors';
+import { getErrorMessage, isApiError } from '@/api/errors';
 import { ExerciseFilters } from '@/features/catalog/components/ExerciseFilters';
 import type { CatalogExercise } from '@/features/catalog/hooks/useExerciseCatalog';
 import { useExerciseSearch } from '@/features/catalog/hooks/useExerciseSearch';
@@ -19,6 +19,31 @@ import {
 
 import { ExerciseRow } from '../components/ExerciseRow';
 import { useDeleteExercise } from '../hooks/useDeleteExercise';
+
+// Lo que responde `deleteExercise` (con un 409) según por qué no se puede borrar el ejercicio.
+const IN_CIRCUITS_MESSAGE =
+  'No se puede eliminar el ejercicio: está en uso en circuitos';
+const TRAINED_MESSAGE =
+  'No se puede eliminar el ejercicio: ya se entrenó con él';
+const WITH_RMS_MESSAGE =
+  'No se puede eliminar el ejercicio: hay alumnos con RMs registrados';
+
+/**
+ * El aviso por un 409 al eliminar, según el motivo que dice el backend. El texto del servidor no se
+ * muestra: uno que no se reconoce cae en el aviso genérico de "en uso".
+ */
+function deleteConflictMessage(serverMessage: string | null): string {
+  switch (serverMessage) {
+    case IN_CIRCUITS_MESSAGE:
+      return 'No se puede eliminar: el ejercicio está en uno o más circuitos. Quitalo de ellos y probá de nuevo.';
+    case TRAINED_MESSAGE:
+      return 'No se puede eliminar: hay alumnos que ya entrenaron con este ejercicio.';
+    case WITH_RMS_MESSAGE:
+      return 'No se puede eliminar: hay alumnos con RMs registrados de este ejercicio.';
+    default:
+      return 'No se puede eliminar el ejercicio porque está en uso.';
+  }
+}
 
 /** Qué decir cuando no hay ejercicios, según lo que se estaba buscando. */
 function EmptyExercises({
@@ -80,8 +105,9 @@ export function ExercisesPage() {
         toast.error(
           getErrorMessage(error, {
             404: 'El ejercicio ya no existe.',
-            // El backend rechaza el borrado de un ejercicio con RMs o entrenamientos hechos (V7).
-            500: 'No se pudo eliminar el ejercicio. Si alguien registró un RM o ya entrenó con él, no se puede borrar.',
+            409: deleteConflictMessage(
+              isApiError(error) ? error.serverMessage : null,
+            ),
           }),
         );
         setToDelete(null);
@@ -139,8 +165,8 @@ export function ExercisesPage() {
           toDelete && (
             <>
               ¿Eliminar <b>{toDelete.name}</b>? No se puede deshacer. Si está en
-              circuitos, se quita de ellos; si alguien registró un RM o ya
-              entrenó con él, no se puede eliminar.
+              circuitos, tiene RMs registrados o ya se entrenó con él, no se
+              puede eliminar.
             </>
           )
         }
