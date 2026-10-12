@@ -130,11 +130,17 @@ export const exercises: ExerciseWithMuscles[] = DEMO_EXERCISES.map(
   }),
 );
 
+/** Por qué el backend no deja borrar un ejercicio: cada motivo tiene su 409 (`deleteExercise`). */
+export type ExerciseUse = 'circuits' | 'trained' | 'rms';
+
 /**
- * Los ejercicios que el backend no deja borrar porque tienen RMs o entrenamientos hechos: los del
- * prototipo con más uso. El resto se puede borrar.
+ * Los ejercicios que el backend no deja borrar, con el motivo: están en circuitos, ya se entrenó
+ * con ellos o hay alumnos con RMs registrados. Son tres para poder ver los tres avisos. El resto se
+ * puede borrar.
  */
-export const EXERCISES_IN_USE: readonly string[] = [
-  exercises[0].id,
-  exercises[3].id,
-];
+export const EXERCISES_IN_USE: Readonly<Partial<Record<string, ExerciseUse>>> =
+  {
+    [exercises[0].id]: 'rms',
+    [exercises[1].id]: 'circuits',
+    [exercises[3].id]: 'trained',
+  };

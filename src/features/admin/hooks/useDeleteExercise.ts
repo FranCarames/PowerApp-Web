@@ -4,8 +4,9 @@ import { api } from '@/api/client';
 import { queryKeys } from '@/api/queryKeys';
 
 /**
- * `DELETE /exercise/{id}` (CU-A-06): el borrado físico de un ejercicio. El backend lo rechaza si hay
- * RMs o entrenamientos hechos con él (V7). Después se piden de nuevo los ejercicios y los circuitos.
+ * `DELETE /exercise/{id}` (CU-A-06): el borrado físico de un ejercicio. Si está en circuitos, ya se
+ * entrenó con él o hay alumnos con RMs registrados, el backend no toca nada y responde 409 con el
+ * motivo. Después se piden de nuevo los ejercicios y los circuitos.
  */
 export function useDeleteExercise() {
   const queryClient = useQueryClient();
