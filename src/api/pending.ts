@@ -143,11 +143,32 @@ export interface ExerciseMuscle {
 
 // PENDIENTE-CONTRATO: V9 CU-A-01
 /**
- * Respuesta de `GET /exercise/all` y `GET /exercise/{id}`: el `Exercise` del contrato más sus
- * músculos. El Swagger no declara `exercisedMuscles`, pero el backend lo manda siempre.
+ * Un ejercicio con sus músculos, como los manda `GET /exercise/all`: el `Exercise` del contrato más
+ * `exercisedMuscles`, que el Swagger no declara. `GET /exercise/{id}` los manda distinto
+ * (`ExerciseDetailResponse`) y `useExercise` lo lleva a esta forma.
  */
 export type ExerciseWithMuscles = Exercise & {
   exercisedMuscles: ExerciseMuscle[];
+};
+
+// PENDIENTE-CONTRATO: V9 CU-A-05
+/**
+ * Un elemento de `exercisedMuscles` en `GET /exercise/{id}`. A diferencia del listado, el backend
+ * no lo aplana: manda el vínculo `Exercised_Muscle` tal cual, con el músculo anidado en `muscle`.
+ * El `id` de este nivel es el del vínculo, no el del músculo, y no sirve para `exercised_muscles_ids`.
+ */
+export interface ExercisedMuscleLink {
+  id: string;
+  muscle: ExerciseMuscle;
+}
+
+// PENDIENTE-CONTRATO: V9 CU-A-05
+/**
+ * Respuesta de `GET /exercise/{id}` tal como llega. Los músculos pueden venir como vínculos o ya
+ * aplanados (la forma del listado), por si el backend unifica los dos.
+ */
+export type ExerciseDetailResponse = Exercise & {
+  exercisedMuscles: Array<ExercisedMuscleLink | ExerciseMuscle>;
 };
 
 // PENDIENTE-CONTRATO: V9 CU-A-01

@@ -1,7 +1,12 @@
 import { queryOptions, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { request } from '@/api/client';
-import type { ExerciseWithMuscles } from '@/api/pending';
+import type {
+  ExerciseDetailResponse,
+  ExercisedMuscleLink,
+  ExerciseMuscle,
+  ExerciseWithMuscles,
+} from '@/api/pending';
 import { queryKeys } from '@/api/queryKeys';
 
 /**
@@ -27,6 +32,27 @@ export function useExercises() {
   return useQuery(exercisesQuery());
 }
 
+function toExerciseMuscle(
+  item: ExercisedMuscleLink | ExerciseMuscle,
+): ExerciseMuscle {
+  return 'muscle' in item ? item.muscle : item;
+}
+
+/**
+ * `GET /exercise/{id}` no aplana `exercisedMuscles` como el listado: manda cada vínculo con el
+ * músculo anidado en `muscle`, y el `id` de primer nivel es el del vínculo. Se lo lleva a la forma
+ * del listado para que quien lo use lea siempre el `id` y el `name` del músculo.
+ */
+function flattenMuscles({
+  exercisedMuscles,
+  ...exercise
+}: ExerciseDetailResponse): ExerciseWithMuscles {
+  return {
+    ...exercise,
+    exercisedMuscles: exercisedMuscles.map(toExerciseMuscle),
+  };
+}
+
 /**
  * `GET /exercise/{id}`: un ejercicio con sus músculos. Pide sesión (cualquier rol) y responde 404 si
  * no existe.
@@ -50,12 +76,14 @@ export function useExercise(
             ?.find((exercise) => exercise.id === id)
         : undefined,
     queryFn: async ({ signal }) =>
-      (
-        await request<ExerciseWithMuscles>(
-          'get',
-          `/api/v1/exercise/${encodeURIComponent(id)}`,
-          { signal },
-        )
-      ).data,
+      flattenMuscles(
+        (
+          await request<ExerciseDetailResponse>(
+            'get',
+            `/api/v1/exercise/${encodeURIComponent(id)}`,
+            { signal },
+          )
+        ).data,
+      ),
   });
 }
