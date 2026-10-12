@@ -1,7 +1,10 @@
 import { passthrough } from 'msw';
 import { HttpResponse } from 'msw/http';
 
-import type { ExerciseWithMuscles } from '@/api/pending';
+import type {
+  ExerciseDetailResponse,
+  ExerciseWithMuscles,
+} from '@/api/pending';
 import type { Exercise } from '@/api/types';
 
 import { adminAccess } from '../access';
@@ -34,6 +37,21 @@ function view({ muscleIds, ...exercise }: StoredExercise): ExerciseWithMuscles {
       const muscle = muscleById(id);
       return muscle ? [toExerciseMuscle(muscle)] : [];
     }),
+  };
+}
+
+/**
+ * Un ejercicio como lo manda `GET /exercise/{id}`: el backend no aplana sus músculos, los manda con
+ * su vínculo `Exercised_Muscle`, y el `id` de primer nivel es el del vínculo y no el del músculo.
+ */
+function detailView(exercise: StoredExercise): ExerciseDetailResponse {
+  const { exercisedMuscles, ...rest } = view(exercise);
+  return {
+    ...rest,
+    exercisedMuscles: exercisedMuscles.map((muscle) => ({
+      id: `demo-link-${exercise.id}-${muscle.id}`,
+      muscle,
+    })),
   };
 }
 
@@ -91,7 +109,7 @@ export const exerciseMocks = [
     }
     const exercise = catalog.find(({ id }) => id === params.id);
     return exercise
-      ? HttpResponse.json(view(exercise))
+      ? HttpResponse.json(detailView(exercise))
       : serviceError(404, 'Ejercicio no encontrado');
   }),
 
