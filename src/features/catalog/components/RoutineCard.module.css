@@ -1,0 +1,20 @@
+/* Una rutina dada de baja se ve apagada, como un circuito o una cuenta inactivos. */
+.inactive {
+  opacity: 0.65;
+}
+
+/* El nombre del prototipo va en 700 (el título de una fila común, en 600). Un nombre largo y sin espacios no tiene dónde cortarse. */
+.name {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* La nota del entrenador, hasta dos líneas: una nota larga no estira la tarjeta. */
+.note {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
