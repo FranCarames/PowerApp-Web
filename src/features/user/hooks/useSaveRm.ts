@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { api } from '@/api/client';
 import { queryKeys } from '@/api/queryKeys';
-import type { UserRmWithExercise } from '@/api/pending';
+import type { UserRm } from '@/api/types';
 
 import type { RmValues } from '../schemas';
 
@@ -17,7 +17,7 @@ import type { RmValues } from '../schemas';
  * es la medianoche UTC y en un servidor al oeste de UTC (el de Fran, en local) caería un día antes, y
  * cada edición lo correría otro más. El mediodía cae en el mismo día en cualquier servidor.
  */
-export function useSaveRm(userId: string, rm?: UserRmWithExercise) {
+export function useSaveRm(userId: string, rm?: UserRm) {
   const queryClient = useQueryClient();
 
   return useMutation({

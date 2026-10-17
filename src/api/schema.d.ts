@@ -1242,10 +1242,11 @@ export interface components {
             /** @example secret123 */
             password: string;
             /**
+             * @description Sólo se acepta `user`: el registro siempre crea un alumno
              * @default user
              * @enum {string}
              */
-            role: "user" | "coach" | "admin";
+            role: "user";
             /** @example +54 */
             phone_prefix: string;
             /** @example 1123456789 */
@@ -1256,6 +1257,46 @@ export interface components {
             email: string;
             /** @example secret123 */
             password: string;
+        };
+        LoginResponseDto: {
+            /** @example uuid-1234 */
+            id: string;
+            /** @example Juan */
+            first_name: string;
+            /** @example Pérez */
+            last_name: string;
+            /** @example juan@example.com */
+            email: string;
+            /** @example false */
+            email_verified: boolean;
+            /**
+             * @default user
+             * @enum {string}
+             */
+            role: "user" | "coach" | "admin";
+            /** @example https://... */
+            profile_picture?: string;
+            /** @example +54 */
+            phone_prefix?: string;
+            /** @example 1123456789 */
+            phone_number?: string;
+            /** @example false */
+            phone_verified: boolean;
+            /**
+             * @description Cuenta activa (no relacionado con si la membresía está vigente)
+             * @example true
+             */
+            active: boolean;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            coach?: components["schemas"]["Coach"];
+            /**
+             * @description true si se ingresó con la contraseña temporal (CU-U-04): el cliente tiene que llevar al cambio de contraseña (CU-U-05) antes de continuar. Viene siempre.
+             * @example false
+             */
+            password_change_required: boolean;
         };
         RecoverPasswordDto: {
             /** @example juan@example.com */
@@ -2211,7 +2252,21 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
         };
-        UserRM: {
+        UserRmExerciseRefDto: {
+            /** @example uuid-1234 */
+            id: string;
+            /** @example Sentadilla */
+            name: string;
+        };
+        UserRmUserRefDto: {
+            /** @example uuid-1234 */
+            id: string;
+            /** @example Juan */
+            first_name: string;
+            /** @example Pérez */
+            last_name: string;
+        };
+        UserRmDetailDto: {
             /** @example uuid-1234 */
             id: string;
             /** @example uuid-1234 */
@@ -2223,7 +2278,8 @@ export interface components {
             /** @example 5 */
             reps: number;
             /**
-             * Format: date-time
+             * Format: date
+             * @description Día calendario, sin hora
              * @example 2024-01-15
              */
             date: string;
@@ -2231,6 +2287,8 @@ export interface components {
             created_at: string;
             /** Format: date-time */
             updated_at: string;
+            exercise: components["schemas"]["UserRmExerciseRefDto"];
+            user: components["schemas"]["UserRmUserRefDto"];
         };
         CalculatePotentialRmDto: {
             /**
@@ -2398,6 +2456,13 @@ export interface operations {
                     "application/json": components["schemas"]["User"];
                 };
             };
+            /** @description Un alumno sólo puede acceder a sus propios datos */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     UsersController_createUser: {
@@ -2423,6 +2488,20 @@ export interface operations {
                     "application/json": components["schemas"]["User"];
                 };
             };
+            /** @description Datos inválidos, o un `role` distinto de `user`: el registro sólo crea alumnos */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ya existe un usuario con ese email */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     UsersController_loginUser: {
@@ -2445,8 +2524,22 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["User"];
+                    "application/json": components["schemas"]["LoginResponseDto"];
                 };
+            };
+            /** @description Credenciales inválidas */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La cuenta está cerrada */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2510,6 +2603,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["User"];
                 };
+            };
+            /** @description Sobre la propia cuenta, o un entrenador sobre alguien que no es alumno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuario no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2633,6 +2740,20 @@ export interface operations {
                     "application/json": components["schemas"]["Membership"];
                 };
             };
+            /** @description Datos inválidos, o ya existe una membresía con esa duración */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ya existe una membresía con ese nombre */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     MembershipController_editMembership: {
@@ -2657,6 +2778,27 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Membership"];
                 };
+            };
+            /** @description Datos inválidos, o otra membresía ya tiene esa duración */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Membresía no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Otra membresía ya tiene ese nombre */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2764,6 +2906,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Del pago más reciente al más viejo */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2771,6 +2914,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["MembershipPayment"][];
                 };
+            };
+            /** @description Un alumno sólo puede acceder a sus propios datos */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuario no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -3140,6 +3297,13 @@ export interface operations {
                     "application/json": components["schemas"]["Exercise"];
                 };
             };
+            /** @description Ya existe un ejercicio con ese nombre */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     ExerciseController_editExercise: {
@@ -3164,6 +3328,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Exercise"];
                 };
+            };
+            /** @description Otro ejercicio ya tiene ese nombre */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -3207,6 +3378,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ejercicio no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description El ejercicio está en uso (en circuitos, ya se entrenó con él o hay RMs registrados) y no se puede eliminar */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3876,7 +4061,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"][];
+                    "application/json": components["schemas"]["UserRmDetailDto"][];
                 };
             };
         };
@@ -3892,12 +4077,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Hoy devuelve un array (vacío si no existe); BE-32 lo pasa a objeto y 404 */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"];
+                    "application/json": components["schemas"]["UserRmDetailDto"][];
                 };
             };
         };
@@ -3937,8 +4123,15 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"][];
+                    "application/json": components["schemas"]["UserRmDetailDto"][];
                 };
+            };
+            /** @description Un alumno sólo puede acceder a sus propios datos */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -3961,10 +4154,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"][];
+                    "application/json": components["schemas"]["UserRmDetailDto"][];
                 };
             };
-            /** @description Un alumno sólo puede consultar sus propios RMs */
+            /** @description Un alumno sólo puede acceder a sus propios datos */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3989,7 +4182,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"][];
+                    "application/json": components["schemas"]["UserRmDetailDto"][];
                 };
             };
         };
@@ -4042,7 +4235,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"];
+                    "application/json": components["schemas"]["UserRmDetailDto"];
                 };
             };
         };
@@ -4062,12 +4255,12 @@ export interface operations {
             };
         };
         responses: {
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"];
+                    "application/json": components["schemas"]["UserRmDetailDto"];
                 };
             };
         };

@@ -29,7 +29,8 @@ interface PendingEntry {
 type RegistryEntry = ContractEntry | PendingEntry;
 
 export const registry: readonly RegistryEntry[] = [
-  // Entrenadores y ejercicios (públicos): solo con la sesión de una cuenta de demo (ver handlers/coaches.ts)
+  // Entrenadores (piden token de admin desde el 17/10) y ejercicios (públicos): solo con la sesión de una
+  // cuenta de demo (ver handlers/coaches.ts)
   { method: 'get', path: '/api/v1/coach/all', mock: true },
   { method: 'get', path: '/api/v1/coach/get/{id}', mock: true },
   { method: 'get', path: '/api/v1/exercise/all', mock: true },

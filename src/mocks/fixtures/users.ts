@@ -14,7 +14,7 @@ export const DEMO_PASSWORD = 'demo123';
 
 export interface DemoAccount {
   user: User;
-  /** Entra con una contraseña temporal (B9): el login avisa que tiene que cambiarla. */
+  /** Entra con una contraseña temporal: el login avisa que tiene que cambiarla. */
   passwordChangeRequired?: true;
   /** Cuenta cerrada: el login responde 403 aunque la contraseña sea correcta. */
   closed?: true;

@@ -2,7 +2,7 @@ import { useId } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { getErrorMessage } from '@/api/errors';
-import type { UserRmWithExercise } from '@/api/pending';
+import type { UserRm } from '@/api/types';
 import { toCalendarDay } from '@/shared/lib/dates';
 import { zodResolver } from '@/shared/lib/zodResolver';
 import {
@@ -22,7 +22,7 @@ import styles from './RmFormModal.module.css';
 
 interface RmFormModalProps {
   /** El RM a editar, `'new'` para registrar uno, o `null` con el modal cerrado. */
-  target: UserRmWithExercise | 'new' | null;
+  target: UserRm | 'new' | null;
   userId: string;
   /** Los ejercicios para elegir, ordenados. `undefined` mientras no se cargaron. */
   exercises: readonly { id: string; name: string }[] | undefined;
@@ -84,7 +84,7 @@ export function RmFormModal({
 
 interface RmFormProps {
   id: string;
-  rm?: UserRmWithExercise;
+  rm?: UserRm;
   exercises: RmFormModalProps['exercises'];
   save: ReturnType<typeof useSaveRm>;
   onSaved: () => void;

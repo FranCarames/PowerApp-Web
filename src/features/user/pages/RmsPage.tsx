@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { getErrorMessage } from '@/api/errors';
-import type { UserRmWithExercise } from '@/api/pending';
+import type { UserRm } from '@/api/types';
 import { useUserRms } from '@/features/account/hooks/useUserRms';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useExercises } from '@/features/catalog/hooks/useExercises';
@@ -45,10 +45,8 @@ function Rms({ userId }: { userId: string }) {
   const query = useUserRms(userId);
   const exercises = useExercises();
   const remove = useDeleteRm();
-  const [editing, setEditing] = useState<UserRmWithExercise | 'new' | null>(
-    null,
-  );
-  const [toDelete, setToDelete] = useState<UserRmWithExercise | null>(null);
+  const [editing, setEditing] = useState<UserRm | 'new' | null>(null);
+  const [toDelete, setToDelete] = useState<UserRm | null>(null);
 
   const groups = useMemo(
     () => (query.data ? groupRmsByExercise(query.data) : []),
@@ -62,7 +60,7 @@ function Rms({ userId }: { userId: string }) {
     [exercises.data],
   );
 
-  function confirmDelete(rm: UserRmWithExercise) {
+  function confirmDelete(rm: UserRm) {
     remove.mutate(rm.id, {
       onSuccess: () => {
         toast.success('RM eliminado');
