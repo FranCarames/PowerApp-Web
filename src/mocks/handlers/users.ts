@@ -1,8 +1,7 @@
 import { passthrough } from 'msw';
 import { HttpResponse } from 'msw/http';
 
-import type { LoginResponse } from '@/api/pending';
-import type { Role, User } from '@/api/types';
+import type { LoginResponse, Role, User } from '@/api/types';
 
 import { staffAccess } from '../access';
 import { mockEndpoint } from '../endpoint';
@@ -87,7 +86,7 @@ function matchesKeyword(user: User, keyword: string): boolean {
 /** Los mocks de Usuarios. Cuáles están encendidos lo dice `registry.ts`. */
 export const userMocks = [
   // El login es REAL: el mock solo simula las cuentas de demo (entre ellas, la de la contraseña
-  // temporal, que el contrato todavía no puede informar: B9). Cualquier otro email va al backend.
+  // temporal, para poder recorrer el cambio obligatorio). Cualquier otro email va al backend.
   mockEndpoint('post', '/api/v1/users/login', async ({ request }) => {
     const { email, password } = await request.clone().json();
     const account = demoAccounts.find(
@@ -102,10 +101,11 @@ export const userMocks = [
 
     // La contraseña temporal deja de serlo cuando la cuenta se cambia la contraseña.
     const passwordChangeRequired =
-      account.passwordChangeRequired && !changedPasswords.has(account.user.id);
+      account.passwordChangeRequired === true &&
+      !changedPasswords.has(account.user.id);
     const body: LoginResponse = {
       ...userOf(account),
-      ...(passwordChangeRequired && { password_change_required: true }),
+      password_change_required: passwordChangeRequired,
     };
     return HttpResponse.json(body, {
       headers: authTokenHeaders(demoToken(account)),

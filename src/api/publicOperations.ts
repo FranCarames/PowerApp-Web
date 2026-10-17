@@ -6,8 +6,6 @@
  * tal como figura en `paths` (con las llaves de los parámetros: /api/v1/users/get/{id}).
  */
 export const PUBLIC_OPERATIONS: ReadonlySet<string> = new Set([
-  'get /api/v1/coach/all',
-  'get /api/v1/coach/get/{id}',
   'get /api/v1/exercise/ExMuscles/all',
   'get /api/v1/exercise/all',
   'get /api/v1/membership/all',

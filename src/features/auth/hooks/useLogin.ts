@@ -2,7 +2,6 @@ import { useMutation } from '@tanstack/react-query';
 
 import { apiRequest, readAuthToken } from '@/api/client';
 import { getErrorMessage } from '@/api/errors';
-import type { LoginResponse } from '@/api/pending';
 
 import type { LoginValues } from '../schemas';
 import type { Session } from '../session';
@@ -21,7 +20,7 @@ class MissingTokenError extends Error {
 
 /**
  * `POST /users/login`. Devuelve la sesión lista para `signIn`: el token (que llega en el header, no
- * en el body), el usuario y, si el backend lo avisa (B9), `passwordChangeRequired`. No abre la
+ * en el body), el usuario y, si entró con la contraseña temporal, `passwordChangeRequired`. No abre la
  * sesión: eso lo decide la pantalla, porque con una contraseña temporal pasa por un modal antes.
  */
 export function useLogin() {
@@ -37,14 +36,12 @@ export function useLogin() {
       const token = readAuthToken(response);
       if (!token) throw new MissingTokenError();
 
-      // B9 todavía no está en el contrato: el campo se lee con el tipo provisional.
-      const { password_change_required, ...user } = data as LoginResponse;
+      // El login avisa siempre si se entró con la contraseña temporal (`password_change_required`).
+      const { password_change_required, ...user } = data;
       return {
         token,
         user,
-        ...(password_change_required === true && {
-          passwordChangeRequired: true,
-        }),
+        ...(password_change_required && { passwordChangeRequired: true }),
       };
     },
   });

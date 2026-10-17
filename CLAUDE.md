@@ -189,7 +189,7 @@ Las rutas de alta usan `nuevo` como id, por ejemplo `/c/circuitos/nuevo`.
   - Registrar un pago manda solo `user_id` y `membership_id`; el vencimiento lo calcula el backend (hoy más la duración, al final del día) y no suma los días que le quedaban a una membresía vigente. Un pago no se puede anular.
   - "Eliminar" un tipo de membresía es una baja lógica.
 - **Recuperar contraseña:** mostrá el mismo mensaje de confirmación exista o no el email.
-- **Contraseña temporal:** si el login indica que se usó la temporal, forzá el cambio de contraseña antes de cualquier otra pantalla. El flag está pendiente de contrato (B9 en PLAN).
+- **Contraseña temporal:** si el login indica que se usó la temporal, forzá el cambio de contraseña antes de cualquier otra pantalla. El flag es `password_change_required` en la respuesta del login (B9, ya en el contrato desde el 17/10).
 - **Registro:** siempre manda `role: user`. Después del alta, volvé al login, como indica CU-U-01.
 - **Contraseñas:** validá con las reglas del DTO: mínimo 6 caracteres y máximo 50.
 - **CUIL** (al convertir un alumno en entrenador): se envía con 11 dígitos sin guiones. Se puede mostrar con máscara.

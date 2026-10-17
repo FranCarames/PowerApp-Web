@@ -6,9 +6,7 @@ import type {
   Exercise,
   Muscle,
   MuscleGroup,
-  User,
   UserPlanification,
-  UserRm,
 } from './types';
 
 // Tipos provisionales de lo que el contrato (openapi.json) todavía no tiene: las dependencias B1 a
@@ -19,7 +17,7 @@ import type {
 // Acá solo está lo que el PLAN deja tipar sin inventar: los nombres de los campos salen de las
 // entidades del contrato. Del resto (B1 a B6) el PLAN dice qué necesita el front, pero no cómo se
 // llaman los campos ni los endpoints: lo tipa la tarea que lo usa (B1: T38; B2: T39 y T40; B3 y B4:
-// T40; B5: T42 y T38; B6: T43). B9 lo tipó T09, con un nombre de campo propuesto por el front.
+// T40; B5: T42 y T38; B6: T43).
 
 // PENDIENTE-CONTRATO: B7 CU-E-13
 /**
@@ -70,15 +68,6 @@ export type CircuitDetail = Omit<CircuitDetailResponse, 'exercises'> & {
  */
 export type EditCoachRequest = Pick<Coach, 'coach_email' | 'cuil'>;
 
-// PENDIENTE-CONTRATO: B9 CU-U-02
-/**
- * Respuesta de `POST /users/login`: el `User` de siempre más el aviso de que entró con una contraseña
- * temporal y tiene que cambiarla. El contrato todavía no lo trae: el nombre `password_change_required`
- * es una propuesta del front y se ajusta cuando Fran defina el contrato. Falta o `false` es una
- * contraseña común. Mientras el backend no lo mande, solo lo manda el mock de las cuentas de demo.
- */
-export type LoginResponse = User & { password_change_required?: boolean };
-
 // PENDIENTE-CONTRATO: V1 CU-E-27
 /** Los estados que acepta el filtro `status` de `GET /membership/status/users`, los del contrato. */
 export type MembershipStatusFilter = NonNullable<
@@ -112,21 +101,6 @@ export interface StudentsByMembershipStatus {
   expiring_soon_days: number;
   students: StudentMembership[];
 }
-
-// PENDIENTE-CONTRATO: V10 CU-E-04
-/**
- * Un RM tal como lo manda `GET /user_rm/user/{id}`: el `UserRM` del contrato pero sin `user_id` ni
- * `exercise_id`, con el ejercicio (`id` y `name`) y el usuario (`id`, `first_name` y `last_name`)
- * anidados. El backend recorta las columnas con un `select` (`getAllUserRmsByUserId`) y el Swagger no
- * lo refleja. `date` es un día sin hora ("2026-10-01").
- */
-export type UserRmWithExercise = Pick<
-  UserRm,
-  'id' | 'weight' | 'reps' | 'date' | 'created_at' | 'updated_at'
-> & {
-  exercise: { id: string; name: string };
-  user: { id: string; first_name: string; last_name: string };
-};
 
 // PENDIENTE-CONTRATO: V9 CU-A-01
 /**

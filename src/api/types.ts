@@ -4,6 +4,7 @@ import type { components } from './schema';
 type Schemas = components['schemas'];
 
 export type User = Schemas['User'];
+export type LoginResponse = Schemas['LoginResponseDto'];
 export type PaginatedUsers = Schemas['PaginatedUsersResponseDto'];
 export type Role = User['role'];
 export type Membership = Schemas['Membership'];
@@ -12,7 +13,7 @@ export type Coach = Schemas['Coach'];
 export type UserPlanification = Schemas['UserPlanification'];
 export type MembershipStatusSummary = Schemas['MembershipStatusSummaryDto'];
 export type Exercise = Schemas['Exercise'];
-export type UserRm = Schemas['UserRM'];
+export type UserRm = Schemas['UserRmDetailDto'];
 export type PotentialRmResponse = Schemas['PotentialRmResponseDto'];
 export type Muscle = Schemas['Muscle'];
 export type MuscleGroup = Schemas['MuscleGroup'];

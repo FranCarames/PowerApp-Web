@@ -111,6 +111,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Un alumno sólo puede acceder a sus propios datos"
           }
         },
         "security": [
@@ -155,6 +158,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Datos inválidos, o un `role` distinto de `user`: el registro sólo crea alumnos"
+          },
+          "409": {
+            "description": "Ya existe un usuario con ese email"
           }
         },
         "tags": [
@@ -190,10 +199,16 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/LoginResponseDto"
                 }
               }
             }
+          },
+          "401": {
+            "description": "Credenciales inválidas"
+          },
+          "403": {
+            "description": "La cuenta está cerrada"
           }
         },
         "tags": [
@@ -273,6 +288,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Sobre la propia cuenta, o un entrenador sobre alguien que no es alumno"
+          },
+          "404": {
+            "description": "Usuario no encontrado"
           }
         },
         "security": [
@@ -435,6 +456,12 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Datos inválidos, o ya existe una membresía con esa duración"
+          },
+          "409": {
+            "description": "Ya existe una membresía con ese nombre"
           }
         },
         "security": [
@@ -481,6 +508,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Datos inválidos, o otra membresía ya tiene esa duración"
+          },
+          "404": {
+            "description": "Membresía no encontrada"
+          },
+          "409": {
+            "description": "Otra membresía ya tiene ese nombre"
           }
         },
         "security": [
@@ -649,7 +685,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Del pago más reciente al más viejo",
             "content": {
               "application/json": {
                 "schema": {
@@ -660,6 +696,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Un alumno sólo puede acceder a sus propios datos"
+          },
+          "404": {
+            "description": "Usuario no encontrado"
           }
         },
         "security": [
@@ -727,6 +769,11 @@
             }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": [
           "Coach"
         ]
@@ -758,6 +805,11 @@
             }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": [
           "Coach"
         ]
@@ -1238,6 +1290,9 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "Ya existe un ejercicio con ese nombre"
           }
         },
         "security": [
@@ -1284,6 +1339,9 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "Otro ejercicio ya tiene ese nombre"
           }
         },
         "security": [
@@ -1313,6 +1371,12 @@
         "responses": {
           "200": {
             "description": ""
+          },
+          "404": {
+            "description": "Ejercicio no encontrado"
+          },
+          "409": {
+            "description": "El ejercicio está en uso (en circuitos, ya se entrenó con él o hay RMs registrados) y no se puede eliminar"
           }
         },
         "security": [
@@ -2557,7 +2621,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UserRM"
+                    "$ref": "#/components/schemas/UserRmDetailDto"
                   }
                 }
               }
@@ -2590,11 +2654,14 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Hoy devuelve un array (vacío si no existe); BE-32 lo pasa a objeto y 404",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserRM"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserRmDetailDto"
+                  }
                 }
               }
             }
@@ -2659,11 +2726,14 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UserRM"
+                    "$ref": "#/components/schemas/UserRmDetailDto"
                   }
                 }
               }
             }
+          },
+          "403": {
+            "description": "Un alumno sólo puede acceder a sus propios datos"
           }
         },
         "security": [
@@ -2709,14 +2779,14 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UserRM"
+                    "$ref": "#/components/schemas/UserRmDetailDto"
                   }
                 }
               }
             }
           },
           "403": {
-            "description": "Un alumno sólo puede consultar sus propios RMs"
+            "description": "Un alumno sólo puede acceder a sus propios datos"
           }
         },
         "security": [
@@ -2751,7 +2821,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UserRM"
+                    "$ref": "#/components/schemas/UserRmDetailDto"
                   }
                 }
               }
@@ -2827,7 +2897,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserRM"
+                  "$ref": "#/components/schemas/UserRmDetailDto"
                 }
               }
             }
@@ -2868,12 +2938,12 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserRM"
+                  "$ref": "#/components/schemas/UserRmDetailDto"
                 }
               }
             }
@@ -3095,11 +3165,10 @@
           "role": {
             "type": "string",
             "enum": [
-              "user",
-              "coach",
-              "admin"
+              "user"
             ],
-            "default": "user"
+            "default": "user",
+            "description": "Sólo se acepta `user`: el registro siempre crea un alumno"
           },
           "phone_prefix": {
             "type": "string",
@@ -3139,6 +3208,96 @@
         "required": [
           "email",
           "password"
+        ]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "Juan",
+            "maxLength": 50
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Pérez",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "example": "juan@example.com",
+            "maxLength": 50
+          },
+          "email_verified": {
+            "type": "boolean",
+            "example": false
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "coach",
+              "admin"
+            ],
+            "default": "user"
+          },
+          "profile_picture": {
+            "type": "string",
+            "example": "https://...",
+            "maxLength": 150
+          },
+          "phone_prefix": {
+            "type": "string",
+            "example": "+54",
+            "maxLength": 10
+          },
+          "phone_number": {
+            "type": "string",
+            "example": "1123456789",
+            "maxLength": 20
+          },
+          "phone_verified": {
+            "type": "boolean",
+            "example": false
+          },
+          "active": {
+            "type": "boolean",
+            "example": true,
+            "description": "Cuenta activa (no relacionado con si la membresía está vigente)"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "coach": {
+            "$ref": "#/components/schemas/Coach"
+          },
+          "password_change_required": {
+            "type": "boolean",
+            "example": false,
+            "description": "true si se ingresó con la contraseña temporal (CU-U-04): el cliente tiene que llevar al cambio de contraseña (CU-U-05) antes de continuar. Viene siempre."
+          }
+        },
+        "required": [
+          "id",
+          "first_name",
+          "last_name",
+          "email",
+          "email_verified",
+          "role",
+          "phone_verified",
+          "active",
+          "created_at",
+          "updated_at",
+          "password_change_required"
         ]
       },
       "RecoverPasswordDto": {
@@ -5236,7 +5395,46 @@
           "updated_at"
         ]
       },
-      "UserRM": {
+      "UserRmExerciseRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "name": {
+            "type": "string",
+            "example": "Sentadilla"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "UserRmUserRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "Juan"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Pérez"
+          }
+        },
+        "required": [
+          "id",
+          "first_name",
+          "last_name"
+        ]
+      },
+      "UserRmDetailDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -5260,9 +5458,10 @@
             "example": 5
           },
           "date": {
-            "format": "date-time",
             "type": "string",
-            "example": "2024-01-15"
+            "format": "date",
+            "example": "2024-01-15",
+            "description": "Día calendario, sin hora"
           },
           "created_at": {
             "format": "date-time",
@@ -5271,6 +5470,12 @@
           "updated_at": {
             "format": "date-time",
             "type": "string"
+          },
+          "exercise": {
+            "$ref": "#/components/schemas/UserRmExerciseRefDto"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserRmUserRefDto"
           }
         },
         "required": [
@@ -5281,7 +5486,9 @@
           "reps",
           "date",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "exercise",
+          "user"
         ]
       },
       "CalculatePotentialRmDto": {

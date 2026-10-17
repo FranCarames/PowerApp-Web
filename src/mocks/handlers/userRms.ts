@@ -1,10 +1,8 @@
 import { passthrough } from 'msw';
 import { HttpResponse } from 'msw/http';
 
-import type { UserRmWithExercise } from '@/api/pending';
-
 import { userAccess } from '../access';
-import { mockEndpoint, mockPendingEndpoint } from '../endpoint';
+import { mockEndpoint } from '../endpoint';
 import {
   createDemoRm,
   deleteDemoRm,
@@ -80,15 +78,11 @@ export const userRmMocks = [
   // Leer los RMs de un usuario es REAL: el mock atiende solo a las cuentas de demo, por su token
   // falso, y responde por cualquier alumno de demo (el entrenador mira los de los demás). Con un
   // token de verdad va al backend. Como él, no valida el id (los de demo no son UUID) y un usuario
-  // sin RMs es un 200 con la lista vacía. Es un mock "pendiente" porque el backend manda otra forma
-  // que el contrato (V10): cada RM con su ejercicio anidado y sin `exercise_id`.
-  mockPendingEndpoint<undefined, UserRmWithExercise[]>(
-    'get',
-    '/api/v1/user_rm/user/{id}',
-    ({ request, params }) =>
-      demoAccountForToken(request.headers.get('Authorization'))
-        ? HttpResponse.json(demoRmsFor(params.id))
-        : passthrough(),
+  // sin RMs es un 200 con la lista vacía.
+  mockEndpoint('get', '/api/v1/user_rm/user/{id}', ({ request, params }) =>
+    demoAccountForToken(request.headers.get('Authorization'))
+      ? HttpResponse.json(demoRmsFor(params.id))
+      : passthrough(),
   ),
 
   // Calcular los RMs potenciales (CU-U-16) es REAL y lo puede pedir cualquier rol: el mock atiende solo
@@ -131,7 +125,7 @@ export const userRmMocks = [
     return HttpResponse.json(created, { status: 201 });
   }),
 
-  // El backend responde 201 al editar, aunque el contrato dice 200.
+  // El backend responde 201 al editar, y el contrato también lo declara así.
   mockEndpoint(
     'post',
     '/api/v1/user_rm/edit/{id}',

@@ -1,12 +1,11 @@
-import type { UserRmWithExercise } from '@/api/pending';
 import type { PotentialRmResponse, UserRm } from '@/api/types';
 
 import { exercises } from './exercises';
 import { students } from './students';
 
-// Los RMs de los alumnos de demo, con la forma que manda el backend (cada uno con su ejercicio y su
-// alumno anidados, sin `exercise_id` ni `user_id`: V10). Las fechas son relativas a hoy, para que el
-// historial se vea igual sin importar el día en que se mire.
+// Los RMs de los alumnos de demo, con la forma que manda el backend (`UserRmDetailDto`: las columnas con
+// `user_id` y `exercise_id`, más el ejercicio y el alumno anidados). Las fechas son relativas a hoy, para
+// que el historial se vea igual sin importar el día en que se mire.
 //
 // Todos parten del mismo perfil (el de Franco, con cinco ejercicios) escalado por alumno y con menos
 // ejercicios para los demás. Franco tiene los cinco, Lucía Gómez dos y Martín Pérez ninguno (es el
@@ -66,20 +65,23 @@ function rmsFor(
   student: { id: string; first_name: string; last_name: string },
   exerciseCount: number,
   scale: number,
-): UserRmWithExercise[] {
+): UserRm[] {
   const { id, first_name, last_name } = student;
   return PROFILE.slice(0, exerciseCount).flatMap(([name, entries]) =>
     entries.map(([weight, reps, daysAgo], index) => {
       const created = new Date(Date.now() - daysAgo * DAY).toISOString();
+      const exercise = exerciseOf(name);
       return {
         id: `demo-rm-${id}-${name}-${index}`,
+        user_id: id,
+        exercise_id: exercise.id,
         // En saltos de 2,5 kg, como se cargan los discos.
         weight: Math.round((weight * scale) / 2.5) * 2.5,
         reps,
         date: calendarDay(daysAgo),
         created_at: created,
         updated_at: created,
-        exercise: exerciseOf(name),
+        exercise,
         user: { id, first_name, last_name },
       };
     }),
@@ -87,7 +89,7 @@ function rmsFor(
 }
 
 /** Los RMs de partida de un alumno de demo. Un id desconocido no tiene ninguno. */
-function baseRmsFor(userId: string): UserRmWithExercise[] {
+function baseRmsFor(userId: string): UserRm[] {
   const position = students.findIndex(({ id }) => id === userId);
   if (position < 0) return [];
   const student = students[position];
@@ -105,15 +107,15 @@ function baseRmsFor(userId: string): UserRmWithExercise[] {
 
 // Lo que cargan, editan o borran las cuentas de demo vive en memoria y se pierde al recargar. Un
 // alumno entra al mapa recién cuando cambia algo: hasta entonces se lee de la lista de partida.
-const changed = new Map<string, UserRmWithExercise[]>();
+const changed = new Map<string, UserRm[]>();
 
 /** Los RMs de un alumno de demo, sin ordenar (como los devuelve el backend), con lo que se cambió. */
-export function demoRmsFor(userId: string): UserRmWithExercise[] {
+export function demoRmsFor(userId: string): UserRm[] {
   return changed.get(userId) ?? baseRmsFor(userId);
 }
 
 /** La lista de un alumno de demo lista para cambiarla: se arma la primera vez. */
-function editableRmsOf(userId: string): UserRmWithExercise[] {
+function editableRmsOf(userId: string): UserRm[] {
   let rms = changed.get(userId);
   if (!rms) {
     rms = [...baseRmsFor(userId)];
@@ -123,7 +125,7 @@ function editableRmsOf(userId: string): UserRmWithExercise[] {
 }
 
 /** Un RM de demo de cualquier alumno, por su id. */
-export function findDemoRm(id: string): UserRmWithExercise | undefined {
+export function findDemoRm(id: string): UserRm | undefined {
   for (const { id: userId } of students) {
     const found = demoRmsFor(userId).find((rm) => rm.id === id);
     if (found) return found;
@@ -146,20 +148,6 @@ export interface RmBody {
   date: string;
 }
 
-/** Lo que responde el backend al crear o editar: el `UserRM` del contrato, con `user_id` y `exercise_id`. */
-function toUserRm(rm: UserRmWithExercise): UserRm {
-  return {
-    id: rm.id,
-    user_id: rm.user.id,
-    exercise_id: rm.exercise.id,
-    weight: rm.weight,
-    reps: rm.reps,
-    date: rm.date,
-    created_at: rm.created_at,
-    updated_at: rm.updated_at,
-  };
-}
-
 let nextRmNumber = 1;
 
 /** Crea un RM del alumno de demo y devuelve lo que responde el backend. El ejercicio tiene que existir. */
@@ -171,8 +159,10 @@ export function createDemoRm(
   if (!exercise) return undefined;
 
   const now = new Date().toISOString();
-  const rm: UserRmWithExercise = {
+  const rm: UserRm = {
     id: `demo-rm-nuevo-${nextRmNumber++}`,
+    user_id: student.id,
+    exercise_id: exercise.id,
     weight: values.weight,
     reps: values.reps,
     // El backend guarda un día sin hora.
@@ -187,12 +177,12 @@ export function createDemoRm(
     },
   };
   editableRmsOf(student.id).push(rm);
-  return toUserRm(rm);
+  return rm;
 }
 
 /** Edita un RM de demo y devuelve lo que responde el backend. El ejercicio tiene que existir. */
 export function editDemoRm(
-  existing: UserRmWithExercise,
+  existing: UserRm,
   values: RmBody,
 ): UserRm | undefined {
   const exercise = findDemoExercise(values.exercise_id);
@@ -200,8 +190,9 @@ export function editDemoRm(
 
   const rms = editableRmsOf(existing.user.id);
   const index = rms.findIndex(({ id }) => id === existing.id);
-  const edited: UserRmWithExercise = {
+  const edited: UserRm = {
     ...existing,
+    exercise_id: exercise.id,
     weight: values.weight,
     reps: values.reps,
     date: values.date.slice(0, 10),
@@ -209,7 +200,7 @@ export function editDemoRm(
     exercise,
   };
   rms[index] = edited;
-  return toUserRm(edited);
+  return edited;
 }
 
 /** Redondea a 2 decimales, como el backend. */
@@ -246,7 +237,7 @@ export function potentialRmsFor(
 }
 
 /** Borra un RM de demo. */
-export function deleteDemoRm(existing: UserRmWithExercise): void {
+export function deleteDemoRm(existing: UserRm): void {
   const rms = editableRmsOf(existing.user.id);
   changed.set(
     existing.user.id,

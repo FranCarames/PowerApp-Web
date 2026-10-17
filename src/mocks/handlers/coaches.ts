@@ -71,15 +71,16 @@ function editErrors(body: unknown): string[] {
 
 /** Los mocks de entrenadores. Cuáles están encendidos lo dice `registry.ts`. */
 export const coachMocks = [
-  // El listado es REAL y público: igual que el de ejercicios, responde solo a la sesión de una cuenta
-  // de demo.
+  // El listado es REAL y solo del Admin (pide token desde el 17/10): responde solo a la sesión de una
+  // cuenta de demo.
   mockEndpoint('get', '/api/v1/coach/all', () =>
     demoAccountForSession()
       ? HttpResponse.json(currentCoaches())
       : passthrough(),
   ),
 
-  // Leer un entrenador es REAL y público: igual, responde solo a la sesión de una cuenta de demo.
+  // Leer un entrenador es REAL y solo del Admin (pide token desde el 17/10): responde solo a la sesión de
+  // una cuenta de demo.
   mockEndpoint('get', '/api/v1/coach/get/{id}', ({ params }) => {
     if (!demoAccountForSession()) return passthrough();
     const coach = records.get(params.id);
