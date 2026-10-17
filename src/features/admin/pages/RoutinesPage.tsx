@@ -1,8 +1,15 @@
-import { SectionPlaceholder } from '@/shared/ui';
+import { RoutineList } from '@/features/catalog/components/RoutineList';
+import { PageHeader } from '@/shared/ui';
 
-// PLACEHOLDER hasta el bloque C2: T21 (listado de rutinas) lo reemplaza.
+/**
+ * Rutinas del Admin (CU-E-15): el listado compartido con el Entrenador (`RoutineList`), bajo su
+ * encabezado. Tocar una rutina abre su editor en `/a/rutinas/:id` (T22).
+ */
 export function RoutinesPage() {
   return (
-    <SectionPlaceholder eyebrow="Sistémicas" title="Rutinas" icon="list" />
+    <>
+      <PageHeader eyebrow="Sistémicas" title="Rutinas" />
+      <RoutineList basePath="/a/rutinas" />
+    </>
   );
 }
