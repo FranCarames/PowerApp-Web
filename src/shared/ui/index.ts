@@ -21,6 +21,7 @@ export { ListSkeleton } from './ListSkeleton';
 export { Logo } from './Logo';
 export { Modal } from './Modal';
 export { Note } from './Note';
+export { NumberStepper } from './NumberStepper';
 export { PageHeader } from './PageHeader';
 export { PasswordInput } from './PasswordInput';
 export { PhoneField } from './PhoneField';
