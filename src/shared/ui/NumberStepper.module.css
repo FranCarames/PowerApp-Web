@@ -1,0 +1,75 @@
+/* Un input con un botón grande a cada lado: los botones igualan la altura del input. */
+.stepper {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.stepper input {
+  flex: 1;
+  min-width: 0;
+  padding-left: 6px;
+  padding-right: 6px;
+  text-align: center;
+  font-family: var(--fM);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.stepper input::placeholder {
+  font-family: var(--fB);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* Cada botón tiene su color: − naranja (el de la marca) y + verde, con fondo suave y borde del mismo tono. */
+.minus {
+  --tone: var(--priL);
+  --tone-soft: var(--priS);
+  --tone-on: #fff;
+}
+
+.plus {
+  --tone: var(--ok);
+  --tone-soft: var(--okS);
+  --tone-on: var(--base);
+}
+
+.button {
+  flex: 0 0 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tone-soft);
+  border: 2px solid var(--tone);
+  border-radius: 12px;
+  color: var(--tone);
+  /* Sin el retraso del doble toque: se toca varias veces seguidas. */
+  touch-action: manipulation;
+  user-select: none;
+  transition:
+    background 0.1s,
+    border-color 0.1s,
+    color 0.1s;
+}
+
+@media (hover: hover) {
+  .button:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--tone) 22%, transparent);
+  }
+}
+
+/* Al tocarlo se llena del todo: se ve que el toque entró. */
+.button:active:not(:disabled) {
+  background: var(--tone);
+  color: var(--tone-on);
+}
+
+/* Sin acción posible (en el mínimo o el máximo) pierde el color: los que sí andan se destacan. */
+.button:disabled {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--tm);
+  opacity: 0.5;
+  cursor: default;
+}

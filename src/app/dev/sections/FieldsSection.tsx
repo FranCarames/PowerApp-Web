@@ -3,6 +3,7 @@ import { useState } from 'react';
 import {
   Field,
   Input,
+  NumberStepper,
   PasswordInput,
   SearchInput,
   Select,
@@ -16,6 +17,8 @@ const EXERCISES = ['Press de banca', 'Sentadilla', 'Peso muerto', 'Dominadas'];
 
 export function FieldsSection() {
   const [email, setEmail] = useState('');
+  const [series, setSeries] = useState('3');
+  const [weight, setWeight] = useState('');
   const emailError =
     email !== '' && !/^\S+@\S+\.\S+$/.test(email)
       ? 'Ingresá un email válido'
@@ -91,6 +94,41 @@ export function FieldsSection() {
           error="Escribí al menos una indicación"
         >
           <Textarea />
+        </Field>
+      </GalleryDemo>
+
+      <GalleryDemo label="Número con − y +" layout="grid">
+        <Field label="Series (1 a 20)">
+          <NumberStepper
+            label="Series"
+            value={series}
+            onChange={setSeries}
+            min={1}
+            max={20}
+          />
+        </Field>
+        <Field label="Peso (kg), opcional: de 2,5 en 2,5">
+          <NumberStepper
+            label="Peso"
+            value={weight}
+            onChange={setWeight}
+            min={0.01}
+            max={1000}
+            step={2.5}
+            decimals={2}
+            optional
+            placeholder="Opcional"
+          />
+        </Field>
+        <Field label="Deshabilitado">
+          <NumberStepper
+            label="Valor"
+            value=""
+            onChange={() => undefined}
+            min={1}
+            max={10}
+            disabled
+          />
         </Field>
       </GalleryDemo>
 
