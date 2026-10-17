@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useId } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { getErrorMessage, isApiError } from '@/api/errors';
+import { getErrorMessage } from '@/api/errors';
 import type { Coach, User } from '@/api/types';
 import { formatCuil } from '@/shared/lib/format';
 import { fullName } from '@/shared/lib/fullName';
@@ -33,21 +33,6 @@ interface CoachEditModalProps {
   onClose: () => void;
 }
 
-/**
- * Si el backend no tiene la ruta: Nest responde 404 con `statusCode`, a diferencia del 404 de un service
- * (`{ error }`, un entrenador que no existe). Mientras B8 no esté en el contrato, es lo que pasa contra
- * un backend de verdad.
- */
-function isMissingRoute(error: unknown): boolean {
-  return (
-    isApiError(error) &&
-    error.status === 404 &&
-    typeof error.body === 'object' &&
-    error.body !== null &&
-    'statusCode' in error.body
-  );
-}
-
 /** Sin los dígitos de más: el CUIL se guarda y se compara de a 11 dígitos. */
 function digits(cuil: string): string {
   return cuil.replace(/\D/g, '');
@@ -56,7 +41,7 @@ function digits(cuil: string): string {
 /**
  * La edición de un entrenador (CU-A-18), en un modal: el email profesional y el CUIL, que son los datos
  * del `Coach`. El nombre y la cuenta son del usuario y no se tocan desde acá (el caso de uso los deja
- * fuera). El endpoint todavía no existe en el contrato (B8): lo responde un mock.
+ * fuera). Se guarda con `POST /coach/promote_user` (ver `useEditCoach`).
  */
 export function CoachEditModal({ user, onClose }: CoachEditModalProps) {
   const formId = useId();
@@ -188,7 +173,7 @@ function CoachEditForm({
     }
 
     edit.mutate(
-      { id: coach.id, ...values },
+      { user_id: coach.id, ...values },
       {
         onSuccess: () => {
           toast.success('Entrenador actualizado');
@@ -202,14 +187,13 @@ function CoachEditForm({
     <form id={id} onSubmit={onSubmit} noValidate>
       {edit.isError && (
         <Note tone="err" icon="alert" role="alert" className={styles.error}>
-          {isMissingRoute(edit.error)
-            ? 'Editar entrenadores todavía no está disponible en el servidor. No se guardó nada.'
-            : getErrorMessage(edit.error, {
-                404: 'El entrenador ya no existe. Cerrá esta ventana y volvé a intentar.',
-                409: 'Ya hay otro entrenador con ese email profesional.',
-                // Todavía no se sabe qué responde el backend: el motivo más probable es el email repetido.
-                500: 'No se pudo guardar. Puede que el email profesional ya lo use otro entrenador.',
-              })}
+          {getErrorMessage(edit.error, {
+            404: 'El entrenador ya no existe. Cerrá esta ventana y volvé a intentar.',
+            // El backend todavía no responde 409 por un email o un CUIL repetido (llega más adelante).
+            409: 'Ya hay otro entrenador con ese email profesional o con ese CUIL.',
+            // Hoy un email repetido (la columna es única) cae en un 500 sin motivo: no se afirma la causa.
+            500: 'No se pudieron guardar los cambios. Puede que otro entrenador ya use ese email profesional: revisalo e intentá de nuevo.',
+          })}
         </Note>
       )}
       <CoachDataFields
