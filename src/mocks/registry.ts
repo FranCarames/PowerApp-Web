@@ -46,16 +46,10 @@ export const registry: readonly RegistryEntry[] = [
   { method: 'post', path: '/api/v1/muscles/mg/create', mock: true },
   { method: 'post', path: '/api/v1/muscles/mg/edit/{id}', mock: true },
   { method: 'delete', path: '/api/v1/muscles/mg/{id}', mock: true },
-  // Alta y baja de un entrenador: solo el Admin de demo, por su token falso (ver handlers/coaches.ts)
+  // Alta, edición (T37: es el mismo promote_user, el backend no tiene un edit) y baja de un entrenador:
+  // solo el Admin de demo, por su token falso (ver handlers/coaches.ts)
   { method: 'post', path: '/api/v1/coach/promote_user', mock: true },
   { method: 'post', path: '/api/v1/coach/delete_coach/{id}', mock: true },
-  // Editar un entrenador no está en el contrato: es un mock pendiente (B8, T37)
-  {
-    method: 'post',
-    path: '/api/v1/coach/edit/{id}',
-    pending: 'B8',
-    mock: true,
-  },
   // Circuitos: apagados el 6/10, el backend ya los tiene completos y probados (T44, primer tramo). Van al backend
   // real también con las cuentas de demo, cuyo token falso el backend rechaza. Los handlers quedan hasta que T44
   // los borre. `routine/all-plus` es de rutinas, pero lo necesita el listado de circuitos para contar en cuántas

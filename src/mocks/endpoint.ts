@@ -110,7 +110,7 @@ export function mockEndpoint<M extends HttpMethod, P extends PathsFor<M>>(
  * y tiene que figurar en el registry con su `pending`.
  *
  * @example
- * mockPendingEndpoint<EditCoachRequest, Coach>('post', '/api/v1/coach/edit/{id}', ...);
+ * mockPendingEndpoint<undefined, StudentsByMembershipType>('get', '/api/v1/membership/type/users', ...);
  */
 export function mockPendingEndpoint<
   Body extends JsonBodyType = undefined,

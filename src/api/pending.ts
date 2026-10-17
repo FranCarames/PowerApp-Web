@@ -2,7 +2,6 @@ import type { paths } from './schema';
 import type {
   CircuitDetailResponse,
   CircuitExerciseResponse,
-  Coach,
   Exercise,
   Muscle,
   MuscleGroup,
@@ -58,15 +57,6 @@ export type CircuitDetail = Omit<CircuitDetailResponse, 'exercises'> & {
     Omit<CircuitExerciseResponse, 'exercise'> & { exercise: CircuitExerciseRef }
   >;
 };
-
-// PENDIENTE-CONTRATO: B8 CU-A-18
-/**
- * Body de `POST /coach/edit/{id}` para editar un entrenador: sus dos campos editables, `coach_email` y
- * `cuil`. El endpoint no existe en el contrato (ni en el `CoachController` del backend al 6/10): el
- * path, la forma del body y la respuesta (el `Coach` ya guardado) son una propuesta del front, con el
- * mismo estilo que `POST /membership/edit/{id}` y `POST /muscles/edit/{id}`.
- */
-export type EditCoachRequest = Pick<Coach, 'coach_email' | 'cuil'>;
 
 // PENDIENTE-CONTRATO: V1 CU-E-27
 /** Los estados que acepta el filtro `status` de `GET /membership/status/users`, los del contrato. */
