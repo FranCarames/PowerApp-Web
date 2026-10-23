@@ -21,9 +21,14 @@ export const queryKeys = {
   planifications: {
     all: ['planifications'] as const,
     list: () => [...queryKeys.planifications.all, 'list'] as const,
-    /** La planificación vigente de un alumno. */
-    userActive: (userId: string) =>
-      [...queryKeys.planifications.all, 'user-active', userId] as const,
+    /** Las planificaciones asignadas a un alumno, con o sin las que se quitaron. */
+    ofUser: (userId: string, includeInactive = false) =>
+      [
+        ...queryKeys.planifications.all,
+        'user',
+        userId,
+        { includeInactive },
+      ] as const,
   },
   routines: {
     all: ['routines'] as const,

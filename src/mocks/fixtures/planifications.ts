@@ -1,8 +1,8 @@
 import type { PlanificationListItem } from '@/api/types';
 
-// Las planificaciones sistémicas de demo: las del prototipo, más una dada de baja. `duration` es un
-// texto libre ("8 semanas"), `number_of_routines` lo que declara el entrenador y `routine_count` lo
-// que está asignado.
+// Las planificaciones sistémicas de demo: las del prototipo, más una dada de baja. `duration` son las
+// semanas del plan (0 es sin duración fija), `number_of_routines` lo que declara el entrenador y
+// `routine_count` lo que está asignado.
 const TIMESTAMP = '2026-03-15T12:00:00.000Z';
 
 function planification(
@@ -18,7 +18,7 @@ function planification(
     id: `demo-planification-${index + 1}`,
     name,
     type,
-    duration: `${weeks} semanas`,
+    duration: weeks,
     number_of_routines,
     routine_count,
     active,

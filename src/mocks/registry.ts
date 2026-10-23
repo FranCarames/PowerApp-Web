@@ -68,11 +68,7 @@ export const registry: readonly RegistryEntry[] = [
   // Rutinas y planificaciones: solo las cuentas de demo; las de verdad pasan al backend real
   { method: 'get', path: '/api/v1/routine/all', mock: true },
   { method: 'get', path: '/api/v1/planification/all', mock: true },
-  {
-    method: 'get',
-    path: '/api/v1/planification/user/{id}/active',
-    mock: true,
-  },
+  { method: 'get', path: '/api/v1/planification/user/{userId}', mock: true },
   // Membresías (tipos)
   { method: 'get', path: '/api/v1/membership/all', mock: true },
   { method: 'post', path: '/api/v1/membership/create', mock: true },
