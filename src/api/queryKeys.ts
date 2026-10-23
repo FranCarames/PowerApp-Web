@@ -62,6 +62,13 @@ export const queryKeys = {
     studentsByStatus: (status: string) =>
       [...queryKeys.memberships.all, 'students-by-status', status] as const,
   },
+  /** El home del alumno: las rutinas de una semana, del plan y las individuales. */
+  routineHome: {
+    all: ['routine-home'] as const,
+    /** La semana que empieza ese lunes (`YYYY-MM-DD`). */
+    week: (userId: string, weekStart: string) =>
+      [...queryKeys.routineHome.all, userId, weekStart] as const,
+  },
   userRms: {
     all: ['user-rms'] as const,
     /** Los RMs registrados de un usuario, de todos sus ejercicios. */

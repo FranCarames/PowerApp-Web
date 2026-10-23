@@ -1,0 +1,12 @@
+/* Mientras llega otra semana se sigue viendo la anterior, apagada. */
+.busy {
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.back {
+  display: flex;
+  justify-content: flex-end;
+  margin: -4px 0 12px;
+  font-size: 13px;
+}
