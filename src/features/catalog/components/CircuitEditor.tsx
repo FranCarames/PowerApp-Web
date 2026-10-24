@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useLocation } from 'react-router';
 
 import { getErrorMessage, isApiError } from '@/api/errors';
 import {
@@ -10,6 +11,11 @@ import {
 } from '@/shared/ui';
 
 import { useCircuit, useCircuitUsage } from '../hooks/useCircuits';
+import {
+  readRoutineReturn,
+  RESTORE_DRAFT_STATE,
+  type RoutineReturn,
+} from '../routineDraft';
 import { CircuitForm } from './CircuitForm';
 import styles from './CircuitEditor.module.css';
 
@@ -24,22 +30,29 @@ interface CircuitEditorProps {
  * La pantalla de alta y edición de un circuito (CU-E-22 a CU-E-24), la misma del Admin
  * (`/a/circuitos/:id`) y del Entrenador (`/c/circuitos/:id`): el encabezado y el formulario, con
  * la carga, el error y el "No encontramos el circuito" del detalle.
+ *
+ * Si se lo abrió desde una rutina (Editar o Nuevo circuito en el editor de rutina), "Volver" y Guardar
+ * regresan a ella y no a la lista de circuitos.
  */
 export function CircuitEditor({ id, basePath }: CircuitEditorProps) {
+  const routineReturn = readRoutineReturn(useLocation().state);
+
   return id === 'nuevo' ? (
-    <NewCircuit basePath={basePath} />
+    <NewCircuit basePath={basePath} routineReturn={routineReturn} />
   ) : (
-    <EditCircuit id={id} basePath={basePath} />
+    <EditCircuit id={id} basePath={basePath} routineReturn={routineReturn} />
   );
 }
 
 function Layout({
   isNew,
   basePath,
+  routineReturn,
   children,
 }: {
   isNew: boolean;
   basePath: string;
+  routineReturn?: RoutineReturn;
   children: ReactNode;
 }) {
   return (
@@ -47,7 +60,8 @@ function Layout({
       <PageHeader
         eyebrow={isNew ? 'Nuevo' : 'Editar'}
         title="Circuito"
-        back={basePath}
+        back={routineReturn?.to ?? basePath}
+        backState={routineReturn && RESTORE_DRAFT_STATE}
       />
       <div className={styles.narrow}>{children}</div>
     </>
@@ -78,25 +92,40 @@ function FormSkeleton() {
   );
 }
 
-function NewCircuit({ basePath }: { basePath: string }) {
+function NewCircuit({
+  basePath,
+  routineReturn,
+}: {
+  basePath: string;
+  routineReturn?: RoutineReturn;
+}) {
   return (
-    <Layout isNew basePath={basePath}>
-      <CircuitForm basePath={basePath} />
+    <Layout isNew basePath={basePath} routineReturn={routineReturn}>
+      <CircuitForm basePath={basePath} routineReturn={routineReturn} />
     </Layout>
   );
 }
 
-function EditCircuit({ id, basePath }: { id: string; basePath: string }) {
+function EditCircuit({
+  id,
+  basePath,
+  routineReturn,
+}: {
+  id: string;
+  basePath: string;
+  routineReturn?: RoutineReturn;
+}) {
   const circuit = useCircuit(id);
   // Las rutinas que lo usan, para el aviso. Si no llega, el aviso no sale y no se bloquea nada.
   const usage = useCircuitUsage();
   const notFound = isApiError(circuit.error) && circuit.error.status === 404;
 
   return (
-    <Layout isNew={false} basePath={basePath}>
+    <Layout isNew={false} basePath={basePath} routineReturn={routineReturn}>
       {circuit.data ? (
         <CircuitForm
           basePath={basePath}
+          routineReturn={routineReturn}
           // Al duplicar se pasa a la copia: el formulario arranca de nuevo con sus datos.
           key={circuit.data.id}
           circuit={circuit.data}

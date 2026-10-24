@@ -48,6 +48,8 @@ export const queryKeys = {
     /** Las rutinas con sus circuitos (`all-plus`), con o sin las dadas de baja. */
     listPlus: (includeInactive: boolean) =>
       [...queryKeys.routines.all, 'list-plus', { includeInactive }] as const,
+    /** Una rutina con sus circuitos completos (el detalle). */
+    detail: (id: string) => [...queryKeys.routines.all, 'detail', id] as const,
   },
   memberships: {
     all: ['memberships'] as const,
