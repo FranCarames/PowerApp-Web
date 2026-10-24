@@ -25,6 +25,8 @@ export type CreateCircuitBody = Schemas['CreateCircuitDto'];
 export type CreateCircuitSetBody = Schemas['CreateCircuitSetDto'];
 export type RoutineListItem = Schemas['RoutineListItemResponseDto'];
 export type RoutineListItemPlus = Schemas['RoutineListItemPlusResponseDto'];
+export type CreateRoutineBody = Schemas['CreateRoutineDto'];
+export type EditRoutineBody = Schemas['EditRoutineDto'];
 export type PlanificationListItem = Schemas['PlanificationListItemResponseDto'];
 /** Una asignación de planificación a un alumno (E-13, E-14 y el listado del alumno). */
 export type UserPlanificationAssignment =

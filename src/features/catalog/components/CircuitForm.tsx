@@ -27,6 +27,12 @@ import {
 } from '@/shared/ui';
 
 import {
+  queueRoutineOp,
+  RESTORE_DRAFT_STATE,
+  type CircuitEditorState,
+  type RoutineReturn,
+} from '../routineDraft';
+import {
   circuitCopyBody,
   circuitDefaultValues,
   circuitSchema,
@@ -59,6 +65,11 @@ interface CircuitFormProps {
   circuit?: CircuitDetail;
   /** Las rutinas vigentes que lo usan, si ya se sabe: para avisar que los cambios se aplican en todas. */
   routines?: CircuitUsage[];
+  /**
+   * La rutina desde la que se abrió el editor, si se abrió desde una. Guardar o dar de baja el circuito
+   * vuelve a ella; uno nuevo se suma a la rutina y, al duplicar, la copia reemplaza al original en ella.
+   */
+  routineReturn?: RoutineReturn;
 }
 
 /**
@@ -67,7 +78,12 @@ interface CircuitFormProps {
  * reactivar. Editar un circuito cambia todas las rutinas que lo usan, y uno dado de baja no se puede
  * editar: primero se lo reactiva.
  */
-export function CircuitForm({ basePath, circuit, routines }: CircuitFormProps) {
+export function CircuitForm({
+  basePath,
+  circuit,
+  routines,
+  routineReturn,
+}: CircuitFormProps) {
   const navigate = useNavigate();
   const toast = useToast();
   const typesId = useId();
@@ -108,6 +124,15 @@ export function CircuitForm({ basePath, circuit, routines }: CircuitFormProps) {
     errors.exercises?.root?.message ?? errors.exercises?.message;
   const usedIn = routines ?? [];
 
+  /** A donde se vuelve al terminar: la rutina de la que se vino, que recupera su borrador, o la lista de circuitos. */
+  function leave() {
+    if (routineReturn) {
+      navigate(routineReturn.to, { state: RESTORE_DRAFT_STATE });
+    } else {
+      navigate(basePath);
+    }
+  }
+
   const onSubmit: SubmitHandler<CircuitValues> = (values) => {
     if (save.isPending || inactive) return;
     // Si otro circuito ya tiene ese tipo escrito de otra forma ("Core" y "core"), se usa la de ese.
@@ -118,9 +143,16 @@ export function CircuitForm({ basePath, circuit, routines }: CircuitFormProps) {
     save.mutate(
       { ...values, type },
       {
-        onSuccess: () => {
+        onSuccess: (saved) => {
           toast.success(circuit ? 'Circuito guardado' : 'Circuito creado');
-          navigate(basePath);
+          // El circuito que se creó desde una rutina se suma a ella cuando se vuelve.
+          if (routineReturn && !circuit) {
+            queueRoutineOp(routineReturn.routineId, {
+              type: 'append',
+              circuitId: saved.id,
+            });
+          }
+          leave();
         },
       },
     );
@@ -130,8 +162,24 @@ export function CircuitForm({ basePath, circuit, routines }: CircuitFormProps) {
     setConfirming(null);
     duplicate.mutate(circuitCopyBody(original, copyName(original.name)), {
       onSuccess: (copy) => {
-        toast.success('Circuito duplicado: estás editando la copia');
-        navigate(`${basePath}/${copy.id}`);
+        // Desde una rutina, la copia ocupa el lugar del original en ella; se sigue en la rutina al guardar.
+        const slot = routineReturn?.slot;
+        if (routineReturn && slot !== undefined) {
+          queueRoutineOp(routineReturn.routineId, {
+            type: 'replace',
+            slot,
+            circuitId: copy.id,
+          });
+        }
+        toast.success(
+          slot !== undefined
+            ? 'Copia creada y reemplazada en esta rutina'
+            : 'Circuito duplicado: estás editando la copia',
+        );
+        const state: CircuitEditorState | undefined = routineReturn && {
+          routine: routineReturn,
+        };
+        navigate(`${basePath}/${copy.id}`, { state });
       },
       onError: (error) => toast.error(getErrorMessage(error)),
     });
@@ -147,7 +195,7 @@ export function CircuitForm({ basePath, circuit, routines }: CircuitFormProps) {
           );
           setConfirming(null);
           // Dar de baja lo saca de la edición; reactivarlo lo deja editable en la misma pantalla.
-          if (!active) navigate(basePath);
+          if (!active) leave();
         },
         onError: (error) => {
           toast.error(
