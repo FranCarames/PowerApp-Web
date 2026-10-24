@@ -75,7 +75,7 @@ Antes de dar una tarea por terminada, `typecheck`, `lint` y `build` tienen que p
 | Variable | Uso |
 |---|---|
 | `VITE_API_URL` | Origen del backend, sin `/api/v1`. En Render: `https://powerapp-backend.onrender.com`. En local queda vacía. |
-| `VITE_USE_MOCKS` | `true` activa MSW para los endpoints marcados como mock en `src/mocks/registry.ts`. El resto va al backend real. Desde T44 el registry está todo apagado, así que con `true` MSW no se inicia. |
+| `VITE_USE_MOCKS` | `true` activa MSW para los endpoints marcados como mock en `src/mocks/registry.ts`. El resto va al backend real. Desde T44 el registry está vacío, así que con `true` MSW no se inicia: no hace falta definirla. |
 | `API_PROXY_TARGET` | Solo del servidor de desarrollo (no llega al navegador). A dónde reenvía Vite las requests a `/api`. Por defecto, `http://localhost:3000`. |
 
 ## Backend y mocks
@@ -88,12 +88,11 @@ El backend lo desarrolla Fran por separado y **este repo nunca lo modifica**. Lo
 
 ### Estado de los mocks desde T44
 
-Al 24/10/2026 los 53 endpoints del registry están en `mock: false`: el backend de Render publica cada uno y no queda ningún mock pendiente (`PendingEntry`). MSW no responde nada y el front va siempre al backend real.
+Desde el 24/10/2026 (T44) todos los endpoints que usa el front están en el backend de Render, así que **no hay ningún mock** y MSW no responde nada. El registry (`src/mocks/registry.ts`) y `src/mocks/handlers/index.ts` están vacíos: los handlers y las fixtures que había se borraron (T44b) y siguen en el historial de git.
 
 - **Las cuentas de demo dejaron de existir.** `POST /users/login` va al backend, que no las conoce, y su token falso se rechaza con 401 (que cierra la sesión). Para recorrer la app hace falta una cuenta real.
-- **Con todo apagado, `startMocks` no registra el service worker** y avisa por consola: `VITE_USE_MOCKS=true` queda inofensivo. En Render la variable pasa a `false` (ver "Deploy").
-- **Los handlers y las fixtures de `src/mocks/` quedan**, circuitos incluidos: sirven para recorrer una pantalla sin backend. Para volver a encender un mock: `mock: true` en su entrada del registry y `VITE_USE_MOCKS=true`. Hay que mantenerlos al día cuando cambian los tipos (el compilador avisa); los de un dominio que no se vaya a usar más se pueden borrar de a uno.
-- **Los bullets "Mocks" de cada pantalla**, más abajo, describen lo que hacía el handler antes de T44.
+- **Con el registry vacío, `startMocks` no registra el service worker** y avisa por consola. `VITE_USE_MOCKS` ya no hace falta: en Render se eliminó la variable y, sin ella, el build no incluye MSW ni `mockServiceWorker.js`.
+- **Lo que queda de `src/mocks/` es el andamiaje**, para el próximo mock que haga falta: `registry.ts`, `browser.ts`, `endpoint.ts` (`mockEndpoint` y `mockPendingEndpoint`) y `responses.ts`. La fixture y el handler se crean con el mock (ver abajo).
 - **Probar sin credenciales:** un `.env.<modo>` con `API_PROXY_TARGET=https://powerapp-backend.onrender.com` y `npm run dev -- --mode <modo>` manda `/api` a Render sin pasar por CORS. Sirve para los endpoints públicos (ejercicios, músculos y membresías: la wiki, el catálogo y los ejercicios del Admin); el resto pide token. Para el resto, el doble local del contrato (`.claude/fake-backend.cjs`, que no se versiona) responde con las formas del backend.
 
 ### Cómo funcionan los mocks
@@ -103,18 +102,18 @@ Con `VITE_USE_MOCKS=true`, `main.tsx` arranca MSW (`src/mocks/browser.ts`) antes
 | Archivo | Qué es |
 |---|---|
 | `src/mocks/registry.ts` | Qué endpoints se mockean: método y path del contrato (si no existen en `openapi.json`, no compila) y `mock: true \| false`. Lo que no figura es real. |
-| `src/mocks/handlers/<dominio>.ts` | Los mocks de cada dominio, con `mockEndpoint(método, path, resolver)`. El resolver recibe el body del request y los parámetros de ruta tipados con el contrato, y el compilador exige que devuelva lo que el contrato declara. |
-| `src/mocks/fixtures/` | Datos de ejemplo en español, tipados con los tipos generados. |
+| `src/mocks/handlers/<dominio>.ts` | (Hoy solo está `index.ts`, con la lista vacía.) Los mocks de cada dominio, con `mockEndpoint(método, path, resolver)`. El resolver recibe el body del request y los parámetros de ruta tipados con el contrato, y el compilador exige que devuelva lo que el contrato declara. |
+| `src/mocks/fixtures/` | (No existe hoy.) Datos de ejemplo en español, tipados con los tipos generados. |
 | `src/mocks/responses.ts` | Los errores con los dos formatos del backend (`serviceError`: `{ error }`; `guardError`: `{ statusCode, message, error }`), la respuesta vacía y `authTokenHeaders`, el header `Authorization` con el que el login manda el token. |
 | `src/mocks/endpoint.ts` | `mockEndpoint` y `mockPendingEndpoint`. |
 
 - **Sumar un mock:** fixture en `fixtures/`, handler en `handlers/<dominio>.ts` (y en `handlers/index.ts`) y la entrada con `mock: true` en el registry. Si el registry y los handlers no coinciden, la consola avisa al arrancar.
 - **Un endpoint sin contrato** (`PENDIENTE-CONTRATO`) se mockea con `mockPendingEndpoint` y una entrada con `pending: '<id>'` (el de la dependencia del PLAN) en el registry. Sus tipos van en `src/api/pending.ts`.
-- **Apagar un mock** cuando el backend implementa el endpoint: `mock: false` en el registry. El handler queda.
+- **Apagar un mock** cuando el backend implementa el endpoint: `mock: false` en el registry. Cuando ya no hace falta, se borran su entrada, su handler y su fixture, como hizo T44b con todos.
 - **Bajar el contrato de Render:** `npm run api:fetch -- https://powerapp-backend.onrender.com/docs-json` y después `npm run api:gen`. Sin argumento usa `API_DOCS_URL` o el backend local. El 23/10 se incorporaron las rutinas del alumno (`GET /routine/home/{userId}`, los detalles de una rutina individual y de una sesión del plan), marcar y desmarcar un ejercicio, la rutina puntual, el historial y las planificaciones de un alumno: sus alias están en `src/api/types.ts` y `pending.ts` ya no tiene ninguno de B1 a B9.
 - **Demora:** cada mock responde después de 100 a 400 ms, como un backend de verdad, para que se vean los estados de carga.
 - **CORS:** los mocks no lo reproducen. La respuesta sale del service worker, así que el navegador deja leer `Authorization` aunque el backend real todavía no lo exponga (C1 de `PLAN.md`).
-- **La variable se lee al compilar** y al arrancar `npm run dev`. Con `VITE_USE_MOCKS=false` (o sin definirla), el build no incluye MSW ni `mockServiceWorker.js`. Con `true` van los dos en `dist`, que es lo que necesita el deploy en Render.
+- **La variable se lee al compilar** y al arrancar `npm run dev`. Con `VITE_USE_MOCKS=false` (o sin definirla), el build no incluye MSW ni `mockServiceWorker.js`. Con `true` van los dos en `dist`.
 - **`public/mockServiceWorker.js`** lo genera MSW y no se edita. Al actualizar `msw`, se regenera con `npx msw init` (el directorio ya está guardado en `package.json`).
 - **MSW 3** pide Node 22.12 o más.
 
@@ -144,7 +143,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Números** (`useDashboardCounts`, seis queries independientes): Usuarios, el `total` de `GET /users/all` (todos los roles); Ejercicios, `GET /exercise/all`; Circuitos activos, `GET /routine/circuit/all`; Rutinas, `GET /routine/all`; y de apoyo, los planes sistémicos de `GET /planification/all` y los entrenadores con el registro de Coach activo (`Coach.active`) de `GET /coach/all`, que baja `delete_coach` y no `set-active`. Sin `include_inactive` el backend deja afuera lo dado de baja, así que los circuitos, rutinas y planes son los vigentes. Rutinas lleva al listado (T21) y Planificaciones, al placeholder hasta el bloque C2.
 - **Catálogo:** "Músculos" y "Grupos musculares" abren `/a/catalogo` con `?seccion=musculos` o `?seccion=grupos`, para elegir el segmento.
 - **Si algo no carga:** esa tarjeta muestra "–", el dato de apoyo vuelve al texto de la sección y aparece un aviso con "Reintentar", que pide solo lo que falló. Mientras carga, el número es un bloque gris.
-- **Mocks (apagados en T44, el handler queda):** con una cuenta de demo, cinco de los seis endpoints responden con datos de ejemplo (`src/mocks/fixtures/`); con una cuenta de verdad van todos al backend. Los circuitos activos (`GET /routine/circuit/all`) **ya no se mockean** (6/10): la cuenta de demo del Admin no puede entrar al panel, porque el backend rechaza su token falso y cierra la sesión. Los públicos (ejercicios y entrenadores) no llevan token, así que el mock mira la sesión (`demoAccountForSession`); los demás, el token falso (`staffAccess`).
 
 ## Usuarios del Admin
 
@@ -153,7 +151,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Fila:** avatar (gris si la cuenta está inactiva, violeta si es entrenador), nombre, email, el rol y, si la cuenta está dada de baja, "Inactivo" y la fila apagada. En los alumnos, el email lleva "· membresía activa", "por vencer" o "vencida". Eso sale de `GET /membership/status/users` (cuatro requests, uno por estado, no uno por alumno); si no cargan, la fila no lo dice.
 - **Detalle** (modal): el alumno, su email, su membresía (la del último pago) y su planificación vigente hoy: la primera asignación activa de `GET /planification/user/{userId}` (`useUserPlanifications`, en `features/account/hooks`) cuyas fechas incluyen el día de hoy. Si el alumno no tiene ninguna vigente, o la consulta falla, esa fila no aparece. Muestra el nombre del plan: desde el contrato del 23/10 la asignación ya no trae el tipo. El entrenador, su email profesional y su CUIL (`GET /coach/get/{id}`); el admin, su email.
 - **Acciones:** "Convertir en entrenador" (alumno activo) abre `/a/convertir?alumno=<id>` (ver "Convertir alumno en entrenador del Admin"). "Editar datos", en el detalle de un entrenador, abre el modal de edición de Entrenadores. "Desactivar cuenta" pide confirmación (es una baja lógica: la cuenta no puede ingresar, pero se conservan sus datos) y "Reactivar cuenta" no. No se ofrece desactivar a un admin ni a la propia cuenta. Después de cada cambio se piden de nuevo los listados y los contadores, también los de Mis alumnos.
-- **Mocks (apagados en T44, el handler queda):** `GET /users/all`, `POST /users/set-active/{id}`, `GET /membership/status/users`, `GET /coach/get/{id}`, `GET /planification/user/{userId}` y los pagos responden con datos de ejemplo a las cuentas de demo; las bajas viven en memoria.
 - **Compartido con Mis alumnos:** los hooks de datos de usuarios (`useUsers`, `useUserCount`, `useSetUserActive`...) viven en `features/account/hooks`; el listado paginado, en `features/account/components/UserList.tsx`; y la búsqueda con chip en la URL, en `shared/lib/useSearchAndFilter.ts`.
 
 ## Ejercicios del Admin
@@ -164,7 +161,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Datos opcionales:** el backend no deja vaciar un dato ya cargado (rechaza el texto vacío y, si el campo no viene, conserva el anterior), así que el formulario no lo permite y lo avisa.
 - **Eliminar:** pide confirmación y avisa que un ejercicio en circuitos, con RMs registrados o que ya se entrenó no se puede eliminar. En esos casos el backend no toca nada y responde un `409` con el motivo en `error`; el front compara ese texto y muestra un aviso por cada uno (en circuitos, ya se entrenó con él, hay alumnos con RMs). Un `409` con otro texto da "No se puede eliminar el ejercicio porque está en uso", y un `500` es una falla del servidor y cae en el aviso por defecto. El texto del servidor nunca se muestra. El borrado de músculos y de grupos sigue con el `500` genérico (V7).
 - **Cruce con los grupos:** `useExerciseCatalog` (`src/features/catalog/hooks`) junta `GET /exercise/all`, que trae los músculos de cada ejercicio, con `GET /muscles/mg/all`, que trae los de cada grupo. Ninguno de los dos campos está en el Swagger (V9): sus tipos están en `pending.ts`. Lo reutiliza la wiki del alumno (T28).
-- **Mocks (apagados en T44, el handler queda):** los seis endpoints (`GET /exercise/all`, `GET /exercise/{id}`, `POST /exercise/create`, `POST /exercise/edit/{id}`, `DELETE /exercise/{id}` y `GET /muscles/mg/all`) responden con datos de ejemplo a las cuentas de demo; los ejercicios viven en memoria. Press de banca (RMs registrados), Press inclinado mancuernas (en circuitos) y Sentadilla (ya se entrenó) están "en uso": borrarlos da el `409` con el motivo de cada uno.
 
 ## Catálogo del Admin: músculos
 
@@ -172,7 +168,7 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Músculos** (CU-A-07 a CU-A-10, `MusclesSection`): lista con el ícono del color de su grupo, el nombre y el grupo; buscador por nombre sin acentos; botón flotante "Crear músculo"; Editar y Eliminar en cada fila.
 - **Modal de alta y edición:** nombre, grupo muscular, y opcionales la descripción, una imagen y una vista previa (links: no hay endpoint de subida). Al editar, vaciar un dato que ya tenía valor manda `null` para borrarlo.
 - **Eliminar:** pide confirmación y dice cuántos ejercicios lo usan. El backend no rechaza un músculo en uso: lo borra y lo quita de los ejercicios (cascada).
-- **Datos:** `GET /muscles/all` (con el grupo anidado, distinto del contrato: V9) y `GET /muscles/mg/all` para el selector, más `POST /muscles/create`, `POST /muscles/edit/{id}` y `DELETE /muscles/{id}`. Con una cuenta de demo responden los mocks; los músculos viven en memoria y se ven también en Ejercicios.
+- **Datos:** `GET /muscles/all` (con el grupo anidado, distinto del contrato: V9) y `GET /muscles/mg/all` para el selector, más `POST /muscles/create`, `POST /muscles/edit/{id}` y `DELETE /muscles/{id}`.
 
 ## Catálogo del Admin: grupos musculares
 
@@ -180,7 +176,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Detalle:** tocar un grupo abre un modal con sus músculos (CU-A-12). Salen de `GET /muscles/mg/all`, que trae los músculos de cada grupo (V9): no hace falta pedir cada grupo.
 - **Modal de alta y edición:** nombre y, opcionales, dos links (imagen y vista previa). Al editar, vaciar un link que ya tenía valor manda `null` para borrarlo.
 - **Eliminar:** el backend rechaza un grupo con músculos (con un `500` sin motivo), así que si el grupo tiene músculos el front no pide confirmación: explica que hay que moverlos o eliminarlos primero. Uno sin músculos pide confirmación.
-- **Mocks (apagados en T44, el handler queda):** `POST /muscles/mg/create`, `POST /muscles/mg/edit/{id}` y `DELETE /muscles/mg/{id}` responden con datos de ejemplo al Admin de demo; los grupos viven en memoria y se ven también en Músculos y en Ejercicios.
 
 ## Tipos de membresía del Admin
 
@@ -189,7 +184,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Alumnos por tipo:** salen de `GET /membership/type/users` (sin schema en el contrato: V1, tipado en `pending.ts`), que trae a todos los alumnos agrupados por el tipo de su último pago. Se pide una vez; si falla, las tarjetas no dicen la cantidad.
 - **Modal de alta y edición:** nombre, precio (mayor a cero, hasta dos decimales) y duración (días enteros). Al editar, los cambios valen para los pagos nuevos: los ya registrados guardan su propia copia. El backend rechaza una duración que ya tiene otro tipo (400, en el alta y en la edición) y un nombre repetido (409), y el modal avisa cada caso.
 - **Eliminar:** es una baja lógica (`POST /membership/set-active/{id}`), con confirmación que lo aclara y dice que se puede reactivar.
-- **Mocks (apagados en T44, el handler queda):** `POST /membership/create`, `POST /membership/edit/{id}`, `POST /membership/set-active/{id}` y `GET /membership/type/users` responden con datos de ejemplo a las cuentas de demo; los tipos viven en memoria. Los alumnos de demo pagan distintos tipos, y sus pagos y su membresía lo reflejan.
 
 ## Entrenadores del Admin
 
@@ -199,7 +193,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Eliminar (CU-A-19):** `POST /coach/delete_coach/{id}` es una baja lógica del `Coach` (`active: false`) y, además, le devuelve a su usuario el rol `user`: deja de ser entrenador y vuelve a ser alumno, con la cuenta y los datos intactos (no toca `User.active`). Por eso sale de este listado y aparece en Alumnos; el panel y los contadores de Usuarios se actualizan. La confirmación lo aclara y dice que se lo puede volver a convertir. Para reactivarlo se lo convierte de nuevo (T36): `promote_user` reactiva su `Coach` anterior y pisa el email y el CUIL.
 - **Sin rechazo por integridad (V7):** el backend no revisa dependencias ni borra filas, así que no hay un rechazo como en ejercicios, músculos o grupos. Los errores posibles son un 404 (el usuario o su `Coach` no existen) y un 500 genérico: se muestran con un aviso.
 - **Editar (CU-A-18):** el botón de la fila y "Editar datos" en el detalle de un entrenador en Usuarios abren un modal (`CoachEditModal`) con el email profesional y el CUIL, los mismos campos y la misma máscara que Convertir (`coachDataSchema`, `CoachDataFields`), precargados con `GET /coach/get/{id}`. No se edita el nombre ni la cuenta: son del usuario, y CU-A-18 los deja fuera (el prototipo edita nombre y email). Avisa de un email que ya usa otro entrenador antes de mandarlo y, sin cambios, cierra sin pedir nada. **Se guarda con `POST /coach/promote_user`** (`{ user_id, coach_email, cuil }`, tipado con `PromoteCoachDto`), el mismo endpoint del alta: el backend no tiene un edit propio ni lo va a tener (B8). Con un entrenador que ya lo es, le cambia el email y el CUIL y deja lo demás igual. El backend todavía no es transaccional ni responde 409 por un email o un CUIL repetidos: un email que ya usa otro entrenador cae en un 500 sin motivo, y el modal lo muestra con un aviso que no afirma la causa. Por eso el aviso previo con `GET /coach/all` sigue.
-- **Mocks (apagados en T44, el handler queda):** `POST /coach/delete_coach/{id}` y `POST /coach/promote_user` (que sirve al alta y a la edición) responden con datos de ejemplo solo al Admin de demo (el entrenador recibe el 403 de un guard). Las bajas y las ediciones viven en memoria: el `Coach` dado de baja queda inactivo en `GET /coach/all` y el usuario pasa a Alumnos, como en el backend. Dar de baja a "Martín López" devuelve el 500, para ver el aviso.
 
 ## Convertir alumno en entrenador del Admin
 
@@ -208,14 +201,13 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Datos profesionales** (`coachDataSchema` y `CoachDataFields`, que reutiliza la edición de T37): el email (hasta 50 caracteres, se manda en minúsculas) y el CUIL, que se escribe con o sin guiones, se muestra con la máscara `27-12345678-4` al salir del campo y se envía de 11 dígitos sin guiones.
 - **`POST /coach/promote_user`:** solo el Admin. Si el alumno ya fue entrenador, reactiva su registro y le pisa el email y el CUIL: el formulario arranca con los que tenía y un aviso lo explica. Es la forma de reactivar a un entrenador eliminado.
 - **Email repetido:** el email profesional es único y el backend cambia el rol antes de guardar los datos, así que un repetido da un 500 que deja a la cuenta con el rol y sin datos. Por eso, antes de mandar, se compara con `GET /coach/all` y se avisa sin llamar al backend. Si igual falla, el aviso manda a revisar Entrenadores, el alumno sigue elegido y se puede reintentar con otro email.
-- **Mocks (apagados en T44, el handler queda):** `POST /coach/promote_user` responde con datos de ejemplo solo al Admin de demo (valida como el DTO, crea o reactiva, y reproduce el 500 del email repetido con el rol ya cambiado) y `GET /users/get/{id}` también responde por los alumnos y entrenadores de demo.
 
 ## Circuitos del Admin
 
 - **Pantalla** (`/a/circuitos`, `src/features/admin/pages/CircuitsPage.tsx`, que monta `CircuitList`, de `src/features/catalog/components`, compartido con el Entrenador): el caso de uso CU-E-21. El aviso de que un circuito se usa en varias rutinas y los cambios valen para todas, el buscador (por nombre, sin acentos), los chips Activos, Inactivos y Todos y las tarjetas de a dos columnas desde 960 px. Un botón flotante abre `/a/circuitos/nuevo`. La búsqueda y el chip quedan en la URL (`?q=…&filtro=inactivos`).
 - **Tarjeta** (`CircuitCard`): el nombre, el tipo y cuántos ejercicios tiene, en cuántas rutinas se usa (píldora "N rutinas") y los nombres de sus ejercicios, en orden. Un circuito dado de baja se ve apagado, con "Inactivo". Tocarla abre su editor (`/a/circuitos/:id`, ver más abajo), donde se lo da de baja o se lo reactiva. No muestra las series (como el prototipo) porque `all-plus` no las trae.
 - **Datos:** `GET /routine/circuit/all-plus?include_inactive=true` (`useCircuits`, en `src/features/catalog/hooks`): una sola lista con los dados de baja incluidos, y los chips la filtran sin volver a pedirla. **En cuántas rutinas se usa** cada circuito no lo devuelve ningún endpoint: `useCircuitUsage` lo calcula con `GET /routine/all-plus` (solo las rutinas vigentes, y una rutina que repite el circuito cuenta una vez). Si ese pedido falla, las tarjetas no dicen la cantidad.
-- **Sin mocks (6/10):** `GET /routine/circuit/all-plus` y `GET /routine/all-plus` van al backend real, que ya tiene los circuitos completos y probados. Las cuentas de demo no sirven para esta pantalla: el backend rechaza su token falso. Los handlers y las fixtures de `src/mocks/` quedan, apagados en el registry, y T44 no los borró (ver "Estado de los mocks desde T44").
+- **Sin mocks (6/10):** `GET /routine/circuit/all-plus` y `GET /routine/all-plus` van al backend real, que ya tiene los circuitos completos y probados.
 
 ## Editor de circuito del Admin
 
@@ -223,14 +215,14 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Ejercicios y series:** cada ejercicio se agrega con un selector (buscador por nombre y solo los que faltan: no se repiten) y se sube, baja o quita. Tiene su nota del entrenador y sus **bloques de series**, con todos los campos a la vista: series y repeticiones, peso, % del RM, intensidad (RPE o RIR, uno u otro), AMRAP con su tiempo y RM. Una fila es un bloque de series iguales (3 series de 8 repeticiones es un bloque) y se resume en una línea ("3×8 · 80 kg · RPE 7"). Las reglas son las de los DTOs: un RM exige una sola serie, el tiempo solo vale con AMRAP, y con AMRAP las repeticiones son el objetivo (1 es "sin objetivo").
 - **Datos:** el detalle sale de `GET /routine/circuit/{id}` (`useCircuit`; el contrato declara el `exercise` de cada ejercicio como un objeto vacío, V2: tipo provisional en `pending.ts`). Alta y edición mandan el circuito completo (`POST /routine/circuit/create` y `edit/{id}`): el backend compara los ejercicios con los guardados y pisa la cabecera, así que lo que se omite (una descripción, una nota) se borra. Editar un circuito cambia todas las rutinas que lo usan; si lo usa más de una, un aviso las nombra y sugiere duplicarlo.
 - **Duplicar, Desactivar y Reactivar:** Duplicar crea una copia de la versión guardada con "(copia)" y pasa a editarla. Desactivar (`POST /routine/circuit/set-active/{id}`) es una baja lógica, con confirmación: las rutinas que lo usan lo conservan. Un circuito dado de baja no se edita (el backend lo rechaza): sus campos se apagan hasta reactivarlo, y Reactivar no pide confirmación.
-- **Sin mocks (6/10):** el detalle, el alta, la edición y la baja o reactivación van al backend real. Las cuentas de demo ya no sirven para esta pantalla (el backend rechaza su token falso). Los handlers y las fixtures quedan, apagados en el registry, hasta que T44 los borre.
+- **Sin mocks (6/10):** el detalle, el alta, la edición y la baja o reactivación van al backend real.
 
 ## Circuitos del Entrenador
 
 - **Acceso:** el tab Rutinas del Entrenador tiene dos segmentos, Rutinas y Circuitos (`RoutinesSegments`). Cada uno es una ruta: `/c/rutinas` y `/c/circuitos`, y el editor cuelga de la segunda (`/c/circuitos/nuevo` y `/c/circuitos/:id`). La tab queda marcada en todas.
 - **Listado y editor:** son los mismos del Admin (ver "Circuitos del Admin" y "Editor de circuito del Admin"), que viven en `src/features/catalog/components` (`CircuitList` y `CircuitEditor`, con `CircuitCard`, `CircuitForm`, `CircuitExerciseCard`, `CircuitSetFields` y `ExercisePickerModal`). Cada rol los monta con su `basePath` (`/a/circuitos` o `/c/circuitos`): de ahí cuelga el editor y a ahí vuelven Guardar, Desactivar y "Volver". Sus páginas son `src/features/coach/pages/CircuitsPage.tsx` y `CircuitEditorPage.tsx`.
 - **Rutinas y Planes:** el segmento Rutinas y `/c/planes` muestran el aviso de que se habilitan con el bloque C2 (`SectionPlaceholder`).
-- **Sin mocks:** los endpoints son los mismos del Admin y van al backend real. Las cuentas de demo no sirven para este segmento: el backend rechaza su token falso y vuelven al login.
+- **Sin mocks:** los endpoints son los mismos del Admin y van al backend real.
 
 ## Rutinas del Admin
 
@@ -238,7 +230,7 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Tarjeta** (`RoutineCard`, un `ListItem`): el nombre, la nota del entrenador (hasta dos líneas), "N ejercicios · M circuitos" y la flecha. Una rutina dada de baja se ve apagada, con "Inactiva". Tocarla abre su editor (`/a/rutinas/:id`, T22: hoy un placeholder).
 - **Datos:** `GET /routine/all-plus?include_inactive=true` (`useRoutines`, en `src/features/catalog/hooks`): una sola lista con las dadas de baja incluidas, y el chip la filtra sin volver a pedirla (apagado, quedan las vigentes). Ese endpoint **no trae los ejercicios** de cada rutina, solo sus circuitos: la cantidad de ejercicios se calcula con `GET /routine/circuit/all-plus?include_inactive=true` (`useCircuits`, el mismo pedido del listado de circuitos), sumando los de cada circuito de la rutina; un circuito repetido cuenta cada vez. Si ese pedido falla, la tarjeta dice solo "N circuitos".
 - **Estados:** carga, error con reintento, "Todavía no hay rutinas" (con "Crear rutina"), "No hay rutinas activas" (todas están dadas de baja) y "Sin coincidencias", que sugiere activar "Incluir inactivas" cuando por eso no se ve lo buscado.
-- **Sin mocks:** `GET /routine/all-plus` y `GET /routine/circuit/all-plus` van al backend real. Las cuentas de demo no sirven para esta pantalla (el backend rechaza su token falso), y el seed del backend no trae rutinas: hasta que se creen, se ve el estado vacío.
+- **Sin mocks:** `GET /routine/all-plus` y `GET /routine/circuit/all-plus` van al backend real. El seed del backend no trae rutinas: hasta que se creen, se ve el estado vacío.
 
 ## Login
 
@@ -246,7 +238,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Llamada:** `useLogin()` hace `POST /users/login` (real) y arma la `Session`: el token sale del header `Authorization` de la respuesta y el usuario, del body. No abre la sesión: eso lo hace la pantalla con `signIn`, y después navega con `homePathFor(session)`. Si la respuesta no trae el token (con el backend real, falta C1), no se abre nada y se avisa.
 - **Errores:** un 401 dice "El email o la contraseña no son correctos." (no aclara cuál falló) y un 403, "Tu cuenta está cerrada…". Para red, 400 y 5xx valen los textos de `getErrorMessage`. Tras un 401 se vacía la contraseña y el foco vuelve a ella.
 - **Contraseña temporal (B9):** el login informa siempre si se entró con una temporal, en `password_change_required` de la respuesta (`LoginResponseDto`, en el contrato desde el 17/10). Si es `true`, la sesión **no se abre**: aparece el modal bloqueante "Actualizá tu contraseña" y, recién al tocar su botón, se abre con `passwordChangeRequired` y se va a `/cambiar-contrasena`. Si se abriera antes, el guard de `PublicRoute` llevaría a esa pantalla sin que el modal llegue a verse.
-- **Cuentas de demo (mocks, apagados en T44):** con `VITE_USE_MOCKS=true` y el login en `mock: true`, `POST /users/login` está en el registry y responde las cuentas de `src/mocks/fixtures/users.ts`: una por rol, una con contraseña temporal y una cerrada. Todas comparten la misma contraseña, que está en ese archivo. Cualquier otro email pasa al backend real (`passthrough`), así que las cuentas de verdad entran igual. El token de las cuentas de demo es falso: sirven para recorrer pantallas con datos mockeados, y un endpoint real las rechaza con 401 y cierra la sesión. Las excepciones son cambiar la contraseña y leer y editar el propio usuario, que también se mockean para las cuentas de demo (ver abajo).
 
 ## Registro
 
@@ -263,7 +254,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Datos personales** (`/cuenta/datos`): se precargan con `GET /users/get/{id}` (con carga, error y reintento) y se guardan con `POST /users/edit`. `profileSchema` (`features/account/schemas.ts`) replica `EditUserDto`: nombre, apellido, email y teléfono (código y número) son obligatorios, y la foto de perfil es opcional, un link `http(s)` de hasta 150 caracteres. Una foto vacía no se manda: el backend la valida como URL y el DTO no permite borrarla. Al guardar se actualiza el usuario de la sesión (`useAuth().updateUser`), el caché queda al día y se vuelve a Mi cuenta. Un 409 se muestra en el campo del email ("El email ya está en uso"). Si cambian el email o el teléfono, el backend les saca la verificación.
 - **El formulario se mantiene al día** con el servidor: usa `values` con `keepDirtyValues`, así que si llega un dato nuevo se actualizan los campos que no se tocaron y se conserva lo que el usuario ya escribió.
 - **Cerrar sesión** (CU-U-03, `features/auth/logout.ts`, expuesto como `useAuth().signOut`): manda `POST /users/logout` y cierra la sesión local enseguida, sin esperar la respuesta. El endpoint es público y el backend solo confirma: el cierre de verdad es descartar el token. Si el request falla, la sesión se cierra igual y no se muestra ningún error. También lo usa el "Cerrar sesión" del cambio obligatorio de contraseña.
-- **Mocks (apagados en T44, el handler queda):** `GET /users/get/{id}` y `POST /users/edit` están en el registry y atienden solo a las cuentas de demo (por su id y su token falso); el resto va al backend (`passthrough`). Las ediciones viven en memoria y se pierden al recargar. `POST /users/logout` no se mockea.
 - **Piezas que salieron de acá y se comparten:** `PhoneField` (`shared/ui`), usado por el registro y los datos personales; las reglas de cada campo de usuario (`shared/lib/userFields.ts`), que usan los schemas de auth y de cuenta; y `formatMonthYear` (`shared/lib/dates.ts`).
 
 ## Historial de pagos
@@ -273,7 +263,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **El estado** se calcula con el `expired_at` de ese pago, no con el flag `active` del pago, que el backend actualiza una sola vez por día: **Activa** (verde), **Por vencer** (amarillo, desde 7 días antes, hasta el final de ese día) o **Vencida** (rojo; entonces la tarjeta dice "Última membresía" y "Venció"). El backend configura esa ventana con `MEMBERSHIP_EXPIRING_SOON_DAYS` y la informa en el resumen de membresías, pero ese endpoint es solo de entrenadores y admins, así que el alumno usa el valor por defecto (`EXPIRING_SOON_DAYS`).
 - **Estados de la pantalla:** carga (esqueleto), error con reintento, y sin pagos ("Todavía no tenés pagos", sin tarjeta). Mi cuenta muestra el estado en una píldora bajo el nombre, con la misma query, así que los pagos se piden una sola vez; si no cargan, la píldora no se muestra y el historial tiene su propio error.
 - **Formatos:** `formatDate` ("15 Jul 2026", en el día local de quien mira) y `formatPrice` ("$18.000", pesos argentinos con hasta dos decimales), en `shared/lib`.
-- **Mocks (apagados en T44, el handler queda):** `GET /membership/payment/user/{id}` atiende solo los ids de las cuentas de demo y el resto va al backend. Las fechas son relativas a hoy, para que el estado no dependa del día: la cuenta de Usuario tiene 4 pagos y su membresía vence en 15 días (activa), y la de contraseña temporal tiene 1 que vence en 3 (por vencer).
 
 ## Mis alumnos
 
@@ -285,7 +274,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Botón de Membresías** (`/c/membresias`): el contador suma los alumnos con la membresía **por vencer o vencida** de `GET /membership/status/summary` (real, solo de entrenador y admin). Si el resumen no carga, el botón queda sin contador. El prototipo hace esa misma suma ("requieren atención").
 - **La URL guarda la búsqueda y el chip** (`?q=ana&estado=inactivos`) y se leen solo al abrir la pantalla: volver del detalle con Atrás deja la lista como estaba. Cambiarlos no agrega entradas al historial.
 - **Estados:** carga (esqueleto), error con reintento, y vacío en tres variantes: "Todavía no hay alumnos" (CU-E-01), "No hay alumnos activos" o "inactivos" (con el chip) y "No hay alumnos que coincidan con la búsqueda" (CU-E-02).
-- **Mocks (apagados en T44, el handler queda):** `GET /users/all` y `GET /membership/status/summary` atienden solo a las cuentas de demo (por su token falso) y el resto va al backend. El entrenador de demo ve 29 alumnos, 24 activos y 5 inactivos, con los nombres del prototipo, y 9 que requieren atención. `GET /users/all` filtra, ordena y pagina como el backend.
 - **Piezas que se comparten:** `useDebouncedValue` (`shared/lib`) y `AccountLink` (`features/account`), el avatar de la barra superior, que va a usar también el home del Usuario.
 
 ## Detalle de alumno del Entrenador
@@ -298,7 +286,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Historial de entrenamientos** (CU-E-06 y CU-E-07): un modal, explicado en "Historial de entrenamientos del Entrenador".
 - **Registrar pago** va a `/c/pago?alumno=<id>`, con el alumno elegido (ver "Registrar pago del Entrenador").
 - **Fechas sin hora:** el `date` de un RM llega como "2026-10-01". JavaScript lo lee en UTC y en Argentina se vería un día antes, así que `formatDate` (`shared/lib/dates.ts`) muestra una fecha sin hora como el día de calendario que es. Las planificaciones también usan `date`.
-- **Mocks (apagados en T44, el handler queda):** `GET /user_rm/user/{id}` atiende solo a las cuentas de demo, por su token falso, y responde por cualquier alumno de demo (el usuario y los pagos ya tenían mock). Franco tiene RMs de cinco ejercicios, Lucía Gómez de dos y Martín Pérez ninguno; los demás tienen de uno a cinco, y algunos ninguno. Un id que el mock no conoce va al backend, y el token de demo recibe un 401: cierra la sesión, como en el resto de los mocks de demo.
 
 ## Historial de entrenamientos del Entrenador
 
@@ -308,8 +295,7 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Qué son las series:** la **prescripción vigente de la rutina**, no lo que levantó el alumno. El modelo no guarda la carga real, y si el entrenador edita el circuito después, el historial viejo muestra la prescripción nueva. Lo dice un aviso arriba del listado y cada ejercicio rotula sus series con "Prescripto", porque el aviso se pierde al hacer scroll. Cada bloque se escribe con `formatSetBlock` ("4×8 · 80 kg · RPE 7").
 - **Filtro por ejercicio:** "Todos los ejercicios", los que hizo el alumno y el resto del catálogo (`GET /exercise/all`), para consultar uno que no hizo y ver "Sin registros para este ejercicio". Al reabrir el modal vuelve a "Todos".
 - **Estados:** carga, "Todavía no registra entrenamientos" (sin filtro), "Sin registros para este ejercicio" y error con reintento, tanto el de la lista completa como el del pedido filtrado.
-- **Sesiones del plan (BE-20d):** el backend las publicó el 24/10 (`source: 'plan'`, con `week` y `planification { id, name }` en lugar de `assignment_id`) y T44 las incorporó: `RoutineHistorySession` (`src/api/types.ts`) es la unión de `RoutineHistoryIndividualSession` y `RoutineHistoryPlanSession`, `originLabel` (en `HistorySessionCard`) dice "Plan · Semana N" y el nombre de la plantilla (que puede ser `null`) va debajo del día. La clave de cada sesión (`sessionKey`, en `shared/lib/trainingHistory.ts`) no depende de `assignment_id`. El mock no las simula (`trainingHistoryFor` solo trae individuales).
-- **Mocks (apagados en T44, el handler queda):** `GET /routine/history/{userId}` atiende a las cuentas de demo del Entrenador y del Admin, por su token falso, y con un token de verdad va al backend. Imita sus errores: 403 de guard para un alumno, 404 si el usuario no existe y 200 con `[]` para quien no es alumno, no tiene sesiones o un `exercise_id` que no coincide. El historial de Franco y de Lucía Gómez sale de lo que hicieron en sus rutinas individuales (`fixtures/finishedMarks.ts`), así que lo que marcan como Usuario aparece al instante (hasta recargar); Lucía Méndez tiene 14 sesiones, Tomás Ríos dos y los demás ninguna (`fixtures/trainingHistory.ts`).
+- **Sesiones del plan (BE-20d):** el backend las publicó el 24/10 (`source: 'plan'`, con `week` y `planification { id, name }` en lugar de `assignment_id`) y T44 las incorporó: `RoutineHistorySession` (`src/api/types.ts`) es la unión de `RoutineHistoryIndividualSession` y `RoutineHistoryPlanSession`, `originLabel` (en `HistorySessionCard`) dice "Plan · Semana N" y el nombre de la plantilla (que puede ser `null`) va debajo del día. La clave de cada sesión (`sessionKey`, en `shared/lib/trainingHistory.ts`) no depende de `assignment_id`.
 
 ## Control de membresías del Entrenador
 
@@ -319,7 +305,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Filtros:** el selector de **tipo de membresía** usa `GET /membership/all` (CU-E-25), con los tipos dados de baja marcados (un alumno puede tener un último pago de uno), y filtra por el tipo del último pago, que ya trae cada alumno (por eso no se pide `GET /membership/type/users`). La **búsqueda** es local, por nombre o email y sin acentos, porque el backend manda a todos sin paginar. La búsqueda y el chip quedan en la URL (`?q=…&estado=vencidas`), así que volver de registrar un pago deja la lista como estaba; el tipo no.
 - **Cada alumno:** el avatar (gris si está vencida o sin pagos), el nombre, el tipo, la píldora de estado y "Vence" o "Venció" con la fecha y los días (`daysUntil` y `formatDaysUntil`, en `shared/lib/dates.ts`: "12 días", "hoy", "hace 3 días"). El botón es **Registrar pago**, o **Renovar** si ya venció, y abre `/c/pago?alumno=<id>`; "Registrar nuevo pago" abre `/c/pago` sin alumno.
 - **Estados:** carga (esqueleto), error con reintento y vacío: "No hay alumnos en este estado", "Todavía no hay alumnos" o "Sin coincidencias" (con búsqueda o tipo elegido). Sin tipos de membresía, el selector queda deshabilitado con "Sin tipos de membresía".
-- **Mocks (apagados en T44, el handler queda):** no hay handlers nuevos. El vencimiento de cada alumno de demo sale de su último pago (`fixtures/payments.ts`), así que coincide con el historial del detalle y cambia de un alumno a otro.
 
 ## Registrar pago del Entrenador
 
@@ -330,7 +315,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Resumen:** el tipo, la vigencia ("hoy → hoy más la duración") y el total. Es una vista previa: el vencimiento lo calcula el backend, al final del día. **No suma lo que le quedaba al alumno:** con una membresía activa o por vencer, un aviso lo dice con su vencimiento (y si el pago nuevo vence antes que el actual, el actual sigue mandando).
 - **Confirmar:** `POST /membership/payment/register` con solo `{ "user_id": …, "membership_id": … }` (real, `useRegisterPayment`). Después invalida `queryKeys.memberships.all`, muestra "Pago registrado · Nombre" y vuelve al control de membresías. Un error se muestra sobre el botón ("Ese tipo de membresía ya no existe", "El alumno ya no existe" o el aviso por defecto) y se va al elegir otro tipo. Un pago no se puede anular: el backend no tiene endpoint para eso.
 - **Estados:** carga (esqueleto del alumno elegido y "Cargando…" en el selector), error de los tipos con reintento y todos los avisos de arriba.
-- **Mocks (apagados en T44, el handler queda):** `POST /membership/payment/register` atiende solo a las cuentas de demo. El pago queda en memoria y se ve en el historial del alumno, en el resumen, en las listas por estado y en el tipo del último pago, hasta recargar la página.
 
 ## Home del Usuario
 
@@ -342,7 +326,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Semana en la URL:** `?semana=2026-10-19` (el lunes); sin parámetro es la actual, y cambiarla no suma entradas al historial. "Volver a esta semana" aparece cuando no es la actual. Los helpers de calendario (`addDays`, `mondayOf`, `weeksBetween`, `formatDayRange`, `formatWeekdayDate`) están en `shared/lib/dates.ts` y trabajan con el día `YYYY-MM-DD` como día de calendario, sin pasarlo por la zona horaria.
 - **Detalle:** tocar una rutina abre `/u/rutina/:id` (individual, con el `id` de su asignación) o `/u/rutina/plan/:userPlanificationId/:routineAsignationId` (del plan); los paths salen de `homeState.ts`. El home le pasa su búsqueda al detalle por el `state` de la navegación (`HomeLocationState`) y `homeBackTo(state)` arma el "Volver", para que quede la misma semana. El detalle es la pantalla de la sección siguiente.
 - **Estados:** carga (esqueleto), error con reintento, una semana sin nada ("Sin rutinas esta semana") y un plan sin rutinas esa semana ("Esta semana del plan no tiene rutinas.").
-- **Mocks (apagados en T44, el handler queda):** `GET /routine/home/{userId}` responde a las cuentas de demo (por su token falso); con un token de verdad va al backend. Franco: un plan de 8 semanas que hoy cursa la semana 3 (la 2 trae una rutina quitada del plan) y dos rutinas individuales; Lucía: una individual hoy; el resto, nada (el estado vacío).
 
 ## Detalle de rutina del Usuario
 
@@ -353,7 +336,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Avisos:** la planificación quitada al alumno (solo lectura: `frozen`), la rutina quitada del plan (se ve solo lo que hizo), y la planificación o la rutina dadas de baja (informativos: se pueden seguir ejecutando). Más la nota del plan, la que el entrenador dejó al asignarlo, y la nota del entrenador de la rutina.
 - **Errores:** 403 ("Esta rutina no es tuya"), 404 y 400 ("No encontramos la rutina", o "Tu entrenador la quitó del plan y no hiciste nada en ella" cuando el backend lo dice) no se reintentan; el resto da el error con reintento.
 - **Cada ejercicio es un botón:** abre su detalle (ver "Detalle de ejercicio del Usuario"), con una flecha al final de la fila.
-- **Mocks (apagados en T44, el handler queda):** los dos detalles responden a las cuentas de demo (por su token falso) con las mismas rutinas que el home (`fixtures/demoRoutines.ts`: cada rutina es una lista de circuitos de `fixtures/circuits.ts`), así que el progreso de una rutina en el home coincide con su detalle. Con un token de verdad van al backend.
 
 ## Detalle de ejercicio del Usuario
 
@@ -365,7 +347,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Actualización optimista:** el cambio se ve al instante en el caché del detalle (`finished[]`) y se revierte si el servidor falla, con un toast ("No pudimos guardarlo…", o el del error). Al terminar se invalidan `queryKeys.routineDetail.all` y `queryKeys.routineHome.all` (el progreso del home). Las mutaciones de una misma asignación se hacen de a una, en orden (`scope` de TanStack Query). El modal se cierra al guardar, sin esperar al servidor.
 - **Qué se puede hacer** (`exerciseAccess`, en `routineDetail.ts`): `open` en las rutinas individuales; `frozen` si el entrenador le quitó la planificación (no se marca ni se anota, solo se ve lo hecho y los RMs); y `plan-pending` en las rutinas del plan, **que por ahora son de solo lectura**: el par de endpoints del plan (`/routine/assign-plan/{up}/{ra}/finished`, BE-20c) ya está publicado en Render (24/10) y el contrato lo tipa, pero el front todavía no lo usa: es una tarea aparte (ver PLAN.md, T44). Para sumarlo, `exerciseAccess` pasa a `open` para el plan y `useExerciseFinished` suma su par de endpoints en `postFinished` y `deleteFinished` (que ya reciben de qué asignación es el ejercicio).
 - **Errores:** los de la rutina (403 "Esta rutina no es tuya", 404 y 400 "No encontramos la rutina") son los del detalle (`RoutineLoadError`); un ejercicio que ya no está en la rutina, "No encontramos el ejercicio"; los RMs que no cargan, un error con reintento en su sección (la tarjeta de arriba queda en "—").
-- **Mocks (apagados en T44, el handler queda):** `POST` y `DELETE …/finished` atienden a las cuentas de demo y cambian lo que ve el detalle **y el progreso del home** (`fixtures/finishedMarks.ts`: lo hecho de cada rutina individual vive en memoria y parte de las cifras de `demoIndividuals.ts`; al recargar vuelve a como estaba). Imitan al backend, en su orden: 400 por los datos, 404 si la asignación no existe, 403 si es de otro alumno, 400 si el ejercicio no es de la rutina o falta el día al marcar uno nuevo. Dentro del plan no hay mock ni uso todavía (ver "Qué se puede hacer", arriba).
 
 ## Mis RMs del Usuario
 
@@ -376,7 +357,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Eliminar** (CU-U-20): `DELETE /user_rm/{id}` (real, `useDeleteRm`), un borrado físico con confirmación ("No se puede deshacer"). Si el RM ya no existe (404), avisa y actualiza la lista; lo mismo pasa al editarlo.
 - **Estados:** carga (esqueleto), error con reintento, vacío, y los errores del guardado dentro del modal (el ejercicio o el RM ya no existe, o el aviso por defecto).
 - **Calculadora:** el botón abre `/u/calculadora` (ver "Calculadora de RM del Usuario").
-- **Mocks (apagados en T44, el handler queda):** la lista, el alta, la edición y la baja atienden solo a las cuentas de demo, por su token falso (`userAccess`, en `mocks/access.ts`); con un token de verdad van al backend. Lo que hace la cuenta de demo del Usuario queda en memoria hasta recargar y también lo ve el Entrenador en el detalle de ese alumno (`fixtures/userRms.ts`). Siguen las reglas del service: un usuario solo toca lo suyo (403), el ejercicio y el RM tienen que existir (404) y editar responde 201.
 
 ## Wiki de ejercicios del Usuario
 
@@ -386,7 +366,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Abre al instante:** si la lista ya se cargó, la ficha muestra el ejercicio del caché del listado (`useExercise(id, { placeholderFromList: true })`) y lo confirma con `GET /exercise/{id}`. Con un link directo, muestra un esqueleto hasta que llega.
 - **"Volver":** desde la lista va al plan (`/u/plan`, como el prototipo); desde la ficha vuelve a la lista con su búsqueda y su chip (la lista le pasa su `location.search` por el `state` de la navegación, `wikiState.ts`).
 - **Estados:** carga (esqueleto), error con reintento, catálogo vacío, sin coincidencias ("No hay ejercicios con ese nombre. Probá con otra búsqueda o categoría.") y, en la ficha, "No encontramos el ejercicio" (404 o 400) sin reintento.
-- **Mocks (apagados en T44, el handler queda):** los ejercicios de demo son los de T31 (los mismos que ve el Admin, en memoria); Press de banca, Sentadilla y Peso muerto traen un video (una búsqueda en YouTube) y algunos traen tips. No hay imágenes de demo: los links de imagen se cargan desde el editor del Admin.
 
 ## Calculadora de RM del Usuario
 
@@ -395,7 +374,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Campos** (`potentialRmSchema`, en `features/user/schemas.ts`): el ejercicio, que el endpoint pide aunque la cuenta no dependa de él (responde 404 si no existe); el peso, mayor a cero, con hasta dos decimales y hasta 1.000 kg; y las repeticiones, enteras de 1 a 100. Los avisos aparecen al escribir. Con más de 12 repeticiones, un aviso dice que la estimación pierde precisión (la tabla del backend llega a 12).
 - **Resultado:** el 1RM con hasta dos decimales (los que calcula el backend) y la tabla con el porcentaje del 1RM, el peso y las repeticiones de cada fila. La fila de las repeticiones ingresadas muestra el mismo peso ingresado, con el peso en violeta. Los números no se redondean a enteros como en el prototipo, justamente para que esa fila coincida.
 - **Estados:** "Calculando…" mientras llega el primer resultado, el cálculo anterior apagado mientras llega el siguiente, y los errores: el servidor, con reintento, y un ejercicio que ya no existe (404), sin reintento.
-- **Mocks (apagados en T44, el handler queda):** `POST /user_rm/potential` atiende solo a las cuentas de demo, por su token falso (cualquier rol), y hace la misma cuenta que el backend; con un token de verdad va al backend.
 
 ## Temporizador del Usuario
 
@@ -412,7 +390,6 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 - **Campos:** contraseña actual, nueva y repetir, con `changePasswordSchema` (`features/auth/schemas.ts`), que replica `ChangePasswordDto`: la actual hasta 50 caracteres y la nueva de 6 a 50. "Repetir" es solo del formulario: no viaja, porque el DTO rechaza campos de más. Cuando se entró con una temporal, "la actual" es esa contraseña temporal, y el campo lo aclara.
 - **Requisitos (V5):** la tarjeta de requisitos del prototipo muestra solo las reglas que el DTO exige, "Entre 6 y 50 caracteres" y "Las dos contraseñas coinciden", y se tildan a medida que se cumplen. El prototipo pide además mayúscula, minúscula y número, pero eso es una regla de backend que no existe.
 - **Contraseña actual incorrecta:** el backend responde 401 con `{ error: 'La contraseña actual es incorrecta' }`. Se muestra en el campo y **no cierra la sesión**, porque no es un 401 de guard (ver "Cierre automático"). Los demás errores, en un aviso arriba.
-- **Cuentas de demo (mocks, apagados en T44):** `POST /users/change-password` está en el registry y atiende solo los tokens de las cuentas de demo, para poder terminar el cambio obligatorio sin backend. El cambio vive en memoria: la contraseña vieja deja de servir y la cuenta con contraseña temporal deja de pedir el cambio, hasta que se recarga la página. Con un token de verdad, el request va al backend (`passthrough`).
 
 ## Recuperar contraseña
 
@@ -429,7 +406,7 @@ Las dependencias abiertas con el backend (B1 a B9, C1 a C3 y V1 a V9) están det
 src/
   app/            router, providers, AppShell (tab bar y sidebar)
   api/            client.ts, coldStart.ts, errors.ts, queryClient.ts, queryKeys.ts, types.ts, openapi.json (bajado del Swagger), schema.d.ts y publicOperations.ts (generados), pending.ts
-  mocks/          browser.ts, registry.ts, endpoint.ts, responses.ts, handlers/<dominio>.ts, fixtures/
+  mocks/          browser.ts, registry.ts, endpoint.ts, responses.ts, handlers/index.ts (los mocks de cada dominio van en handlers/<dominio>.ts)
   features/
     auth/         login, registro, recuperar y cambiar contraseña
     account/      Mi cuenta, compartida por los tres roles, y los hooks de datos de usuarios que usan varios roles
@@ -486,7 +463,7 @@ Static Site en Render, desplegado desde `main`: https://powerapp-web.onrender.co
 | Variable | Valor en Render |
 |---|---|
 | `VITE_API_URL` | `https://powerapp-backend.onrender.com` |
-| `VITE_USE_MOCKS` | `false`: T44 apagó todos los mocks (con `true` el build incluye MSW y `mockServiceWorker.js` y no hacen nada). Si en Render sigue en `true`, hay que cambiarla y redesplegar (*Manual Deploy*). |
+| `VITE_USE_MOCKS` | No se define: T44 apagó todos los mocks y la variable se eliminó en Render el 24/10. Sin ella, el build no incluye MSW ni `mockServiceWorker.js`. |
 | `NODE_VERSION` | `22` (Vite 8 pide Node 20.19 o 22.12 o más) |
 
 Las variables `VITE_*` se leen al compilar: si las cambiás en Render hay que redesplegar (*Manual Deploy*), no alcanza con guardarlas.
