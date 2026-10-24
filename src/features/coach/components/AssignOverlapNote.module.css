@@ -1,0 +1,10 @@
+.box {
+  margin-bottom: 14px;
+}
+
+/* Las asignaciones que se pisan, de a una y con 8 px entre sí. */
+.list {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}

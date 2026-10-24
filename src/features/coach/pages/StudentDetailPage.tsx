@@ -26,6 +26,7 @@ import {
 
 import { StudentHistoryModal } from '../components/StudentHistoryModal';
 import { StudentPaymentsModal } from '../components/StudentPaymentsModal';
+import { StudentPlansModal } from '../components/StudentPlansModal';
 import { StudentRmsModal } from '../components/StudentRmsModal';
 import styles from './StudentDetailPage.module.css';
 
@@ -88,9 +89,9 @@ function StudentDetail({ student }: { student: User }) {
   const navigate = useNavigate();
   const toast = useToast();
   const setActive = useSetUserActive();
-  const [modal, setModal] = useState<'rms' | 'history' | 'payments' | null>(
-    null,
-  );
+  const [modal, setModal] = useState<
+    'rms' | 'history' | 'payments' | 'plans' | null
+  >(null);
   const [confirming, setConfirming] = useState(false);
   const name = fullName(student);
 
@@ -158,6 +159,13 @@ function StudentDetail({ student }: { student: User }) {
           onClick={() => setModal('history')}
         />
         <ListItem
+          leading={<Tile icon="calendar" />}
+          title="Planificaciones"
+          subtitle="Asignar o quitar"
+          chevron
+          onClick={() => setModal('plans')}
+        />
+        <ListItem
           leading={<Tile icon="wallet" />}
           title="Historial de pagos"
           subtitle="Membresías y pagos"
@@ -207,6 +215,14 @@ function StudentDetail({ student }: { student: User }) {
         studentId={student.id}
         open={modal === 'payments'}
         onClose={() => setModal(null)}
+      />
+      <StudentPlansModal
+        studentId={student.id}
+        studentName={name}
+        studentActive={student.active}
+        open={modal === 'plans'}
+        onClose={() => setModal(null)}
+        onAssign={() => navigate(`/c/alumnos/${student.id}/asignar`)}
       />
       <ConfirmDialog
         open={confirming}

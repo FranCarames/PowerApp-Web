@@ -1,0 +1,17 @@
+/* .narrow del prototipo: los formularios de una columna no se estiran en pantallas anchas. */
+.narrow {
+  max-width: 540px;
+}
+
+/* Cada paso como un campo más: la etiqueta de los formularios y 14 px hasta el siguiente. */
+.step {
+  margin-bottom: 14px;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ts);
+  margin-bottom: 6px;
+}

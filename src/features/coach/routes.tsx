@@ -2,6 +2,7 @@ import { redirect, type RouteObject } from 'react-router';
 
 import { AssignPlanPage } from './pages/AssignPlanPage';
 import { AssignRoutinePage } from './pages/AssignRoutinePage';
+import { AssignStudentPlanPage } from './pages/AssignStudentPlanPage';
 import { CircuitEditorPage } from './pages/CircuitEditorPage';
 import { CircuitsPage } from './pages/CircuitsPage';
 import { MembershipsPage } from './pages/MembershipsPage';
@@ -18,6 +19,7 @@ export const coachRoutes: RouteObject[] = [
   { index: true, loader: () => redirect('/c/alumnos') },
   { path: 'alumnos', Component: StudentsPage },
   { path: 'alumnos/:id', Component: StudentDetailPage },
+  { path: 'alumnos/:id/asignar', Component: AssignStudentPlanPage },
   { path: 'membresias', Component: MembershipsPage },
   { path: 'pago', Component: RegisterPaymentPage },
   { path: 'planes', Component: PlansPage },
