@@ -6,8 +6,8 @@ import { demoIndividuals, type DemoIndividual } from './demoIndividuals';
 // Lo que los alumnos de demo hicieron en sus rutinas, por ejercicio y por asignación (CU-U-12). Las
 // rutinas individuales parten de `DemoIndividual.finished` y viven en memoria: marcar o desmarcar un
 // ejercicio las cambia, y el home (el progreso) y el detalle salen de acá, así que coinciden. Al
-// recargar la página vuelven a como estaban. Las del plan (`routineDetails.ts`) no se marcan en el mock:
-// marcar dentro de un plan (BE-20c) va siempre al backend real y no tiene mock.
+// recargar la página vuelven a como estaban. Las del plan (`routineDetails.ts`) no se marcan: el backend
+// publicado todavía no tiene ese endpoint (BE-20c).
 const NOTE = 'Subí 2,5 kg respecto de la semana pasada.';
 
 /** Lo que un alumno hizo: los primeros `count` ejercicios, cada uno el día que da `dayOf`. Al primero le dejó una nota. */
