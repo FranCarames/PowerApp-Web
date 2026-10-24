@@ -1,0 +1,19 @@
+/* Un ejercicio hecho se apaga, como las rutinas hechas del home. */
+.done {
+  opacity: 0.62;
+}
+
+/* El nombre y la nota los escribe el entrenador y el alumno: uno largo y sin espacios no tiene que desbordar la fila. */
+.name {
+  overflow-wrap: anywhere;
+}
+
+.line {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.note {
+  font-style: italic;
+  margin-top: 2px;
+}

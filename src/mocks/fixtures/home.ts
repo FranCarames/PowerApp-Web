@@ -11,33 +11,40 @@ import {
   weeksBetween,
 } from '@/shared/lib/dates';
 
+import {
+  DEMO_ROUTINES,
+  routineExerciseIds,
+  type DemoRoutine,
+} from './demoRoutines';
 import { demoAccounts } from './users';
 
 // El home de las cuentas de demo, calculado alrededor de hoy para que siempre haya algo en la semana
 // en curso. Franco (el alumno de demo) empezó un plan de 8 semanas hace dos: hoy cursa la 3. Las dos
-// primeras están hechas, en la tercera hizo una rutina y media y las demás no empezaron; la segunda
+// primeras están hechas, en la tercera hizo una rutina y casi otra y las demás no empezaron; la segunda
 // trae además una rutina que el entrenador quitó del plan. Tiene dos rutinas individuales: una esta
 // semana y una la anterior. Lucía tiene una rutina individual hoy y ningún plan; el resto de las
-// cuentas, nada (el estado vacío).
+// cuentas, nada (el estado vacío). El detalle de cada rutina sale de las mismas sesiones
+// (`routineDetails.ts`), así que el progreso de acá coincide con lo que allá se ve.
 const TIMESTAMP = '2026-03-12T12:00:00.000Z';
-const PLAN_WEEKS = 8;
+export const PLAN_WEEKS = 8;
 const CURRENT_PLAN_WEEK = 3;
 
-const PLAN_ROUTINES = [
-  { name: 'Empuje', total: 6 },
-  { name: 'Tirón', total: 5 },
-  { name: 'Piernas', total: 7 },
-];
-
-const franco = demoAccounts[0].user;
+export const franco = demoAccounts[0].user;
 const lucia = demoAccounts.find(({ user }) => user.email === 'lucia@email.com');
 
+/** El lunes en que arrancó el plan de Franco: hace dos semanas. */
+function planStart(): string {
+  return addDays(mondayOf(toCalendarDay()), -(CURRENT_PLAN_WEEK - 1) * 7);
+}
+
+/** El lunes de la semana `week` del plan de Franco. */
+export function planWeekStart(week: number): string {
+  return addDays(planStart(), (week - 1) * 7);
+}
+
 /** La asignación del plan de Franco: arranca el lunes de hace dos semanas y dura `PLAN_WEEKS`. */
-function francoAssignment() {
-  const start = addDays(
-    mondayOf(toCalendarDay()),
-    -(CURRENT_PLAN_WEEK - 1) * 7,
-  );
+export function francoAssignment() {
+  const start = planStart();
   return {
     id: 'demo-user-planification-franco',
     start_date: start,
@@ -52,39 +59,65 @@ function francoAssignment() {
   };
 }
 
+/** Una rutina de una semana del plan de Franco: cuánto hizo y si el entrenador la quitó del plan. */
+export interface DemoPlanSession {
+  routineAsignationId: string;
+  order: number;
+  routine: DemoRoutine;
+  removed: boolean;
+  finished: number;
+  total: number;
+}
+
 /** Los ejercicios que Franco hizo de la rutina `index` en la semana `week` del plan. */
 function finishedInPlanWeek(week: number, index: number, total: number) {
   if (week < CURRENT_PLAN_WEEK) return total;
   if (week > CURRENT_PLAN_WEEK) return 0;
   if (index === 0) return total;
-  return index === 1 ? 3 : 0;
+  return index === 1 ? Math.min(3, total) : 0;
+}
+
+/** Las rutinas de la semana `week` del plan de Franco, en el orden del entrenador. */
+export function planSessions(week: number): DemoPlanSession[] {
+  const inOrder = [DEMO_ROUTINES.push, DEMO_ROUTINES.pull, DEMO_ROUTINES.legs];
+  const sessions = inOrder.map((routine, index): DemoPlanSession => {
+    const total = routineExerciseIds(routine).length;
+    return {
+      routineAsignationId: `demo-asignation-w${week}-${index + 1}`,
+      order: index + 1,
+      routine,
+      removed: false,
+      finished: finishedInPlanWeek(week, index, total),
+      total,
+    };
+  });
+  // Una rutina que el entrenador quitó del plan después de que Franco hiciera parte: se ve solo lo hecho,
+  // así que su total es lo que hizo.
+  if (week === 2) {
+    sessions.push({
+      routineAsignationId: 'demo-asignation-w2-4',
+      order: 4,
+      routine: DEMO_ROUTINES.conditioning,
+      removed: true,
+      finished: 2,
+      total: 2,
+    });
+  }
+  return sessions;
 }
 
 function planRoutines(week: number): RoutineAssignedPlanRoutine[] {
-  const routines: RoutineAssignedPlanRoutine[] = PLAN_ROUTINES.map(
-    ({ name, total }, index) => ({
-      routine_asignation_id: `demo-asignation-w${week}-${index + 1}`,
-      order: index + 1,
+  return planSessions(week).map((session) => ({
+    routine_asignation_id: session.routineAsignationId,
+    order: session.order,
+    active: !session.removed,
+    routine: {
+      id: session.routine.id,
+      name: session.routine.name,
       active: true,
-      routine: { id: `demo-plan-routine-${index + 1}`, name, active: true },
-      progress: { finished: finishedInPlanWeek(week, index, total), total },
-    }),
-  );
-  // Una rutina que el entrenador quitó del plan después de que Franco la hiciera: se ve solo lo hecho.
-  if (week === 2) {
-    routines.push({
-      routine_asignation_id: 'demo-asignation-w2-4',
-      order: 4,
-      active: false,
-      routine: {
-        id: 'demo-plan-routine-4',
-        name: 'Cardio y core',
-        active: true,
-      },
-      progress: { finished: 3, total: 3 },
-    });
-  }
-  return routines;
+    },
+    progress: { finished: session.finished, total: session.total },
+  }));
 }
 
 function planGroups(
@@ -106,46 +139,45 @@ function planGroups(
   ];
 }
 
-interface IndividualDemo {
+/** Una rutina individual de demo: de quién es, qué día y cuánto hizo. */
+export interface DemoIndividual {
   id: string;
-  name: string;
+  userId: string;
+  routine: DemoRoutine;
   date: string;
   finished: number;
-  total: number;
 }
 
-function individualDemos(userId: string): IndividualDemo[] {
+/** Las rutinas individuales de todas las cuentas de demo. */
+export function demoIndividuals(): DemoIndividual[] {
   const thisMonday = mondayOf(toCalendarDay());
-  if (userId === franco.id) {
-    return [
-      {
-        id: 'demo-individual-franco-1',
-        name: 'Evaluación inicial',
-        date: addDays(thisMonday, -3),
-        finished: 5,
-        total: 5,
-      },
-      {
-        id: 'demo-individual-franco-2',
-        name: 'Movilidad y core',
-        date: addDays(thisMonday, 2),
-        finished: 0,
-        total: 4,
-      },
-    ];
-  }
-  if (userId === lucia?.user.id) {
-    return [
-      {
-        id: 'demo-individual-lucia-1',
-        name: 'Rutina de adaptación',
-        date: toCalendarDay(),
-        finished: 2,
-        total: 5,
-      },
-    ];
-  }
-  return [];
+  return [
+    {
+      id: 'demo-individual-franco-1',
+      userId: franco.id,
+      routine: DEMO_ROUTINES.evaluation,
+      date: addDays(thisMonday, -3),
+      finished: routineExerciseIds(DEMO_ROUTINES.evaluation).length,
+    },
+    {
+      id: 'demo-individual-franco-2',
+      userId: franco.id,
+      routine: DEMO_ROUTINES.mobility,
+      date: addDays(thisMonday, 2),
+      finished: 0,
+    },
+    ...(lucia
+      ? [
+          {
+            id: 'demo-individual-lucia-1',
+            userId: lucia.user.id,
+            routine: DEMO_ROUTINES.adaptation,
+            date: toCalendarDay(),
+            finished: 2,
+          },
+        ]
+      : []),
+  ];
 }
 
 function individualRoutines(
@@ -153,17 +185,22 @@ function individualRoutines(
   weekStart: string,
 ): RoutineAssignedListItem[] {
   const weekEnd = addDays(weekStart, 6);
-  return individualDemos(userId)
-    .filter(({ date }) => date >= weekStart && date <= weekEnd)
-    .map(({ id, name, date, finished, total }) => ({
+  return demoIndividuals()
+    .filter(
+      (demo) =>
+        demo.userId === userId &&
+        demo.date >= weekStart &&
+        demo.date <= weekEnd,
+    )
+    .map(({ id, routine, date, finished }) => ({
       id,
-      routine_id: `${id}-routine`,
+      routine_id: routine.id,
       user_id: userId,
       date,
       created_at: TIMESTAMP,
       updated_at: TIMESTAMP,
-      routine: { id: `${id}-routine`, name, active: true },
-      progress: { finished, total },
+      routine: { id: routine.id, name: routine.name, active: true },
+      progress: { finished, total: routineExerciseIds(routine).length },
     }));
 }
 
