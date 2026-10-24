@@ -28,6 +28,8 @@
   font-size: 12px;
   color: var(--tm);
   font-weight: 600;
+  /* El título y el sobretítulo son nombres que cargan el entrenador y el Admin: uno largo y sin espacios no desborda. */
+  overflow-wrap: anywhere;
 }
 
 .title {
@@ -37,6 +39,7 @@
   letter-spacing: -0.2px;
   line-height: 1.02;
   margin-top: 2px;
+  overflow-wrap: anywhere;
 }
 
 .actions {

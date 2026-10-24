@@ -14,6 +14,14 @@ function newestFirst(a: UserRm, b: UserRm): number {
   );
 }
 
+/** Los RMs de un ejercicio del catálogo (por el `id` de la ficha), del más reciente al más antiguo. */
+export function rmsOfExercise(
+  rms: readonly UserRm[],
+  exerciseId: string,
+): UserRm[] {
+  return rms.filter((rm) => rm.exercise.id === exerciseId).sort(newestFirst);
+}
+
 /**
  * Agrupa los RMs por ejercicio (CU-E-04 y CU-U-19). El backend los manda sueltos y sin ordenar, cada
  * uno con su ejercicio (`id` y `name`). Los ejercicios van por orden alfabético y, dentro de cada

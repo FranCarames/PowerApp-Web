@@ -1,10 +1,8 @@
 import { useMemo } from 'react';
 import { useLocation, useParams } from 'react-router';
 
-import { getErrorMessage, isApiError } from '@/api/errors';
 import {
   EmptyState,
-  ErrorState,
   ListSkeleton,
   Note,
   PageHeader,
@@ -12,6 +10,10 @@ import {
   StatGrid,
 } from '@/shared/ui';
 
+import {
+  RoutineLoadError,
+  type RoutineQuery,
+} from '../components/RoutineLoadError';
 import { RoutineCircuit } from '../components/RoutineCircuit';
 import { homeBackTo } from '../homeState';
 import {
@@ -26,20 +28,12 @@ import {
 } from '../routineDetail';
 import styles from './RoutineDetailPage.module.css';
 
-/** Lo que la pantalla necesita de la consulta, sea de la vía individual o de la del plan. */
-interface RoutineQuery {
-  isPending: boolean;
-  isError: boolean;
-  error: Error | null;
-  isRefetching: boolean;
-  refetch: () => unknown;
-}
-
 /**
  * Detalle de una rutina del Usuario (CU-U-09): sus circuitos en orden, con los ejercicios y sus series,
  * y lo que el alumno ya hizo. Se abre desde una asignación, así que hay dos rutas con la misma pantalla:
  * `/u/rutina/:id` (una rutina individual) y `/u/rutina/plan/:userPlanificationId/:routineAsignationId`
- * (una rutina de una semana del plan). "Volver" deja el home en la semana de la que vino.
+ * (una rutina de una semana del plan). "Volver" deja el home en la semana de la que vino. Cada
+ * ejercicio abre su detalle (CU-U-10).
  */
 export function RoutineDetailPage() {
   const { id, userPlanificationId, routineAsignationId } = useParams();
@@ -80,40 +74,6 @@ function PlanRoutine({
   return <RoutineScreen query={query} view={view} />;
 }
 
-/** El error de una rutina que no se puede abrir: 403 y 404 son definitivos, no se reintentan. */
-function RoutineError({ query }: { query: RoutineQuery }) {
-  const { error } = query;
-  if (isApiError(error) && error.status === 403) {
-    return (
-      <ErrorState
-        title="Esta rutina no es tuya"
-        message="Solo podés ver las rutinas que te asignaron a vos."
-      />
-    );
-  }
-  if (isApiError(error) && (error.status === 404 || error.status === 400)) {
-    // El backend distingue la rutina que el entrenador quitó del plan sin que el alumno hiciera nada.
-    const removed = error.serverMessage?.includes('quitada') ?? false;
-    return (
-      <ErrorState
-        title="No encontramos la rutina"
-        message={
-          removed
-            ? 'Tu entrenador la quitó del plan y no hiciste nada en ella.'
-            : 'Puede que tu entrenador la haya cambiado. Volvé al inicio y buscala de nuevo.'
-        }
-      />
-    );
-  }
-  return (
-    <ErrorState
-      message={getErrorMessage(error)}
-      onRetry={() => void query.refetch()}
-      retrying={query.isRefetching}
-    />
-  );
-}
-
 function RoutineScreen({
   query,
   view,
@@ -125,7 +85,7 @@ function RoutineScreen({
 
   let content;
   if (query.isError) {
-    content = <RoutineError query={query} />;
+    content = <RoutineLoadError query={query} />;
   } else if (!view) {
     content = <ListSkeleton columns={2} rows={4} />;
   } else {
@@ -145,7 +105,7 @@ function RoutineScreen({
 }
 
 function RoutineBody({ view }: { view: RoutineView }) {
-  const { routine, finished, notices, planNote } = view;
+  const { routine, finished, notices, planNote, assignment } = view;
   const stats = routineStats(view);
   const circuits = [...routine.circuits].sort((a, b) => a.order - b.order);
 
@@ -191,7 +151,12 @@ function RoutineBody({ view }: { view: RoutineView }) {
         />
       ) : (
         circuits.map((link) => (
-          <RoutineCircuit key={link.id} link={link} finished={finished} />
+          <RoutineCircuit
+            key={link.id}
+            link={link}
+            assignment={assignment}
+            finished={finished}
+          />
         ))
       )}
     </>

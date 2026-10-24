@@ -1,0 +1,9 @@
+.weight {
+  font-family: var(--fM);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.register {
+  margin-top: 10px;
+}

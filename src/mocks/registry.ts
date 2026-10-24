@@ -71,6 +71,17 @@ export const registry: readonly RegistryEntry[] = [
   { method: 'get', path: '/api/v1/routine/home/{userId}', mock: true },
   // El detalle de una rutina del alumno, individual o de una semana del plan: solo las cuentas de demo (ver handlers/routineDetail.ts)
   { method: 'get', path: '/api/v1/routine/assign-user/{id}', mock: true },
+  // Marcar y desmarcar un ejercicio de una rutina individual: solo las cuentas de demo, y cambian el detalle y el home (ver handlers/routineDetail.ts). Dentro de un plan todavía no existe en el backend publicado (BE-20c).
+  {
+    method: 'post',
+    path: '/api/v1/routine/assign-user/{id}/finished',
+    mock: true,
+  },
+  {
+    method: 'delete',
+    path: '/api/v1/routine/assign-user/{id}/finished/{routineExerciseId}',
+    mock: true,
+  },
   {
     method: 'get',
     path: '/api/v1/routine/assign-plan/{userPlanificationId}/{routineAsignationId}',

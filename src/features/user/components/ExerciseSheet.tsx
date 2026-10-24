@@ -1,6 +1,10 @@
 import { useId, useState, type ReactNode } from 'react';
 
-import type { ExerciseWithMuscles } from '@/api/pending';
+import type {
+  CircuitExerciseRef,
+  ExerciseMuscle,
+  ExerciseWithMuscles,
+} from '@/api/pending';
 import { Icon } from '@/shared/icons';
 import { isHttpUrl } from '@/shared/lib/url';
 import {
@@ -37,9 +41,29 @@ function Picture({ src, className, fallback = null }: PictureProps) {
   );
 }
 
+/**
+ * Lo que la ficha necesita de un ejercicio: la descripción, los tips, el video y las imágenes. Lo cumplen
+ * el ejercicio del catálogo y el que viene dentro de una rutina (`CircuitExerciseRef`).
+ */
+export type ExerciseSheetData = Pick<
+  CircuitExerciseRef,
+  | 'description'
+  | 'safety_tips'
+  | 'activation_tips'
+  | 'video_url'
+  | 'preview_image'
+  | 'bg_image'
+>;
+
+interface HeroProps {
+  exercise: ExerciseSheetData;
+  /** Los músculos que trabaja. Sin ellos (`undefined`, todavía no llegaron) no se muestra el bloque. */
+  muscles: readonly ExerciseMuscle[] | undefined;
+}
+
 /** La cabecera de la ficha: la imagen de fondo, la miniatura y los músculos que trabaja. */
-function Hero({ exercise }: { exercise: ExerciseWithMuscles }) {
-  const { bg_image, preview_image, exercisedMuscles } = exercise;
+export function ExerciseHero({ exercise, muscles }: HeroProps) {
+  const { bg_image, preview_image } = exercise;
   const labelId = useId();
   const dumbbell = <Icon name="dumbbell" size={36} />;
 
@@ -63,38 +87,38 @@ function Hero({ exercise }: { exercise: ExerciseWithMuscles }) {
             dumbbell
           )}
         </span>
-        <div className={styles.muscles}>
-          <div id={labelId} className={styles.label}>
-            Músculos que trabaja
+        {muscles && (
+          <div className={styles.muscles}>
+            <div id={labelId} className={styles.label}>
+              Músculos que trabaja
+            </div>
+            {muscles.length === 0 ? (
+              <div className={styles.none}>Sin músculos asignados</div>
+            ) : (
+              <ul className={styles.pills} aria-labelledby={labelId}>
+                {muscles.map((muscle) => (
+                  <li key={muscle.id}>
+                    <Pill>{muscle.name}</Pill>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-          {exercisedMuscles.length === 0 ? (
-            <div className={styles.none}>Sin músculos asignados</div>
-          ) : (
-            <ul className={styles.pills} aria-labelledby={labelId}>
-              {exercisedMuscles.map((muscle) => (
-                <li key={muscle.id}>
-                  <Pill>{muscle.name}</Pill>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
 }
 
 /**
- * La ficha de un ejercicio de la wiki (CU-U-15): los músculos que trabaja, la descripción, los tips
- * de seguridad y de activación, el video (un link que se abre aparte) y las imágenes. Lo que el
- * ejercicio no trae no se muestra.
+ * El resto de la ficha: la descripción, los tips de seguridad y de activación y el video (un link que se
+ * abre aparte). Lo que el ejercicio no trae no se muestra.
  */
-export function ExerciseSheet({ exercise }: { exercise: ExerciseWithMuscles }) {
+export function ExerciseDetails({ exercise }: { exercise: ExerciseSheetData }) {
   const { description, safety_tips, activation_tips, video_url } = exercise;
 
   return (
-    <article className={styles.sheet}>
-      <Hero exercise={exercise} />
+    <>
       {description && (
         <>
           <SectionHeader title="Descripción" />
@@ -126,6 +150,20 @@ export function ExerciseSheet({ exercise }: { exercise: ExerciseWithMuscles }) {
           </ButtonLink>
         </>
       )}
+    </>
+  );
+}
+
+/**
+ * La ficha de un ejercicio de la wiki (CU-U-15): los músculos que trabaja, la descripción, los tips
+ * de seguridad y de activación, el video (un link que se abre aparte) y las imágenes. Lo que el
+ * ejercicio no trae no se muestra.
+ */
+export function ExerciseSheet({ exercise }: { exercise: ExerciseWithMuscles }) {
+  return (
+    <article className={styles.sheet}>
+      <ExerciseHero exercise={exercise} muscles={exercise.exercisedMuscles} />
+      <ExerciseDetails exercise={exercise} />
     </article>
   );
 }

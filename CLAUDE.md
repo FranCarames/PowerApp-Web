@@ -153,7 +153,7 @@ Tokens, copiados del prototipo. Van en `src/shared/styles/tokens.css`:
 Rutas:
 
 - **Auth:** `/login`, `/registro`, `/recuperar`, `/cambiar-contrasena`.
-- **Usuario:** `/u/plan`, `/u/rutina/:id` (una rutina individual), `/u/rutina/plan/:userPlanificationId/:routineAsignationId` (una rutina de una semana del plan), `/u/ejercicio/:id`, `/u/rms`, `/u/calculadora`, `/u/wiki`, `/u/wiki/:id`, `/u/timer`.
+- **Usuario:** `/u/plan`, `/u/rutina/:id` (una rutina individual), `/u/rutina/plan/:userPlanificationId/:routineAsignationId` (una rutina de una semana del plan), `/u/rutina/:id/ejercicio/:routineExerciseId` y `/u/rutina/plan/:userPlanificationId/:routineAsignationId/ejercicio/:routineExerciseId` (un ejercicio de esas rutinas: sale del mismo detalle y necesita saber de qué asignación es, así que cuelga de su ruta; `routineExerciseId` es el `id` del ejercicio en el árbol de la rutina, no el del catálogo), `/u/rms`, `/u/calculadora`, `/u/wiki`, `/u/wiki/:id`, `/u/timer`.
 - **Entrenador:** `/c/alumnos`, `/c/alumnos/:id`, `/c/membresias`, `/c/pago`, `/c/planes`, `/c/planes/:id`, `/c/rutinas`, `/c/rutinas/:id`, `/c/circuitos`, `/c/circuitos/:id`.
 - **Admin:** `/a/inicio`, `/a/usuarios`, `/a/entrenadores`, `/a/convertir`, `/a/ejercicios`, `/a/ejercicios/:id`, `/a/circuitos`, `/a/circuitos/:id`, `/a/rutinas`, `/a/rutinas/:id`, `/a/planes`, `/a/planes/:id`, `/a/catalogo`, `/a/membresias`, `/a/mas`.
 - **Cuenta (los tres roles):** `/cuenta`, `/cuenta/datos`, `/cuenta/pagos`. El historial de pagos solo se muestra para el rol Usuario.

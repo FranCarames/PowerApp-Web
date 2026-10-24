@@ -108,3 +108,35 @@ export const potentialRmSchema = z.object({
 
 export type PotentialRmInput = z.input<typeof potentialRmSchema>;
 export type PotentialRmValues = z.output<typeof potentialRmSchema>;
+
+/** El largo máximo de la nota del alumno en un ejercicio (`user_note` de `MarkExerciseFinishedDto`). */
+export const USER_NOTE_MAX_LENGTH = 100;
+
+/**
+ * `MarkExerciseFinishedDto` (CU-U-12 y CU-U-13): el día en que el alumno hizo el ejercicio y su nota.
+ *
+ * - `finished_at`: un día de calendario. El backend no lo valida contra ninguna fecha, pero un ejercicio
+ *   no se hizo en el futuro: `latestDay` es el último día que se acepta (hoy, o el día ya registrado si
+ *   fuera posterior, para que se pueda editar la nota de una marca hecha desde otro lado).
+ * - `user_note`: hasta 100 caracteres; vacía, borra la nota.
+ */
+export function exerciseLogSchema(latestDay: string) {
+  return z.object({
+    finished_at: z
+      .string()
+      .min(1, 'Elegí el día')
+      .refine(isCalendarDay, 'Ingresá una fecha válida')
+      // Los días de calendario "YYYY-MM-DD" se ordenan como texto.
+      .refine((value) => value <= latestDay, 'El día no puede ser futuro'),
+    user_note: z
+      .string()
+      .trim()
+      .max(
+        USER_NOTE_MAX_LENGTH,
+        `La nota puede tener hasta ${USER_NOTE_MAX_LENGTH} caracteres`,
+      ),
+  });
+}
+
+export type ExerciseLogInput = z.input<ReturnType<typeof exerciseLogSchema>>;
+export type ExerciseLogValues = z.output<ReturnType<typeof exerciseLogSchema>>;

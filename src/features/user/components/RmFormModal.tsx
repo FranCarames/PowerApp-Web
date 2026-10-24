@@ -26,6 +26,8 @@ interface RmFormModalProps {
   userId: string;
   /** Los ejercicios para elegir, ordenados. `undefined` mientras no se cargaron. */
   exercises: readonly { id: string; name: string }[] | undefined;
+  /** El ejercicio con el que arranca un RM nuevo, si ya se sabe cuál es (el del detalle de un ejercicio). */
+  initialExerciseId?: string;
   onClose: () => void;
 }
 
@@ -34,6 +36,7 @@ export function RmFormModal({
   target,
   userId,
   exercises,
+  initialExerciseId,
   onClose,
 }: RmFormModalProps) {
   const rm = target === 'new' ? undefined : (target ?? undefined);
@@ -74,6 +77,7 @@ export function RmFormModal({
           id={formId}
           rm={rm}
           exercises={exercises}
+          initialExerciseId={initialExerciseId}
           save={save}
           onSaved={close}
         />
@@ -86,11 +90,19 @@ interface RmFormProps {
   id: string;
   rm?: UserRm;
   exercises: RmFormModalProps['exercises'];
+  initialExerciseId: RmFormModalProps['initialExerciseId'];
   save: ReturnType<typeof useSaveRm>;
   onSaved: () => void;
 }
 
-function RmForm({ id, rm, exercises, save, onSaved }: RmFormProps) {
+function RmForm({
+  id,
+  rm,
+  exercises,
+  initialExerciseId,
+  save,
+  onSaved,
+}: RmFormProps) {
   const toast = useToast();
   const {
     register,
@@ -99,7 +111,7 @@ function RmForm({ id, rm, exercises, save, onSaved }: RmFormProps) {
   } = useForm<RmInput, unknown, RmValues>({
     resolver: zodResolver(rmSchema),
     defaultValues: {
-      exercise_id: rm?.exercise.id ?? '',
+      exercise_id: rm?.exercise.id ?? initialExerciseId ?? '',
       weight: rm ? String(rm.weight) : '',
       reps: rm ? String(rm.reps) : '',
       // El backend guarda un día sin hora; por si algún día manda la hora, el campo usa solo el día.

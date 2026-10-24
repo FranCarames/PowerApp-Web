@@ -1,5 +1,7 @@
 import type { To } from 'react-router';
 
+import type { RoutineAssignment } from './routineDetail';
+
 /** El home del alumno. */
 export const HOME_PATH = '/u/plan';
 
@@ -14,6 +16,27 @@ export function planRoutinePath(
   routineAsignationId: string,
 ): string {
   return `/u/rutina/plan/${userPlanificationId}/${routineAsignationId}`;
+}
+
+/** El detalle de la rutina de una asignación, sea individual o de una semana del plan. */
+export function routinePath(assignment: RoutineAssignment): string {
+  return assignment.kind === 'individual'
+    ? individualRoutinePath(assignment.assignmentId)
+    : planRoutinePath(
+        assignment.userPlanificationId,
+        assignment.routineAsignationId,
+      );
+}
+
+/**
+ * El detalle de un ejercicio de la rutina de una asignación (CU-U-10). Cuelga de la ruta de la rutina:
+ * el ejercicio sale del mismo detalle y necesita saber de qué asignación es.
+ */
+export function exercisePath(
+  assignment: RoutineAssignment,
+  routineExerciseId: string,
+): string {
+  return `${routinePath(assignment)}/ejercicio/${routineExerciseId}`;
 }
 
 /**
