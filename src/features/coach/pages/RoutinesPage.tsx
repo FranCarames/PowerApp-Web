@@ -1,12 +1,18 @@
-import { SectionPlaceholder } from '@/shared/ui';
+import { RoutineList } from '@/features/catalog/components/RoutineList';
+import { PageHeader } from '@/shared/ui';
 
 import { RoutinesSegments } from '../components/RoutinesSegments';
 
-// PLACEHOLDER hasta el bloque C2: T21 (listado de rutinas) reemplaza el aviso. El segmento Circuitos ya anda (T48).
+/**
+ * Rutinas del Entrenador (CU-E-15), el primer segmento del tab Rutinas: el listado compartido con el
+ * Admin (`RoutineList`). Tocar una rutina abre su editor en `/c/rutinas/:id`.
+ */
 export function RoutinesPage() {
   return (
-    <SectionPlaceholder eyebrow="Sistémicas" title="Rutinas" icon="list">
+    <>
+      <PageHeader eyebrow="Sistémicas" title="Rutinas" />
       <RoutinesSegments value="rutinas" />
-    </SectionPlaceholder>
+      <RoutineList basePath="/c/rutinas" />
+    </>
   );
 }

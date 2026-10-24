@@ -1,0 +1,9 @@
+.note {
+  margin-bottom: 12px;
+}
+
+/* Las asignaciones, de a una y con 8 px entre sí. */
+.list {
+  display: grid;
+  gap: 8px;
+}

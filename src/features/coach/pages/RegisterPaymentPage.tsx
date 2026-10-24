@@ -8,7 +8,7 @@ import { fullName } from '@/shared/lib/fullName';
 import { Note, PageHeader, Skeleton } from '@/shared/ui';
 
 import { PaymentForm } from '../components/PaymentForm';
-import { PaymentStudentPicker } from '../components/PaymentStudentPicker';
+import { StudentPicker } from '../components/StudentPicker';
 import styles from './RegisterPaymentPage.module.css';
 
 /**
@@ -83,7 +83,7 @@ function RegisterPayment({ studentId }: { studentId: string | null }) {
           {preselected.loading && chosen === undefined ? (
             <Skeleton height={68} radius={16} />
           ) : (
-            <PaymentStudentPicker student={student} onChange={setChosen} />
+            <StudentPicker student={student} onChange={setChosen} />
           )}
         </div>
         {student ? (

@@ -17,10 +17,12 @@ import {
   SearchInput,
 } from '@/shared/ui';
 
-interface PaymentStudentPickerProps {
+interface StudentPickerProps {
   /** El alumno elegido, o `null` si todavía no hay. */
   student: User | null;
   onChange: (student: User | null) => void;
+  /** Ofrece solo los alumnos con la cuenta abierta. Por defecto se ofrecen todos. */
+  activeOnly?: boolean;
 }
 
 function StudentAvatar({ student }: { student: User }) {
@@ -35,15 +37,17 @@ function StudentAvatar({ student }: { student: User }) {
 }
 
 /**
- * El alumno al que se le registra el pago. Sin elegir, un buscador y la lista de alumnos (de a
+ * El alumno elegido para una acción del entrenador. Sin elegir, un buscador y la lista de alumnos (de a
  * páginas); elegido, solo su fila con "Cambiar", para que el resto del formulario quede a la vista.
- * Se ofrecen también los de cuenta inactiva: el backend deja registrarles un pago y el control de
- * membresías los lista.
+ * Por defecto se ofrecen también los de cuenta inactiva (el backend deja registrarles un pago y el
+ * control de membresías los lista); con `activeOnly`, solo los de cuenta abierta (asignarles una
+ * planificación a los otros da 400).
  */
-export function PaymentStudentPicker({
+export function StudentPicker({
   student,
   onChange,
-}: PaymentStudentPickerProps) {
+  activeOnly = false,
+}: StudentPickerProps) {
   const [search, setSearch] = useState('');
   const keyword = useDebouncedValue(search, SEARCH_DEBOUNCE_MS).trim();
 
@@ -77,7 +81,7 @@ export function PaymentStudentPicker({
       <UserList
         columns={1}
         gap={8}
-        filter={{ role: 'user', keyword }}
+        filter={{ role: 'user', keyword, active: activeOnly || undefined }}
         empty={
           <EmptyState
             icon={keyword ? 'search' : 'users'}
