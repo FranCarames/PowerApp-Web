@@ -158,7 +158,8 @@ export function PaymentForm({ student }: { student: User }) {
       {failed && (
         <Note tone="err" icon="alert" role="alert" className={styles.note}>
           {getErrorMessage(register.error, {
-            400: 'Ese tipo de membresía ya no existe. Elegí otro.',
+            // El contrato del 24/10 lo documenta para datos inválidos, un destinatario que no es alumno, su cuenta cerrada o un tipo de baja.
+            400: 'No se pudo registrar el pago: el tipo de membresía ya no está disponible o la cuenta del alumno está cerrada. Revisá los datos e intentá de nuevo.',
             404: 'El alumno ya no existe. Elegí a otro.',
           })}
         </Note>

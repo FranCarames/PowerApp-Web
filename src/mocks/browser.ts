@@ -40,6 +40,14 @@ export async function startMocks(): Promise<void> {
     .filter((mock) => isMocked(mock.method, mock.path))
     .map((mock) => mock.handler);
 
+  // Con todo apagado (T44) no hay nada que interceptar: no se registra el service worker.
+  if (handlers.length === 0) {
+    console.info(
+      '[mocks] No hay mocks encendidos en registry.ts: MSW no se inicia y todo va al backend real.',
+    );
+    return;
+  }
+
   await setupWorker(...handlers).start({
     // Lo que no está mockeado no genera avisos: se espera que vaya al backend.
     onUnhandledFrame: 'bypass',

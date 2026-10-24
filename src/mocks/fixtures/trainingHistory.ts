@@ -1,6 +1,7 @@
 import type {
   CircuitSetResponse,
   RoutineHistoryExercise,
+  RoutineHistoryIndividualSession,
   RoutineHistorySession,
   RoutineHistorySet,
 } from '@/api/types';
@@ -76,7 +77,7 @@ function present<T>(value: T | undefined): value is T {
 }
 
 /** Las sesiones de las rutinas individuales de la cuenta de demo, con lo que marcó hasta ahora. */
-function individualSessions(userId: string): RoutineHistorySession[] {
+function individualSessions(userId: string): RoutineHistoryIndividualSession[] {
   return demoIndividuals()
     .filter((demo) => demo.userId === userId)
     .flatMap((demo) => {
@@ -168,7 +169,7 @@ const PAST_SESSIONS: Record<string, readonly PastSession[]> = {
   ],
 };
 
-function pastSessions(userId: string): RoutineHistorySession[] {
+function pastSessions(userId: string): RoutineHistoryIndividualSession[] {
   const student = students.find(({ id }) => id === userId);
   const sessions = student ? PAST_SESSIONS[student.email] : undefined;
   if (!sessions) return [];

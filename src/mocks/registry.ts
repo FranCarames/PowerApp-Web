@@ -28,32 +28,33 @@ interface PendingEntry {
 
 type RegistryEntry = ContractEntry | PendingEntry;
 
+// Estado al 24/10/2026 (T44): todo está apagado. El backend de Render publica cada endpoint de esta lista y no
+// queda ningún mock pendiente (`PendingEntry`), así que MSW no responde nada y el front va siempre al backend
+// real. Con eso dejan de existir las cuentas de demo: el backend rechaza su token falso (401 que cierra la
+// sesión) y el login de demo ya no se mockea. Los handlers y las fixtures quedan en `src/mocks/` por si hace
+// falta recorrer una pantalla sin backend: se pasa su entrada a `mock: true` (ver README, "Backend y mocks").
 export const registry: readonly RegistryEntry[] = [
-  // Entrenadores (piden token de admin desde el 17/10) y ejercicios (públicos): solo con la sesión de una
-  // cuenta de demo (ver handlers/coaches.ts)
-  { method: 'get', path: '/api/v1/coach/all', mock: true },
-  { method: 'get', path: '/api/v1/coach/get/{id}', mock: true },
-  { method: 'get', path: '/api/v1/exercise/all', mock: true },
-  { method: 'get', path: '/api/v1/exercise/{id}', mock: true },
-  { method: 'post', path: '/api/v1/exercise/create', mock: true },
-  { method: 'post', path: '/api/v1/exercise/edit/{id}', mock: true },
-  { method: 'delete', path: '/api/v1/exercise/{id}', mock: true },
-  { method: 'get', path: '/api/v1/muscles/all', mock: true },
-  { method: 'get', path: '/api/v1/muscles/mg/all', mock: true },
-  { method: 'post', path: '/api/v1/muscles/create', mock: true },
-  { method: 'post', path: '/api/v1/muscles/edit/{id}', mock: true },
-  { method: 'delete', path: '/api/v1/muscles/{id}', mock: true },
-  { method: 'post', path: '/api/v1/muscles/mg/create', mock: true },
-  { method: 'post', path: '/api/v1/muscles/mg/edit/{id}', mock: true },
-  { method: 'delete', path: '/api/v1/muscles/mg/{id}', mock: true },
-  // Alta, edición (T37: es el mismo promote_user, el backend no tiene un edit) y baja de un entrenador:
-  // solo el Admin de demo, por su token falso (ver handlers/coaches.ts)
-  { method: 'post', path: '/api/v1/coach/promote_user', mock: true },
-  { method: 'post', path: '/api/v1/coach/delete_coach/{id}', mock: true },
-  // Circuitos: apagados el 6/10, el backend ya los tiene completos y probados (T44, primer tramo). Van al backend
-  // real también con las cuentas de demo, cuyo token falso el backend rechaza. Los handlers quedan hasta que T44
-  // los borre. `routine/all-plus` es de rutinas, pero lo necesita el listado de circuitos para contar en cuántas
-  // rutinas se usa cada uno.
+  // Entrenadores (piden token de admin desde el 17/10) y ejercicios
+  { method: 'get', path: '/api/v1/coach/all', mock: false },
+  { method: 'get', path: '/api/v1/coach/get/{id}', mock: false },
+  { method: 'get', path: '/api/v1/exercise/all', mock: false },
+  { method: 'get', path: '/api/v1/exercise/{id}', mock: false },
+  { method: 'post', path: '/api/v1/exercise/create', mock: false },
+  { method: 'post', path: '/api/v1/exercise/edit/{id}', mock: false },
+  { method: 'delete', path: '/api/v1/exercise/{id}', mock: false },
+  { method: 'get', path: '/api/v1/muscles/all', mock: false },
+  { method: 'get', path: '/api/v1/muscles/mg/all', mock: false },
+  { method: 'post', path: '/api/v1/muscles/create', mock: false },
+  { method: 'post', path: '/api/v1/muscles/edit/{id}', mock: false },
+  { method: 'delete', path: '/api/v1/muscles/{id}', mock: false },
+  { method: 'post', path: '/api/v1/muscles/mg/create', mock: false },
+  { method: 'post', path: '/api/v1/muscles/mg/edit/{id}', mock: false },
+  { method: 'delete', path: '/api/v1/muscles/mg/{id}', mock: false },
+  // Alta, edición (T37: es el mismo promote_user, el backend no tiene un edit) y baja de un entrenador
+  { method: 'post', path: '/api/v1/coach/promote_user', mock: false },
+  { method: 'post', path: '/api/v1/coach/delete_coach/{id}', mock: false },
+  // Circuitos: apagados el 6/10 (T44, primer tramo). `routine/all-plus` es de rutinas, pero lo necesita el
+  // listado de circuitos para contar en cuántas rutinas se usa cada uno.
   { method: 'get', path: '/api/v1/routine/circuit/all', mock: false },
   { method: 'get', path: '/api/v1/routine/circuit/all-plus', mock: false },
   { method: 'get', path: '/api/v1/routine/circuit/{id}', mock: false },
@@ -65,58 +66,56 @@ export const registry: readonly RegistryEntry[] = [
     mock: false,
   },
   { method: 'get', path: '/api/v1/routine/all-plus', mock: false },
-  // Rutinas y planificaciones: solo las cuentas de demo; las de verdad pasan al backend real
-  { method: 'get', path: '/api/v1/routine/all', mock: true },
-  // El home del alumno: solo las cuentas de demo; las de verdad pasan al backend real (ver handlers/routineHome.ts)
-  { method: 'get', path: '/api/v1/routine/home/{userId}', mock: true },
-  // El detalle de una rutina del alumno, individual o de una semana del plan: solo las cuentas de demo (ver handlers/routineDetail.ts)
-  { method: 'get', path: '/api/v1/routine/assign-user/{id}', mock: true },
-  // Marcar y desmarcar un ejercicio de una rutina individual: solo las cuentas de demo, y cambian el detalle y el home (ver handlers/routineDetail.ts). Dentro de un plan todavía no existe en el backend publicado (BE-20c).
+  // Rutinas y planificaciones
+  { method: 'get', path: '/api/v1/routine/all', mock: false },
+  // El home del alumno y el detalle de una rutina, individual o de una semana del plan
+  { method: 'get', path: '/api/v1/routine/home/{userId}', mock: false },
+  { method: 'get', path: '/api/v1/routine/assign-user/{id}', mock: false },
+  // Marcar y desmarcar un ejercicio de una rutina individual. Dentro de un plan (BE-20c) el backend ya lo
+  // publica, pero el front todavía no lo usa (no tuvo mock): ver PLAN.md, T44.
   {
     method: 'post',
     path: '/api/v1/routine/assign-user/{id}/finished',
-    mock: true,
+    mock: false,
   },
   {
     method: 'delete',
     path: '/api/v1/routine/assign-user/{id}/finished/{routineExerciseId}',
-    mock: true,
+    mock: false,
   },
   {
     method: 'get',
     path: '/api/v1/routine/assign-plan/{userPlanificationId}/{routineAsignationId}',
-    mock: true,
+    mock: false,
   },
-  // El historial de entrenamientos de un alumno (B6): solo las cuentas de demo; las de verdad pasan al backend real (ver handlers/trainingHistory.ts)
-  { method: 'get', path: '/api/v1/routine/history/{userId}', mock: true },
-  { method: 'get', path: '/api/v1/planification/all', mock: true },
-  { method: 'get', path: '/api/v1/planification/user/{userId}', mock: true },
+  // El historial de entrenamientos de un alumno (B6)
+  { method: 'get', path: '/api/v1/routine/history/{userId}', mock: false },
+  { method: 'get', path: '/api/v1/planification/all', mock: false },
+  { method: 'get', path: '/api/v1/planification/user/{userId}', mock: false },
   // Membresías (tipos)
-  { method: 'get', path: '/api/v1/membership/all', mock: true },
-  { method: 'post', path: '/api/v1/membership/create', mock: true },
-  { method: 'post', path: '/api/v1/membership/edit/{id}', mock: true },
-  { method: 'post', path: '/api/v1/membership/set-active/{id}', mock: true },
-  { method: 'get', path: '/api/v1/membership/type/users', mock: true },
-  // Resumen de estados: solo las cuentas de demo; las de verdad pasan al backend real (ver handlers/memberships.ts)
-  { method: 'get', path: '/api/v1/membership/status/summary', mock: true },
-  { method: 'get', path: '/api/v1/membership/status/users', mock: true },
-  // Registrar un pago: solo las cuentas de demo (ver handlers/memberships.ts)
-  { method: 'post', path: '/api/v1/membership/payment/register', mock: true },
-  // Pagos: solo los de las cuentas de demo; los demás ids pasan al backend real (ver handlers/payments.ts)
-  { method: 'get', path: '/api/v1/membership/payment/user/{id}', mock: true },
-  // RMs: solo las cuentas de demo; los de verdad pasan al backend real (ver handlers/userRms.ts)
-  { method: 'get', path: '/api/v1/user_rm/user/{id}', mock: true },
-  { method: 'post', path: '/api/v1/user_rm/potential', mock: true },
-  { method: 'post', path: '/api/v1/user_rm/create', mock: true },
-  { method: 'post', path: '/api/v1/user_rm/edit/{id}', mock: true },
-  { method: 'delete', path: '/api/v1/user_rm/{id}', mock: true },
-  // Usuarios: solo las cuentas de demo; los demás emails pasan al backend real (ver handlers/users.ts)
-  { method: 'get', path: '/api/v1/users/all', mock: true },
-  { method: 'post', path: '/api/v1/users/set-active/{id}', mock: true },
-  { method: 'post', path: '/api/v1/users/login', mock: true },
-  { method: 'post', path: '/api/v1/users/change-password', mock: true },
-  { method: 'get', path: '/api/v1/users/get/{id}', mock: true },
-  { method: 'post', path: '/api/v1/users/edit', mock: true },
+  { method: 'get', path: '/api/v1/membership/all', mock: false },
+  { method: 'post', path: '/api/v1/membership/create', mock: false },
+  { method: 'post', path: '/api/v1/membership/edit/{id}', mock: false },
+  { method: 'post', path: '/api/v1/membership/set-active/{id}', mock: false },
+  { method: 'get', path: '/api/v1/membership/type/users', mock: false },
+  // Resumen de estados, listas por estado, registrar un pago e historial de pagos
+  { method: 'get', path: '/api/v1/membership/status/summary', mock: false },
+  { method: 'get', path: '/api/v1/membership/status/users', mock: false },
+  { method: 'post', path: '/api/v1/membership/payment/register', mock: false },
+  { method: 'get', path: '/api/v1/membership/payment/user/{id}', mock: false },
+  // RMs
+  { method: 'get', path: '/api/v1/user_rm/user/{id}', mock: false },
+  { method: 'post', path: '/api/v1/user_rm/potential', mock: false },
+  { method: 'post', path: '/api/v1/user_rm/create', mock: false },
+  { method: 'post', path: '/api/v1/user_rm/edit/{id}', mock: false },
+  { method: 'delete', path: '/api/v1/user_rm/{id}', mock: false },
+  // Usuarios (el login incluido: devuelve `password_change_required` del backend)
+  { method: 'get', path: '/api/v1/users/all', mock: false },
+  { method: 'post', path: '/api/v1/users/set-active/{id}', mock: false },
+  { method: 'post', path: '/api/v1/users/login', mock: false },
+  { method: 'post', path: '/api/v1/users/change-password', mock: false },
+  { method: 'get', path: '/api/v1/users/get/{id}', mock: false },
+  { method: 'post', path: '/api/v1/users/edit', mock: false },
 ];
 
 /** La clave de un endpoint: la misma forma que `PUBLIC_OPERATIONS` ("get /api/v1/users/all"). */

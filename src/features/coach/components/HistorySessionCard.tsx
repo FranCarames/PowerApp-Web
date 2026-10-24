@@ -9,11 +9,13 @@ import { Card, Pill } from '@/shared/ui';
 import styles from './HistorySessionCard.module.css';
 
 /**
- * De dónde viene la sesión: CU-E-06 pide que cada una lo diga. Las del plan llegan con BE-20d, con su
- * semana y su plantilla; cuando el contrato las traiga, se tipan y el rótulo suma esos datos.
+ * De dónde viene la sesión: CU-E-06 pide que cada una lo diga. Las del plan (BE-20d) suman su semana; el
+ * nombre de la plantilla va debajo del día, porque lo escribe el entrenador y puede ser largo.
  */
 function originLabel(session: RoutineHistorySession): string {
-  return session.source === 'plan' ? 'Plan' : 'Individual';
+  return session.source === 'plan'
+    ? `Plan · Semana ${session.week}`
+    : 'Individual';
 }
 
 function HistoryExerciseItem({
@@ -79,6 +81,9 @@ export function HistorySessionCard({
           <time className={styles.date} dateTime={session.date}>
             {formatDate(session.date)}
           </time>
+          {session.source === 'plan' && session.planification.name && (
+            <span className={styles.date}>{session.planification.name}</span>
+          )}
         </div>
         <Pill>{originLabel(session)}</Pill>
       </header>
