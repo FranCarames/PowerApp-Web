@@ -24,6 +24,12 @@ export function formatWeight(kg: number): string {
   return `${formatDecimal(kg)} kg`;
 }
 
+/** "12 semanas", "1 semana" o "Sin duración fija" (0): la duración de una planificación, que es un número de semanas. */
+export function formatWeeks(weeks: number): string {
+  if (weeks === 0) return 'Sin duración fija';
+  return `${weeks} semana${weeks === 1 ? '' : 's'}`;
+}
+
 /** "01:30": segundos como minutos y segundos, con dos dígitos cada uno (el reloj del temporizador). */
 export function formatClock(totalSeconds: number): string {
   const seconds = Math.max(0, Math.floor(totalSeconds));

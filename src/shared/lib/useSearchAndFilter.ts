@@ -39,12 +39,38 @@ export function useSearchAndFilter<V extends string = string>(
   const keyword = useDebouncedValue(search, SEARCH_DEBOUNCE_MS).trim();
 
   useEffect(() => {
-    const params = new URLSearchParams();
+    // Solo toca `q` y su chip: lo demás de la URL (otro filtro, como el de `useUrlFlag`) se conserva.
+    const params = new URLSearchParams(urlSearch);
     if (keyword) params.set('q', keyword);
+    else params.delete('q');
     if (filter) params.set(param, filter);
+    else params.delete(param);
     const next = params.size > 0 ? `?${params}` : '';
     if (next !== urlSearch) navigate({ search: next }, { replace: true });
   }, [keyword, filter, param, urlSearch, navigate]);
 
   return { search, setSearch, keyword, filter, setFilter };
+}
+
+/**
+ * Un interruptor de un listado (el chip "Incluir inactivas" junto a otro filtro) que queda en la URL
+ * (`?<param>=1`). Como el chip de `useSearchAndFilter`, se lee de ahí solo al abrir la pantalla y
+ * cambiarlo no agrega entradas al historial. Cada uno solo escribe su parámetro: conviven en la URL.
+ */
+export function useUrlFlag(param: string) {
+  const navigate = useNavigate();
+  const { search: urlSearch } = useLocation();
+  const [on, setOn] = useState(
+    () => new URLSearchParams(urlSearch).get(param) === '1',
+  );
+
+  useEffect(() => {
+    const params = new URLSearchParams(urlSearch);
+    if (on) params.set(param, '1');
+    else params.delete(param);
+    const next = params.size > 0 ? `?${params}` : '';
+    if (next !== urlSearch) navigate({ search: next }, { replace: true });
+  }, [on, param, urlSearch, navigate]);
+
+  return [on, setOn] as const;
 }

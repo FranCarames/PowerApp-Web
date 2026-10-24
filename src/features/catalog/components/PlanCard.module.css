@@ -1,0 +1,65 @@
+/* La tarjeta es un botón: el contenido es en línea, alineado a la izquierda y sin la tipografía de un botón. */
+.card {
+  display: block;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+/* Una planificación dada de baja se ve apagada, como una rutina o un circuito inactivos. */
+.inactive {
+  opacity: 0.65;
+}
+
+/* El nombre con la flecha: la fila del prototipo, con el nombre en Barlow Condensed de 22 px. */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--fD);
+  font-size: 22px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* Una fila vieja sin nombre (la columna admite null): se lo dice en gris. */
+.unnamed {
+  color: var(--tm);
+  font-style: italic;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--tm);
+}
+
+.sub {
+  display: block;
+  font-size: 12px;
+  color: var(--tm);
+  margin-top: 2px;
+}
+
+/* La descripción, hasta dos líneas: una larga (el backend admite 1000 caracteres) no estira la tarjeta. */
+.description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  color: var(--ts);
+  margin-top: 8px;
+}
+
+/* La píldora con las rutinas, 12 px bajo el detalle, como el prototipo. */
+.foot {
+  display: flex;
+  margin-top: 12px;
+}

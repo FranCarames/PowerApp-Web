@@ -20,7 +20,9 @@ export const queryKeys = {
   },
   planifications: {
     all: ['planifications'] as const,
-    list: () => [...queryKeys.planifications.all, 'list'] as const,
+    /** Las planificaciones sistémicas (`all`), solo las vigentes o con las dadas de baja. */
+    list: (includeInactive = false) =>
+      [...queryKeys.planifications.all, 'list', { includeInactive }] as const,
     /** Las planificaciones asignadas a un alumno, con o sin las que se quitaron. */
     ofUser: (userId: string, includeInactive = false) =>
       [
