@@ -51,9 +51,16 @@ function typesOf(
  * (`?q=…&tipo=fuerza&inactivas=1`). Va debajo del encabezado de cada pantalla.
  *
  * `basePath` es la ruta de las planificaciones del rol (`/a/planes` o `/c/planes`): el editor cuelga
- * de ahí (`<basePath>/<id>` y `<basePath>/nuevo`).
+ * de ahí (`<basePath>/<id>` y `<basePath>/nuevo`). `onAssign` es del Entrenador: con él, cada
+ * planificación vigente tiene su botón "Asignar" (CU-E-13).
  */
-export function PlanList({ basePath }: { basePath: string }) {
+export function PlanList({
+  basePath,
+  onAssign,
+}: {
+  basePath: string;
+  onAssign?: (plan: PlanificationListItem) => void;
+}) {
   const navigate = useNavigate();
   const {
     search,
@@ -155,6 +162,7 @@ export function PlanList({ basePath }: { basePath: string }) {
                 key={plan.id}
                 plan={plan}
                 onOpen={({ id }) => navigate(`${basePath}/${id}`)}
+                onAssign={onAssign}
               />
             ))}
           </List>

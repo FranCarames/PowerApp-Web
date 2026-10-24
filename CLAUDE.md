@@ -147,14 +147,14 @@ Tokens, copiados del prototipo. Van en `src/shared/styles/tokens.css`:
 | Rol | Tabs | Notas |
 |---|---|---|
 | Usuario | Rutina, RMs, Timer, Perfil | Progreso se suma solo si sobra tiempo (T45). |
-| Entrenador | Alumnos, Planes, Rutinas, Perfil | Rutinas tiene segmentos Rutinas \| Circuitos, que son dos rutas (`/c/rutinas` y `/c/circuitos`) y dejan la tab marcada. Se entra a Membresías desde un botón con badge en la top bar de Mis Alumnos. |
+| Entrenador | Alumnos, Planes, Rutinas, Perfil | Rutinas tiene segmentos Rutinas \| Circuitos, que son dos rutas (`/c/rutinas` y `/c/circuitos`) y dejan la tab marcada. Planes y Rutinas montan los listados y editores de `features/catalog`, los mismos del Admin. Asignar a alumnos es solo del Entrenador (al Admin el backend le responde 403): "Asignar" en cada planificación vigente y "Asignar a alumno" en el editor de rutina, que los componentes compartidos muestran solo si el rol les pasa `onAssign`. Se entra a Membresías desde un botón con badge en la top bar de Mis Alumnos. |
 | Admin | Inicio, Usuarios, Ejercicios, Rutinas, Más (tab bar de mobile) | En desktop, la barra lateral tiene tres grupos: Inicio, Usuarios y Entrenadores; "Entrenamiento" (Ejercicios, Circuitos, Rutinas y Planificaciones); y "Configuración" (Catálogo, Membresías y Perfil). "Más" (`/a/mas`) lleva a Planificaciones, Circuitos, Entrenadores, Catálogo, Membresías y Mi cuenta, y queda marcada en toda pantalla que no esté en la tab bar. Catálogo tiene segmentos Músculos \| Grupos musculares. Músculos, grupos, tipos de membresía (alta y edición) y la edición de entrenadores van en modales, sin ruta propia. |
 
 Rutas:
 
 - **Auth:** `/login`, `/registro`, `/recuperar`, `/cambiar-contrasena`.
 - **Usuario:** `/u/plan`, `/u/rutina/:id` (una rutina individual), `/u/rutina/plan/:userPlanificationId/:routineAsignationId` (una rutina de una semana del plan), `/u/rutina/:id/ejercicio/:routineExerciseId` y `/u/rutina/plan/:userPlanificationId/:routineAsignationId/ejercicio/:routineExerciseId` (un ejercicio de esas rutinas: sale del mismo detalle y necesita saber de qué asignación es, así que cuelga de su ruta; `routineExerciseId` es el `id` del ejercicio en el árbol de la rutina, no el del catálogo), `/u/rms`, `/u/calculadora`, `/u/wiki`, `/u/wiki/:id`, `/u/timer`.
-- **Entrenador:** `/c/alumnos`, `/c/alumnos/:id`, `/c/membresias`, `/c/pago`, `/c/planes`, `/c/planes/:id`, `/c/rutinas`, `/c/rutinas/:id`, `/c/circuitos`, `/c/circuitos/:id`.
+- **Entrenador:** `/c/alumnos`, `/c/alumnos/:id`, `/c/membresias`, `/c/pago`, `/c/planes`, `/c/planes/:id`, `/c/planes/:id/asignar` (placeholder hasta T41), `/c/rutinas`, `/c/rutinas/:id`, `/c/rutinas/:id/asignar` (placeholder hasta T42), `/c/circuitos`, `/c/circuitos/:id`.
 - **Admin:** `/a/inicio`, `/a/usuarios`, `/a/entrenadores`, `/a/convertir`, `/a/ejercicios`, `/a/ejercicios/:id`, `/a/circuitos`, `/a/circuitos/:id`, `/a/rutinas`, `/a/rutinas/:id`, `/a/planes`, `/a/planes/:id`, `/a/catalogo`, `/a/membresias`, `/a/mas`.
 - **Cuenta (los tres roles):** `/cuenta`, `/cuenta/datos`, `/cuenta/pagos`. El historial de pagos solo se muestra para el rol Usuario.
 

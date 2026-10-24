@@ -96,6 +96,8 @@ interface RoutineFormProps {
   circuitsPath: string;
   /** La rutina a editar. Sin ella, el formulario da de alta una nueva. */
   routine?: RoutineTree;
+  /** Asignar la rutina a un alumno (CU-E-19): es del Entrenador. Sin esto, no hay botón. */
+  onAssign?: (routineId: string) => void;
   /** Si se vuelve de otra pantalla (un circuito), el formulario recupera lo que había escrito. */
   restoreDraft?: boolean;
 }
@@ -108,12 +110,14 @@ interface RoutineFormProps {
  * se ve, pero no se edita: el backend lo rechaza, así que primero se la reactiva.
  *
  * Editar un circuito o crear uno nuevo lleva al editor de circuitos y vuelve acá: lo que ya estaba escrito
- * se guarda en `routineDraft` antes de salir y se recupera al volver.
+ * se guarda en `routineDraft` antes de salir y se recupera al volver. Con `onAssign` (el Entrenador), una
+ * rutina vigente suma "Asignar a alumno" junto a "Eliminar", y también se va guardando lo escrito.
  */
 export function RoutineForm({
   basePath,
   circuitsPath,
   routine,
+  onAssign,
   restoreDraft = false,
 }: RoutineFormProps) {
   const navigate = useNavigate();
@@ -188,6 +192,12 @@ export function RoutineForm({
       routine: { to: editorPath, routineId: routineKey, slot },
     };
     navigate(path, { state });
+  }
+
+  /** Se va a asignar la rutina dejando guardado lo escrito: la asignación es de la rutina guardada. */
+  function openAssign(target: RoutineTree) {
+    stashRoutineDraft(routineKey, getValues());
+    onAssign?.(target.id);
   }
 
   const onSubmit: SubmitHandler<RoutineValues> = (values) => {
@@ -324,13 +334,27 @@ export function RoutineForm({
         </fieldset>
         {routine &&
           (routine.active ? (
-            <Button
-              variant="danger"
-              className={styles.secondary}
-              onClick={() => setConfirmingDelete(true)}
-            >
-              Eliminar rutina
-            </Button>
+            onAssign ? (
+              <Columns className={styles.secondary}>
+                <Button variant="sec" onClick={() => openAssign(routine)}>
+                  Asignar a alumno
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => setConfirmingDelete(true)}
+                >
+                  Eliminar
+                </Button>
+              </Columns>
+            ) : (
+              <Button
+                variant="danger"
+                className={styles.secondary}
+                onClick={() => setConfirmingDelete(true)}
+              >
+                Eliminar rutina
+              </Button>
+            )
           ) : (
             <Button
               variant="ghost"

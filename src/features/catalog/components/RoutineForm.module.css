@@ -29,7 +29,7 @@
   color: var(--tm);
 }
 
-/* "Eliminar rutina" o "Reactivar rutina", bajo "Guardar rutina". */
+/* "Eliminar rutina" (o, del Entrenador, "Asignar a alumno" y "Eliminar") o "Reactivar rutina", bajo "Guardar rutina". */
 .secondary {
   margin-top: 10px;
 }

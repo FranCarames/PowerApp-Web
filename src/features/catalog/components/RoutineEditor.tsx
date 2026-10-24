@@ -22,6 +22,8 @@ interface RoutineEditorProps {
   basePath: string;
   /** La ruta de los circuitos del rol (`/a/circuitos` o `/c/circuitos`): donde se editan y se crean los de la rutina. */
   circuitsPath: string;
+  /** Asignar la rutina a un alumno (CU-E-19): es del Entrenador. Sin esto, el editor no ofrece el botón. */
+  onAssign?: (routineId: string) => void;
 }
 
 /**
@@ -33,6 +35,7 @@ export function RoutineEditor({
   id,
   basePath,
   circuitsPath,
+  onAssign,
 }: RoutineEditorProps) {
   // Al volver de un circuito (o con Atrás) el formulario recupera lo que se había escrito.
   const { state } = useLocation();
@@ -51,6 +54,7 @@ export function RoutineEditor({
       id={id}
       basePath={basePath}
       circuitsPath={circuitsPath}
+      onAssign={onAssign}
       restoreDraft={restoreDraft}
     />
   );
@@ -109,6 +113,7 @@ function EditRoutine({
   id,
   basePath,
   circuitsPath,
+  onAssign,
   restoreDraft,
 }: RoutineEditorProps & { restoreDraft: boolean }) {
   const routine = useRoutine(id);
@@ -121,6 +126,7 @@ function EditRoutine({
           basePath={basePath}
           circuitsPath={circuitsPath}
           routine={routine.data}
+          onAssign={onAssign}
           restoreDraft={restoreDraft}
         />
       ) : routine.isError ? (
