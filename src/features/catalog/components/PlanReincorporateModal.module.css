@@ -1,0 +1,18 @@
+.segmented {
+  margin-bottom: 14px;
+}
+
+/* A dónde vuelve, con "A su lugar". */
+.place {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--ts);
+  text-align: center;
+}
+
+/* Los botones, apilados al pie, como las acciones de un <Modal>. */
+.actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
