@@ -98,7 +98,9 @@ export function ConvertForm({ student, previous, coaches }: ConvertFormProps) {
         <Note tone="err" icon="alert" role="alert" className={styles.note}>
           {getErrorMessage(convert.error, {
             404: 'El alumno ya no existe. Elegí a otro de la lista.',
-            // El único 500 que se conoce es el del email repetido, con el rol ya cambiado.
+            // El contrato del 24/10 documenta el email o el CUIL repetido (también de un entrenador dado de baja) como 409.
+            409: 'Ya hay otro entrenador con ese email profesional o con ese CUIL.',
+            // Hasta entonces era un 500, con el rol ya cambiado: queda por si el backend lo sigue dando.
             500: 'No se pudo completar la conversión. Puede que el email profesional ya lo use otro entrenador. Revisá en Entrenadores cómo quedó la cuenta antes de volver a intentar.',
           })}
         </Note>

@@ -26,13 +26,10 @@ class MissingTokenError extends Error {
 export function useLogin() {
   return useMutation({
     mutationFn: async (credentials: LoginValues): Promise<Session> => {
-      const { data, response } = await apiRequest(
+      const { data, response } = await apiRequest<
         'post',
-        '/api/v1/users/login',
-        {
-          body: credentials,
-        },
-      );
+        '/api/v1/users/login'
+      >('post', '/api/v1/users/login', { body: credentials });
       const token = readAuthToken(response);
       if (!token) throw new MissingTokenError();
 

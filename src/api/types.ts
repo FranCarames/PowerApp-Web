@@ -60,8 +60,14 @@ export type RoutineAssignedUnfinished =
   Schemas['RoutineAssignedUnfinishedResponseDto'];
 export type AssignRoutineToUserBody = Schemas['AssignRoutineToUserDto'];
 export type RoutineAssignUserResponse = Schemas['RoutineAssignUserResponseDto'];
-/** Una sesión del historial de entrenamientos del alumno (B6): de una rutina individual, con lo que hizo en ella. */
-export type RoutineHistorySession = Schemas['RoutineHistorySessionDto'];
+/** Una sesión del historial que viene de una rutina individual (B6), con lo que el alumno hizo en ella. */
+export type RoutineHistoryIndividualSession =
+  Schemas['RoutineHistoryIndividualSessionDto'];
+/** Una sesión del historial que viene de una rutina de un plan (BE-20d): la semana y la plantilla en lugar de `assignment_id`. */
+export type RoutineHistoryPlanSession = Schemas['RoutineHistoryPlanSessionDto'];
+/** Una sesión del historial de entrenamientos del alumno (B6): individual o de un plan, se distinguen por `source`. */
+export type RoutineHistorySession =
+  RoutineHistoryIndividualSession | RoutineHistoryPlanSession;
 /** Un ejercicio que el alumno hizo en una sesión del historial: el día, su nota y la prescripción de sus series. */
 export type RoutineHistoryExercise = Schemas['RoutineHistoryExerciseDto'];
 /** Un bloque de series del historial: lo que prescribió el entrenador, no lo que levantó el alumno. */

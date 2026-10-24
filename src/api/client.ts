@@ -174,6 +174,9 @@ function fillPath(template: string, params: TypedOptions['params']): string {
 /**
  * Hace un request a un endpoint del contrato, con los tipos del contrato, y devuelve el dato
  * junto con la respuesta. Para leer los headers: `readAuthToken(response)`.
+ *
+ * Llamada directa, pasale los genéricos (`apiRequest<'post', '/api/v1/users/login'>(…)`): con las ~85
+ * operaciones del contrato, TypeScript no puede inferirlos y corta con "union type that is too complex".
  */
 export async function apiRequest<M extends HttpMethod, P extends PathsFor<M>>(
   method: M,

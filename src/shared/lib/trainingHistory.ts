@@ -25,8 +25,8 @@ export function exercisesInHistory(
 }
 
 /**
- * La clave de una sesión en una lista. Las individuales traen `assignment_id`; las del plan (BE-20d)
- * no lo van a traer, así que la clave suma la rutina, el día y la posición.
+ * La clave de una sesión en una lista. Las individuales traen `assignment_id` y las del plan no, así que
+ * la clave suma la rutina, el día y la posición.
  */
 export function sessionKey(
   session: RoutineHistorySession,
