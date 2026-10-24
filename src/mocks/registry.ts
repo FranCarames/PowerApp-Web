@@ -87,6 +87,8 @@ export const registry: readonly RegistryEntry[] = [
     path: '/api/v1/routine/assign-plan/{userPlanificationId}/{routineAsignationId}',
     mock: true,
   },
+  // El historial de entrenamientos de un alumno (B6): solo las cuentas de demo; las de verdad pasan al backend real (ver handlers/trainingHistory.ts)
+  { method: 'get', path: '/api/v1/routine/history/{userId}', mock: true },
   { method: 'get', path: '/api/v1/planification/all', mock: true },
   { method: 'get', path: '/api/v1/planification/user/{userId}', mock: true },
   // Membresías (tipos)
