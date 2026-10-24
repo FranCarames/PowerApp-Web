@@ -67,6 +67,8 @@ export const registry: readonly RegistryEntry[] = [
   { method: 'get', path: '/api/v1/routine/all-plus', mock: false },
   // Rutinas y planificaciones: solo las cuentas de demo; las de verdad pasan al backend real
   { method: 'get', path: '/api/v1/routine/all', mock: true },
+  // El home del alumno: solo las cuentas de demo; las de verdad pasan al backend real (ver handlers/routineHome.ts)
+  { method: 'get', path: '/api/v1/routine/home/{userId}', mock: true },
   { method: 'get', path: '/api/v1/planification/all', mock: true },
   { method: 'get', path: '/api/v1/planification/user/{userId}', mock: true },
   // Membresías (tipos)

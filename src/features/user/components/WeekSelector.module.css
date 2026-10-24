@@ -1,0 +1,23 @@
+/* .week y .wk-l del prototipo; los botones son los <IconButton size="sm">. */
+.week {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.label {
+  text-align: center;
+  min-width: 88px;
+  display: flex;
+  flex-direction: column;
+  color: var(--tp);
+}
+
+.label b {
+  font-size: 13px;
+}
+
+.label span {
+  font-size: 11px;
+  color: var(--tm);
+}
