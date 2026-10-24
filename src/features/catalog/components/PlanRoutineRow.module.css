@@ -1,0 +1,4 @@
+/* Una rutina dada de baja sigue en el plan, pero se ve apagada. */
+.inactive {
+  opacity: 0.7;
+}

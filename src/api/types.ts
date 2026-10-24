@@ -28,6 +28,19 @@ export type RoutineListItemPlus = Schemas['RoutineListItemPlusResponseDto'];
 export type CreateRoutineBody = Schemas['CreateRoutineDto'];
 export type EditRoutineBody = Schemas['EditRoutineDto'];
 export type PlanificationListItem = Schemas['PlanificationListItemResponseDto'];
+/** Una planificación con sus rutinas vigentes: el detalle y lo que devuelven el alta, la edición y las altas de rutinas (CU-E-09 a CU-E-12b). */
+export type PlanificationDetail = Schemas['PlanificationDetailResponseDto'];
+/** Una rutina vigente del plan: su vínculo `Routine_Asignation` (el `id` es el del vínculo, no el de la rutina), con su `week` y su `order`. */
+export type PlanificationAsignation =
+  Schemas['PlanificationAsignationResponseDto'];
+export type CreatePlanificationBody = Schemas['CreatePlanificationDto'];
+export type EditPlanificationBody = Schemas['EditPlanificationDto'];
+export type AssignRoutineToPlanificationBody =
+  Schemas['AssignRoutineToPlanificationDto'];
+export type AssignRoutinesToPlanificationBody =
+  Schemas['AssignRoutinesToPlanificationDto'];
+export type SetRoutineAsignationActiveBody =
+  Schemas['SetRoutineAsignationActiveDto'];
 /** Una asignación de planificación a un alumno (E-13, E-14 y el listado del alumno). */
 export type UserPlanificationAssignment =
   Schemas['UserPlanificationResponseDto'];
