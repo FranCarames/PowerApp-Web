@@ -32,18 +32,14 @@ interface ExerciseLogProps {
   finished: RoutineAssignedFinished | undefined;
 }
 
-const READ_ONLY: Record<Exclude<ExerciseAccess, 'open'>, string> = {
-  frozen:
-    'Tu entrenador te quitó esta planificación: ya no se puede marcar ni anotar. Podés seguir viendo tus RMs.',
-  'plan-pending':
-    'Por ahora, los ejercicios de las rutinas del plan se pueden ver, pero todavía no se pueden marcar desde la app.',
-};
+const FROZEN =
+  'Tu entrenador te quitó esta planificación: ya no se puede marcar ni anotar. Podés seguir viendo tus RMs.';
 
 /**
  * Lo que el alumno hizo del ejercicio (CU-U-12 y CU-U-13): lo marca como hecho (hoy, o el día que
  * elija si lo hizo antes), lo desmarca, y deja o edita su nota, que se guarda con la marca. El
  * cambio se ve al instante y se revierte si el servidor falla. Si la rutina no se puede modificar
- * (la planificación se quitó, o es del plan), solo muestra lo que hizo y por qué no se puede marcar.
+ * (el entrenador le quitó la planificación), solo muestra lo que hizo y por qué no se puede marcar.
  */
 export function ExerciseLog({
   assignment,
@@ -157,8 +153,8 @@ export function ExerciseLog({
           />
         </>
       ) : (
-        <Note tone={access === 'frozen' ? 'warn' : 'acc'} icon="alert">
-          {READ_ONLY[access]}
+        <Note tone="warn" icon="alert">
+          {FROZEN}
         </Note>
       )}
     </section>
