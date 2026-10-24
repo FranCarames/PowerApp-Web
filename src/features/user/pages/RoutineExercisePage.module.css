@@ -1,0 +1,62 @@
+/* Una columna en mobile; desde 960 px, las series y el registro a la izquierda y los RMs y la ficha a la derecha. */
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 24px;
+}
+
+@media (min-width: 960px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* "Tu RM actual" y "Series objetivo": las dos tarjetas centradas del prototipo, a 12 px de la cabecera. */
+.figures {
+  margin-top: 12px;
+}
+
+.figure {
+  text-align: center;
+}
+
+.value {
+  font-family: var(--fM);
+  font-variant-numeric: tabular-nums;
+  font-size: 24px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+/* El RM del alumno va en el violeta de acento, como en el prototipo. */
+.rm {
+  color: var(--acc);
+}
+
+.unit {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--tm);
+}
+
+.label {
+  font-size: 12px;
+  color: var(--tm);
+  margin-top: 2px;
+}
+
+.none {
+  font-weight: 700;
+  color: var(--ts);
+  margin-bottom: 4px;
+}
+
+.timer {
+  margin-top: 12px;
+}
+
+/* La nota del entrenador y el registro del alumno van separados del resto, con el aire de una sección. */
+.coachNote {
+  margin: 14px 0 0;
+}

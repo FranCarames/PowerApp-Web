@@ -16,7 +16,8 @@ import {
   routineExerciseIds,
   type DemoRoutine,
 } from './demoRoutines';
-import { demoAccounts } from './users';
+import { demoIndividuals, franco } from './demoIndividuals';
+import { individualFinishedCount } from './finishedMarks';
 
 // El home de las cuentas de demo, calculado alrededor de hoy para que siempre haya algo en la semana
 // en curso. Franco (el alumno de demo) empezó un plan de 8 semanas hace dos: hoy cursa la 3. Las dos
@@ -28,9 +29,6 @@ import { demoAccounts } from './users';
 const TIMESTAMP = '2026-03-12T12:00:00.000Z';
 export const PLAN_WEEKS = 8;
 const CURRENT_PLAN_WEEK = 3;
-
-export const franco = demoAccounts[0].user;
-const lucia = demoAccounts.find(({ user }) => user.email === 'lucia@email.com');
 
 /** El lunes en que arrancó el plan de Franco: hace dos semanas. */
 function planStart(): string {
@@ -139,47 +137,6 @@ function planGroups(
   ];
 }
 
-/** Una rutina individual de demo: de quién es, qué día y cuánto hizo. */
-export interface DemoIndividual {
-  id: string;
-  userId: string;
-  routine: DemoRoutine;
-  date: string;
-  finished: number;
-}
-
-/** Las rutinas individuales de todas las cuentas de demo. */
-export function demoIndividuals(): DemoIndividual[] {
-  const thisMonday = mondayOf(toCalendarDay());
-  return [
-    {
-      id: 'demo-individual-franco-1',
-      userId: franco.id,
-      routine: DEMO_ROUTINES.evaluation,
-      date: addDays(thisMonday, -3),
-      finished: routineExerciseIds(DEMO_ROUTINES.evaluation).length,
-    },
-    {
-      id: 'demo-individual-franco-2',
-      userId: franco.id,
-      routine: DEMO_ROUTINES.mobility,
-      date: addDays(thisMonday, 2),
-      finished: 0,
-    },
-    ...(lucia
-      ? [
-          {
-            id: 'demo-individual-lucia-1',
-            userId: lucia.user.id,
-            routine: DEMO_ROUTINES.adaptation,
-            date: toCalendarDay(),
-            finished: 2,
-          },
-        ]
-      : []),
-  ];
-}
-
 function individualRoutines(
   userId: string,
   weekStart: string,
@@ -192,15 +149,23 @@ function individualRoutines(
         demo.date >= weekStart &&
         demo.date <= weekEnd,
     )
-    .map(({ id, routine, date, finished }) => ({
-      id,
-      routine_id: routine.id,
+    .map((demo) => ({
+      id: demo.id,
+      routine_id: demo.routine.id,
       user_id: userId,
-      date,
+      date: demo.date,
       created_at: TIMESTAMP,
       updated_at: TIMESTAMP,
-      routine: { id: routine.id, name: routine.name, active: true },
-      progress: { finished, total: routineExerciseIds(routine).length },
+      routine: {
+        id: demo.routine.id,
+        name: demo.routine.name,
+        active: true,
+      },
+      // Sale de lo que el alumno marcó, así que cambia cuando marca o desmarca un ejercicio.
+      progress: {
+        finished: individualFinishedCount(demo),
+        total: routineExerciseIds(demo.routine).length,
+      },
     }));
 }
 

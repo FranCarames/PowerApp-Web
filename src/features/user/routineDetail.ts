@@ -1,10 +1,45 @@
 import type {
   AssignedRoutineDetail,
+  CircuitDetail,
   PlanSessionDetail,
   RoutineTree,
 } from '@/api/pending';
+import { queryKeys } from '@/api/queryKeys';
 import type { RoutineAssignedFinished } from '@/api/types';
 import { formatWeekdayDate } from '@/shared/lib/dates';
+
+/** Un ejercicio de una rutina del alumno: el del árbol, con su ficha del catálogo y sus bloques de series. */
+export type RoutineExercise = CircuitDetail['exercises'][number];
+
+/**
+ * De qué asignación es la rutina que se mira. Define dónde se cachea el detalle y adónde se marca lo
+ * que el alumno hizo: lo hecho pertenece a la asignación y no a la rutina, así que una misma rutina
+ * asignada dos veces tiene marcas independientes.
+ */
+export type RoutineAssignment =
+  | { kind: 'individual'; assignmentId: string }
+  | {
+      kind: 'plan';
+      userPlanificationId: string;
+      routineAsignationId: string;
+    };
+
+/** Un texto estable que identifica la asignación: para agrupar mutaciones y guardar el estado de la interfaz. */
+export function assignmentKey(assignment: RoutineAssignment): string {
+  return assignment.kind === 'individual'
+    ? `individual:${assignment.assignmentId}`
+    : `plan:${assignment.userPlanificationId}:${assignment.routineAsignationId}`;
+}
+
+/** La query key del detalle de la asignación: donde vive lo que el alumno hizo. */
+export function assignmentDetailKey(assignment: RoutineAssignment) {
+  return assignment.kind === 'individual'
+    ? queryKeys.routineDetail.individual(assignment.assignmentId)
+    : queryKeys.routineDetail.planSession(
+        assignment.userPlanificationId,
+        assignment.routineAsignationId,
+      );
+}
 
 /** Un aviso sobre la asignación: `warn` es algo que limita lo que el alumno puede hacer; `acc`, algo informativo. */
 export interface RoutineNotice {
@@ -18,6 +53,8 @@ export interface RoutineNotice {
  */
 export interface RoutineView {
   routine: RoutineTree;
+  /** De qué asignación es, para marcar lo que el alumno hace y para abrir sus ejercicios. */
+  assignment: RoutineAssignment;
   /** Lo que el alumno hizo, por el id de cada ejercicio del árbol (`routine_exercise_id`). */
   finished: ReadonlyMap<string, RoutineAssignedFinished>;
   /** La línea chica sobre el título: el día de la rutina o el plan y su semana. */
@@ -27,9 +64,44 @@ export interface RoutineView {
   notices: RoutineNotice[];
   /**
    * El entrenador le quitó la planificación al alumno: la sesión se lee pero no se modifica, así que
-   * ya no se puede marcar, desmarcar ni anotar (D24 del backend). Lo usa T40.
+   * ya no se puede marcar, desmarcar ni anotar (D24 del backend).
    */
   frozen: boolean;
+}
+
+/**
+ * Qué puede hacer el alumno con los ejercicios de la rutina (CU-U-12 y CU-U-13):
+ * - `open`: marcarlos, desmarcarlos y anotarlos.
+ * - `frozen`: nada, el entrenador le quitó la planificación. Solo ve los RMs.
+ * - `plan-pending`: nada por ahora, aunque el entrenador no le quitó nada: el backend publicado todavía
+ *   no tiene el endpoint para marcar dentro de un plan (BE-20c).
+ */
+export type ExerciseAccess = 'open' | 'frozen' | 'plan-pending';
+
+/**
+ * Qué se puede hacer con los ejercicios de la rutina. Cuando el backend publique BE-20c, la vía del
+ * plan pasa a `open` acá y se suma su par de endpoints en `useExerciseFinished`.
+ */
+export function exerciseAccess(view: RoutineView): ExerciseAccess {
+  if (view.frozen) return 'frozen';
+  return view.assignment.kind === 'plan' ? 'plan-pending' : 'open';
+}
+
+/** Un ejercicio de la rutina por su `routine_exercise_id`, con el circuito donde aparece primero. */
+export function findRoutineExercise(
+  routine: RoutineTree,
+  routineExerciseId: string,
+):
+  | { exercise: RoutineExercise; circuit: RoutineTree['circuits'][number] }
+  | undefined {
+  const circuits = [...routine.circuits].sort((a, b) => a.order - b.order);
+  for (const circuit of circuits) {
+    const exercise = circuit.circuit.exercises.find(
+      ({ id }) => id === routineExerciseId,
+    );
+    if (exercise) return { exercise, circuit };
+  }
+  return undefined;
 }
 
 const ROUTINE_INACTIVE =
@@ -45,6 +117,7 @@ function finishedById(
 export function individualView(detail: AssignedRoutineDetail): RoutineView {
   return {
     routine: detail.routine,
+    assignment: { kind: 'individual', assignmentId: detail.id },
     finished: finishedById(detail.finished),
     eyebrow: formatWeekdayDate(detail.date),
     planNote: null,
@@ -90,6 +163,11 @@ export function planSessionView(detail: PlanSessionDetail): RoutineView {
 
   return {
     routine: detail.routine,
+    assignment: {
+      kind: 'plan',
+      userPlanificationId: assignment.id,
+      routineAsignationId: detail.routine_asignation_id,
+    },
     finished: finishedById(detail.finished),
     eyebrow: `${planName} · ${weekText}`,
     planNote: assignment.coach_note,

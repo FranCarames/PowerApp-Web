@@ -14,6 +14,8 @@ interface PageHeaderProps {
   actions?: ReactNode;
   /** Destino del enlace "Volver". Sin él, no se muestra. */
   back?: To;
+  /** El `state` de la navegación de "Volver": lo que la pantalla de destino necesita para saber de dónde viene. */
+  backState?: unknown;
   /** Título de la pestaña del navegador. Por defecto es `title`; con `false` no se toca. */
   documentTitle?: string | false;
 }
@@ -24,6 +26,7 @@ export function PageHeader({
   eyebrow,
   actions,
   back,
+  backState,
   documentTitle,
 }: PageHeaderProps) {
   return (
@@ -32,7 +35,7 @@ export function PageHeader({
         <title>{`${documentTitle ?? title} · PowerApp`}</title>
       )}
       {back && (
-        <Link to={back} className={styles.back}>
+        <Link to={back} state={backState} className={styles.back}>
           <Icon name="chevL" size={18} />
           Volver
         </Link>

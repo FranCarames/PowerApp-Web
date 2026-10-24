@@ -1,11 +1,14 @@
 import type { AssignedRoutineDetail, PlanSessionDetail } from '@/api/pending';
-import type { RoutineAssignedFinished } from '@/api/types';
 import { addDays, toCalendarDay } from '@/shared/lib/dates';
 
 import { routineExerciseIds, routineTree } from './demoRoutines';
 import {
+  findDemoIndividual,
+  finishedEntries,
+  individualFinished,
+} from './finishedMarks';
+import {
   PLAN_WEEKS,
-  demoIndividuals,
   francoAssignment,
   planSessions,
   planWeekStart,
@@ -13,35 +16,16 @@ import {
 
 // El detalle de las rutinas de demo. Sale de las mismas sesiones que el home (`home.ts`): de cada una,
 // los primeros `finished` ejercicios del árbol están hechos, así que el progreso coincide. Al primero
-// de cada rutina el alumno le dejó una nota.
+// de cada rutina el alumno le dejó una nota. Lo hecho en las rutinas individuales cambia cuando el alumno
+// marca o desmarca (`finishedMarks.ts`); las del plan quedan como están.
 const TIMESTAMP = '2026-03-12T12:00:00.000Z';
-const NOTE = 'Subí 2,5 kg respecto de la semana pasada.';
-
-/** Lo que Franco hizo: los primeros `count` ejercicios, cada uno el día que da `dayOf`. */
-function finishedEntries(
-  ids: readonly string[],
-  count: number,
-  dayOf: (index: number) => string,
-): RoutineAssignedFinished[] {
-  return ids.slice(0, count).map((id, index) => {
-    const day = dayOf(index);
-    return {
-      routine_exercise_id: id,
-      user_note: index === 0 ? NOTE : null,
-      finished_at: day,
-      created_at: `${day}T12:00:00.000Z`,
-      updated_at: `${day}T12:00:00.000Z`,
-    };
-  });
-}
 
 /** El detalle de una rutina individual de demo y de quién es, o `undefined` si no existe. */
 export function demoIndividualDetail(
   assignmentId: string,
 ): { userId: string; detail: AssignedRoutineDetail } | undefined {
-  const demo = demoIndividuals().find(({ id }) => id === assignmentId);
+  const demo = findDemoIndividual(assignmentId);
   if (!demo) return undefined;
-  const ids = routineExerciseIds(demo.routine);
   return {
     userId: demo.userId,
     detail: {
@@ -52,7 +36,7 @@ export function demoIndividualDetail(
       created_at: TIMESTAMP,
       updated_at: TIMESTAMP,
       routine: routineTree(demo.routine),
-      finished: finishedEntries(ids, demo.finished, () => demo.date),
+      finished: individualFinished(demo),
     },
   };
 }

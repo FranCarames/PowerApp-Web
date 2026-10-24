@@ -1,0 +1,74 @@
+/* Las series del ejercicio: .set del prototipo, con el tipo de la serie a la derecha. */
+.list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+}
+
+.set {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--el);
+  border: 1px solid var(--border);
+  color: var(--ts);
+  font-size: 14px;
+  text-align: left;
+}
+
+.button {
+  cursor: pointer;
+}
+
+.check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--tm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+}
+
+.number {
+  display: block;
+}
+
+.target {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--fM);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--tp);
+  overflow-wrap: anywhere;
+}
+
+.checked {
+  background: var(--okS);
+  border-color: var(--ok);
+}
+
+.checked .check {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+
+.checked .target {
+  color: var(--ok);
+}
+
+.next {
+  background: var(--priS);
+  border-color: var(--pri);
+}
