@@ -69,6 +69,13 @@ export const queryKeys = {
     studentsByStatus: (status: string) =>
       [...queryKeys.memberships.all, 'students-by-status', status] as const,
   },
+  /** Las rutinas puntuales de un alumno (CU-E-19 y CU-E-20): las que el entrenador le asignó para un día. */
+  assignedRoutines: {
+    all: ['assigned-routines'] as const,
+    /** Todas las de un alumno, sin filtrar por días. */
+    byUser: (userId: string) =>
+      [...queryKeys.assignedRoutines.all, 'user', userId] as const,
+  },
   /** El home del alumno: las rutinas de una semana, del plan y las individuales. */
   routineHome: {
     all: ['routine-home'] as const,

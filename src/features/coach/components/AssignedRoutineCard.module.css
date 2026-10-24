@@ -1,0 +1,38 @@
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.name {
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.date {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--tm);
+}
+
+.progress {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--ts);
+}
+
+/* La rutina se dio de baja después de asignarla: el aviso es informativo, no un error. */
+.inactive {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--warn);
+}
+
+.foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}

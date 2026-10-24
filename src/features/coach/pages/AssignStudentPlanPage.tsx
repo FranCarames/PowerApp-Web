@@ -17,7 +17,7 @@ import {
 } from '@/shared/ui';
 
 import { AssignPlanForm } from '../components/AssignPlanForm';
-import { AssignPlanLayout } from '../components/AssignPlanLayout';
+import { AssignLayout } from '../components/AssignLayout';
 import { PlanPicker } from '../components/PlanPicker';
 import styles from './AssignStudentPlanPage.module.css';
 
@@ -73,7 +73,7 @@ export function AssignStudentPlanPage() {
   const name = fullName(person);
 
   return (
-    <AssignPlanLayout
+    <AssignLayout
       eyebrow={name}
       title="Asignar planificación"
       back={back}
@@ -127,6 +127,6 @@ export function AssignStudentPlanPage() {
             Elegí una planificación para indicar las fechas.
           </p>
         ))}
-    </AssignPlanLayout>
+    </AssignLayout>
   );
 }

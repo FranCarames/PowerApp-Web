@@ -2,7 +2,7 @@ import { useId, type ReactNode } from 'react';
 
 import { PageHeader } from '@/shared/ui';
 
-import styles from './AssignPlanLayout.module.css';
+import styles from './AssignLayout.module.css';
 
 /** Un paso de la pantalla, con su etiqueta como la de un campo. */
 function Step({ label, children }: { label: string; children: ReactNode }) {
@@ -17,14 +17,16 @@ function Step({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-interface AssignPlanLayoutProps {
+interface AssignLayoutProps {
   eyebrow: string;
   title: string;
   /** El "Volver": la pantalla de donde se vino. */
   back: string;
+  /** El `state` de la navegación de "Volver": lo que la pantalla de destino necesita para saber de dónde viene. */
+  backState?: unknown;
   /** Avisos sobre lo que ya viene dado (una cuenta inactiva, un plan sin rutinas). */
   notice?: ReactNode;
-  /** Lo que ya viene elegido de la pantalla de origen, con su etiqueta ("Planificación" o "Alumno"). */
+  /** Lo que ya viene elegido de la pantalla de origen, con su etiqueta ("Planificación", "Rutina" o "Alumno"). */
   fixed: { label: string; content: ReactNode };
   /** Lo que se elige acá, con su etiqueta; sin él no hay nada que elegir (algo lo impide). */
   choice?: { label: string; content: ReactNode };
@@ -33,23 +35,30 @@ interface AssignPlanLayoutProps {
 }
 
 /**
- * La pantalla de asignar una planificación a un alumno (CU-E-13), la misma sirve si se entra desde la
- * planificación (`/c/planes/:id/asignar`, donde se elige al alumno) o desde el alumno
- * (`/c/alumnos/:id/asignar`, donde se elige la planificación): el encabezado, lo que ya viene dado, lo que
- * se elige y, abajo, las fechas y el botón.
+ * La pantalla de asignar algo a un alumno, la misma para una planificación (CU-E-13) y para una rutina
+ * puntual (CU-E-19), entre la planificación o la rutina y el alumno. Sirve si se entra desde la
+ * planificación o la rutina (`/c/planes/:id/asignar`, `/c/rutinas/:id/asignar`, donde se elige al alumno)
+ * o desde el alumno (`/c/alumnos/:id/asignar`, `/c/alumnos/:id/asignar-rutina`, donde se elige qué
+ * asignarle): el encabezado, lo que ya viene dado, lo que se elige y, abajo, las fechas y el botón.
  */
-export function AssignPlanLayout({
+export function AssignLayout({
   eyebrow,
   title,
   back,
+  backState,
   notice,
   fixed,
   choice,
   children,
-}: AssignPlanLayoutProps) {
+}: AssignLayoutProps) {
   return (
     <>
-      <PageHeader eyebrow={eyebrow} title={title} back={back} />
+      <PageHeader
+        eyebrow={eyebrow}
+        title={title}
+        back={back}
+        backState={backState}
+      />
       <div className={styles.narrow}>
         {notice}
         <Step label={fixed.label}>{fixed.content}</Step>
