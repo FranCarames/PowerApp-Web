@@ -5,7 +5,7 @@ import { RoutineEditor } from '@/features/catalog/components/RoutineEditor';
 /**
  * Alta y edición de una rutina (CU-E-16 a CU-E-18), en `/c/rutinas/nuevo` y `/c/rutinas/:id`. Los
  * circuitos de la rutina se editan en `/c/circuitos`, y "Asignar a alumno" lleva a
- * `/c/rutinas/:id/asignar` (hoy un placeholder hasta T42).
+ * `/c/rutinas/:id/asignar` (T42).
  */
 export function RoutineEditorPage() {
   const { id } = useParams();

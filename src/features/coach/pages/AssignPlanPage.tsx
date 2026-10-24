@@ -17,7 +17,7 @@ import {
 } from '@/shared/ui';
 
 import { AssignPlanForm } from '../components/AssignPlanForm';
-import { AssignPlanLayout } from '../components/AssignPlanLayout';
+import { AssignLayout } from '../components/AssignLayout';
 import { StudentPicker } from '../components/StudentPicker';
 import styles from './AssignPlanPage.module.css';
 
@@ -79,7 +79,7 @@ export function AssignPlanPage() {
       : null;
 
   return (
-    <AssignPlanLayout
+    <AssignLayout
       eyebrow={`Planificación · ${name || 'Sin nombre'}`}
       title="Asignar a un alumno"
       back={BACK}
@@ -139,6 +139,6 @@ export function AssignPlanPage() {
             Elegí un alumno para indicar las fechas.
           </p>
         ))}
-    </AssignPlanLayout>
+    </AssignLayout>
   );
 }

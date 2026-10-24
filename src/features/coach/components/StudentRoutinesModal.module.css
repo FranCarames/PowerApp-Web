@@ -1,0 +1,15 @@
+.note {
+  margin-bottom: 12px;
+}
+
+/* Las rutinas, de a una y con 8 px entre sí. */
+.list {
+  display: grid;
+  gap: 8px;
+}
+
+/* En lugar de Quitar: el alumno ya marcó ejercicios y el backend no deja borrarla (409). */
+.trained {
+  font-size: 12px;
+  color: var(--tm);
+}

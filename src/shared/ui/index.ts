@@ -27,7 +27,6 @@ export { PasswordInput } from './PasswordInput';
 export { PhoneField } from './PhoneField';
 export { Pill } from './Pill';
 export { SearchInput } from './SearchInput';
-export { SectionPlaceholder } from './SectionPlaceholder';
 export { SectionHeader } from './SectionHeader';
 export { Segmented } from './Segmented';
 export { Select } from './Select';
