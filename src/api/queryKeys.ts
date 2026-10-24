@@ -84,6 +84,12 @@ export const queryKeys = {
         routineAsignationId,
       ] as const,
   },
+  /** El historial de entrenamientos de un alumno (lo ve el entrenador), completo o filtrado por un ejercicio del catálogo. */
+  trainingHistory: {
+    all: ['training-history'] as const,
+    byUser: (userId: string, exerciseId: string | null = null) =>
+      [...queryKeys.trainingHistory.all, userId, { exerciseId }] as const,
+  },
   userRms: {
     all: ['user-rms'] as const,
     /** Los RMs registrados de un usuario, de todos sus ejercicios. */

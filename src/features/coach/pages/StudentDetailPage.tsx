@@ -24,6 +24,7 @@ import {
   VisuallyHidden,
 } from '@/shared/ui';
 
+import { StudentHistoryModal } from '../components/StudentHistoryModal';
 import { StudentPaymentsModal } from '../components/StudentPaymentsModal';
 import { StudentRmsModal } from '../components/StudentRmsModal';
 import styles from './StudentDetailPage.module.css';
@@ -87,7 +88,9 @@ function StudentDetail({ student }: { student: User }) {
   const navigate = useNavigate();
   const toast = useToast();
   const setActive = useSetUserActive();
-  const [modal, setModal] = useState<'rms' | 'payments' | null>(null);
+  const [modal, setModal] = useState<'rms' | 'history' | 'payments' | null>(
+    null,
+  );
   const [confirming, setConfirming] = useState(false);
   const name = fullName(student);
 
@@ -147,11 +150,12 @@ function StudentDetail({ student }: { student: User }) {
           chevron
           onClick={() => setModal('rms')}
         />
-        {/* El historial de entrenamientos llega con T43. */}
         <ListItem
           leading={<Tile icon="list" />}
           title="Historial de entrenamientos"
-          subtitle="Próximamente"
+          subtitle="Sesiones completadas"
+          chevron
+          onClick={() => setModal('history')}
         />
         <ListItem
           leading={<Tile icon="wallet" />}
@@ -191,6 +195,12 @@ function StudentDetail({ student }: { student: User }) {
         studentId={student.id}
         studentName={name}
         open={modal === 'rms'}
+        onClose={() => setModal(null)}
+      />
+      <StudentHistoryModal
+        studentId={student.id}
+        studentName={name}
+        open={modal === 'history'}
         onClose={() => setModal(null)}
       />
       <StudentPaymentsModal
