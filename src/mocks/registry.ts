@@ -71,8 +71,8 @@ export const registry: readonly RegistryEntry[] = [
   // El home del alumno y el detalle de una rutina, individual o de una semana del plan
   { method: 'get', path: '/api/v1/routine/home/{userId}', mock: false },
   { method: 'get', path: '/api/v1/routine/assign-user/{id}', mock: false },
-  // Marcar y desmarcar un ejercicio de una rutina individual. Dentro de un plan (BE-20c) el backend ya lo
-  // publica, pero el front todavía no lo usa (no tuvo mock): ver PLAN.md, T44.
+  // Marcar y desmarcar un ejercicio de una rutina individual. Dentro de un plan (BE-20c) el par de endpoints
+  // es real desde el principio (T40b) y no tuvo mock: por eso no figura acá.
   {
     method: 'post',
     path: '/api/v1/routine/assign-user/{id}/finished',

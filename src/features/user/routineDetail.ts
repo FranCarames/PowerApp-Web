@@ -73,18 +73,16 @@ export interface RoutineView {
  * Qué puede hacer el alumno con los ejercicios de la rutina (CU-U-12 y CU-U-13):
  * - `open`: marcarlos, desmarcarlos y anotarlos.
  * - `frozen`: nada, el entrenador le quitó la planificación. Solo ve los RMs.
- * - `plan-pending`: nada por ahora, aunque el entrenador no le quitó nada: el backend publicado todavía
- *   no tiene el endpoint para marcar dentro de un plan (BE-20c).
  */
-export type ExerciseAccess = 'open' | 'frozen' | 'plan-pending';
+export type ExerciseAccess = 'open' | 'frozen';
 
 /**
- * Qué se puede hacer con los ejercicios de la rutina. Cuando el backend publique BE-20c, la vía del
- * plan pasa a `open` acá y se suma su par de endpoints en `useExerciseFinished`.
+ * Qué se puede hacer con los ejercicios de la rutina: las individuales y las del plan se marcan igual
+ * (cada una con su par de endpoints, en `useExerciseFinished`), salvo que el entrenador le haya quitado
+ * la planificación al alumno.
  */
 export function exerciseAccess(view: RoutineView): ExerciseAccess {
-  if (view.frozen) return 'frozen';
-  return view.assignment.kind === 'plan' ? 'plan-pending' : 'open';
+  return view.frozen ? 'frozen' : 'open';
 }
 
 /** Un ejercicio de la rutina por su `routine_exercise_id`, con el circuito donde aparece primero. */

@@ -70,41 +70,59 @@ function optimisticEntry(
 }
 
 /**
- * `POST /routine/assign-user/{id}/finished`: marca un ejercicio de una rutina individual como hecho. Es
- * idempotente: si ya estaba marcado responde 200 y corrige el día o la nota si cambiaron.
- *
- * Es el punto donde la vía del plan se va a sumar: su par (`/routine/assign-plan/{up}/{ra}/finished`,
- * BE-20c) no está en el backend publicado, así que por ahora solo se marcan las rutinas individuales.
+ * Marca un ejercicio como hecho: `POST /routine/assign-user/{id}/finished` en una rutina individual y
+ * `POST /routine/assign-plan/{userPlanificationId}/{routineAsignationId}/finished` en una del plan
+ * (BE-20c). Los dos reciben el mismo cuerpo y son idempotentes: si ya estaba marcado responden 200 y
+ * corrigen el día o la nota si cambiaron.
  */
 function postFinished(assignment: RoutineAssignment, input: MarkExerciseInput) {
-  if (assignment.kind !== 'individual') {
-    return Promise.reject(
-      new Error('Marcar dentro de un plan todavía no está en el backend'),
-    );
+  const body = {
+    routine_exercise_id: input.routineExerciseId,
+    finished_at: input.finishedAt,
+    user_note: input.userNote,
+  };
+  if (assignment.kind === 'individual') {
+    return api.post('/api/v1/routine/assign-user/{id}/finished', {
+      params: { id: assignment.assignmentId },
+      body,
+    });
   }
-  return api.post('/api/v1/routine/assign-user/{id}/finished', {
-    params: { id: assignment.assignmentId },
-    body: {
-      routine_exercise_id: input.routineExerciseId,
-      finished_at: input.finishedAt,
-      user_note: input.userNote,
+  return api.post(
+    '/api/v1/routine/assign-plan/{userPlanificationId}/{routineAsignationId}/finished',
+    {
+      params: {
+        userPlanificationId: assignment.userPlanificationId,
+        routineAsignationId: assignment.routineAsignationId,
+      },
+      body,
     },
-  });
+  );
 }
 
-/** `DELETE /routine/assign-user/{id}/finished/{routineExerciseId}`: desmarca el ejercicio y borra su nota. Idempotente. */
+/**
+ * Desmarca el ejercicio y borra su nota: `DELETE /routine/assign-user/{id}/finished/{routineExerciseId}`
+ * en una rutina individual y `DELETE /routine/assign-plan/{up}/{ra}/finished/{routineExerciseId}` en una
+ * del plan. Idempotente.
+ */
 function deleteFinished(
   assignment: RoutineAssignment,
   routineExerciseId: string,
 ) {
-  if (assignment.kind !== 'individual') {
-    return Promise.reject(
-      new Error('Desmarcar dentro de un plan todavía no está en el backend'),
+  if (assignment.kind === 'individual') {
+    return api.delete(
+      '/api/v1/routine/assign-user/{id}/finished/{routineExerciseId}',
+      { params: { id: assignment.assignmentId, routineExerciseId } },
     );
   }
   return api.delete(
-    '/api/v1/routine/assign-user/{id}/finished/{routineExerciseId}',
-    { params: { id: assignment.assignmentId, routineExerciseId } },
+    '/api/v1/routine/assign-plan/{userPlanificationId}/{routineAsignationId}/finished/{routineExerciseId}',
+    {
+      params: {
+        userPlanificationId: assignment.userPlanificationId,
+        routineAsignationId: assignment.routineAsignationId,
+        routineExerciseId,
+      },
+    },
   );
 }
 
@@ -175,7 +193,10 @@ export function useMarkExercise(assignment: RoutineAssignment) {
         ),
       ),
     errors: {
-      400: 'No pudimos guardarlo. Puede que tu entrenador haya cambiado la rutina: actualizamos la pantalla.',
+      400:
+        assignment.kind === 'plan'
+          ? 'No pudimos guardarlo. Puede que tu entrenador haya cambiado la rutina o te haya quitado la planificación: actualizamos la pantalla.'
+          : 'No pudimos guardarlo. Puede que tu entrenador haya cambiado la rutina: actualizamos la pantalla.',
       403: 'Esta rutina no es tuya.',
       404: 'No encontramos la rutina. Puede que tu entrenador la haya cambiado.',
     },
@@ -190,7 +211,10 @@ export function useUnmarkExercise(assignment: RoutineAssignment) {
     apply: (detail, { routineExerciseId }) =>
       withFinished(detail, routineExerciseId),
     errors: {
-      400: 'No pudimos desmarcarlo. Actualizamos la pantalla.',
+      400:
+        assignment.kind === 'plan'
+          ? 'No pudimos desmarcarlo. Puede que tu entrenador te haya quitado la planificación: actualizamos la pantalla.'
+          : 'No pudimos desmarcarlo. Actualizamos la pantalla.',
       403: 'Esta rutina no es tuya.',
       404: 'No encontramos la rutina. Puede que tu entrenador la haya cambiado.',
     },
