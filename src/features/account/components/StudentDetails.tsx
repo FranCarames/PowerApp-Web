@@ -1,5 +1,5 @@
-import type { User } from '@/api/types';
-import { formatDate } from '@/shared/lib/dates';
+import type { User, UserPlanificationAssignment } from '@/api/types';
+import { formatDate, toCalendarDay } from '@/shared/lib/dates';
 import {
   latestPayment,
   MEMBERSHIP_STATUS_LABEL,
@@ -7,21 +7,33 @@ import {
 } from '@/shared/lib/membershipStatus';
 import { DetailList, Skeleton } from '@/shared/ui';
 
-import { useActiveUserPlanification } from '../hooks/useActiveUserPlanification';
 import { useUserPayments } from '../hooks/useUserPayments';
+import { useUserPlanifications } from '../hooks/useUserPlanifications';
 
-/** "Fuerza · vigente hasta 12 Dic 2026". */
-function planificationText(type: string | undefined, endDate: string) {
-  const until = `vigente hasta ${formatDate(endDate)}`;
-  return type
-    ? `${type.charAt(0).toUpperCase()}${type.slice(1)} · ${until}`
-    : until;
+/**
+ * La planificación vigente hoy: la primera asignación activa cuyo rango incluye el día de hoy. Las
+ * fechas son días de calendario (`YYYY-MM-DD`), así que se comparan como texto.
+ */
+function currentAssignment(assignments: UserPlanificationAssignment[]) {
+  const today = toCalendarDay();
+  return assignments.find(
+    ({ start_date, end_date }) => start_date <= today && today <= end_date,
+  );
+}
+
+/** "Fuerza 5×5 · vigente hasta 12 Dic 2026". */
+function planificationText({
+  planification,
+  end_date,
+}: UserPlanificationAssignment) {
+  const until = `vigente hasta ${formatDate(end_date)}`;
+  return planification.name ? `${planification.name} · ${until}` : until;
 }
 
 /**
  * Los datos de un alumno en su detalle, el del Admin y el del Entrenador: el email, la membresía (la
  * del último pago, la misma query que el historial) y la planificación vigente. Esta última se
- * muestra solo si el backend la respondió: hasta el bloque C2 no lo hace, y entonces se omite.
+ * muestra solo si el alumno tiene una asignación vigente hoy y la consulta respondió.
  */
 export function StudentDetails({
   user,
@@ -31,7 +43,10 @@ export function StudentDetails({
   className?: string;
 }) {
   const payments = useUserPayments(user.id);
-  const planification = useActiveUserPlanification(user.id);
+  const planifications = useUserPlanifications(user.id);
+  const current = planifications.data
+    ? currentAssignment(planifications.data)
+    : undefined;
 
   let membership;
   if (payments.isPending) {
@@ -53,16 +68,8 @@ export function StudentDetails({
       items={[
         { label: 'Email', value: user.email },
         { label: 'Membresía', value: membership },
-        ...(planification.data
-          ? [
-              {
-                label: 'Planificación',
-                value: planificationText(
-                  planification.data.type,
-                  planification.data.end_date,
-                ),
-              },
-            ]
+        ...(current
+          ? [{ label: 'Planificación', value: planificationText(current) }]
           : []),
       ]}
     />

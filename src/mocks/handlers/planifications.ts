@@ -1,9 +1,12 @@
 import { HttpResponse } from 'msw/http';
 
+import { toCalendarDay } from '@/shared/lib/dates';
+
 import { staffAccess, withoutInactive } from '../access';
 import { mockEndpoint } from '../endpoint';
 import { planifications } from '../fixtures/planifications';
-import { studentMembershipStatus, students } from '../fixtures/students';
+import { students } from '../fixtures/students';
+import { demoAccounts } from '../fixtures/users';
 import { serviceError } from '../responses';
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -20,42 +23,44 @@ export const planificationMocks = [
     return HttpResponse.json(withoutInactive(planifications, request));
   }),
 
-  // La planificación vigente de un alumno es REAL en el contrato, pero el backend todavía no la
-  // responde (el controller no llama al service y el request queda colgado). El mock imita lo que
-  // pasará cuando lo haga, y solo atiende a las cuentas de demo. Sin planificación, 404 (la forma de
-  // decirlo es la del PLAN, B7: a confirmar).
+  // Las planificaciones asignadas a un alumno (B7) son REAL: el mock atiende solo a las cuentas de
+  // demo. Imita al backend: 404 si el usuario no existe, `[]` si no tiene ninguna, y las asignaciones
+  // activas con la forma de `UserPlanificationResponseDto` (las fechas son días de calendario).
   mockEndpoint(
     'get',
-    '/api/v1/planification/user/{id}/active',
+    '/api/v1/planification/user/{userId}',
     ({ request, params }) => {
       const denied = staffAccess(request);
       if (denied) return denied;
 
-      const index = students.findIndex(({ id }) => id === params.id);
-      if (index < 0 || index >= WITH_PLANIFICATION) {
-        return serviceError(
-          404,
-          'El usuario no tiene una planificación vigente',
-        );
-      }
+      const index = students.findIndex(({ id }) => id === params.userId);
+      if (index < 0) return serviceError(404, 'Usuario no encontrado');
+      if (index >= WITH_PLANIFICATION) return HttpResponse.json([]);
 
       const plan = planifications[index % 4];
       const start = new Date(Date.now() - 14 * DAY);
       const end = new Date(Date.now() + 42 * DAY);
-      return HttpResponse.json({
-        id: `demo-user-planification-${index + 1}`,
-        user_id: params.id,
-        planification_id: plan.id,
-        description: plan.description,
-        number_of_routines: plan.number_of_routines,
-        type: plan.type,
-        duration: plan.duration,
-        start_date: start.toISOString(),
-        end_date: end.toISOString(),
-        active: studentMembershipStatus(params.id) !== 'expired',
-        created_at: start.toISOString(),
-        updated_at: start.toISOString(),
-      });
+      const coach = demoAccounts.find(({ user }) => user.role === 'coach');
+      return HttpResponse.json([
+        {
+          id: `demo-user-planification-${index + 1}`,
+          user_id: params.userId,
+          coach_id: coach?.user.id ?? 'demo-coach',
+          planification_id: plan.id,
+          start_date: toCalendarDay(start),
+          end_date: toCalendarDay(end),
+          coach_note: null,
+          active: true,
+          created_at: start.toISOString(),
+          updated_at: start.toISOString(),
+          planification: {
+            id: plan.id,
+            name: plan.name ?? null,
+            duration: plan.duration,
+            active: plan.active,
+          },
+        },
+      ]);
     },
   ),
 ];
