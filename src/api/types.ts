@@ -36,6 +36,7 @@ export type AssignPlanificationOverlap =
 export type SetUserPlanificationActiveBody =
   Schemas['SetUserPlanificationActiveDto'];
 export type RoutineDetail = Schemas['RoutineDetailResponseDto'];
+export type RoutineDetailCircuit = Schemas['RoutineDetailCircuitDto'];
 /** Una semana del home: de lunes a domingo, con lo individual y lo del plan (B1). */
 export type RoutineHomeWeek = Schemas['RoutineHomeWeekResponseDto'];
 /** Una rutina individual asignada a un día, con su progreso. */

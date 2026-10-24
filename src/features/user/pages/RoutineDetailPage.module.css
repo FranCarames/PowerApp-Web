@@ -1,0 +1,4 @@
+/* Los avisos van pegados a las estadísticas: sin esto no tienen aire arriba (el prototipo no tiene avisos acá). Con un encabezado de circuito justo debajo, el margen se junta con el suyo. */
+.stats {
+  margin-bottom: 18px;
+}

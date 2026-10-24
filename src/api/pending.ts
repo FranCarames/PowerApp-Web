@@ -5,6 +5,10 @@ import type {
   Exercise,
   Muscle,
   MuscleGroup,
+  RoutineAssignedDetail,
+  RoutineDetail,
+  RoutineDetailCircuit,
+  RoutinePlanSessionDetail,
 } from './types';
 
 // Tipos provisionales de lo que el contrato (openapi.json) declara mal o no declara: los puntos V1,
@@ -42,6 +46,30 @@ export type CircuitDetail = Omit<CircuitDetailResponse, 'exercises'> & {
   exercises: Array<
     Omit<CircuitExerciseResponse, 'exercise'> & { exercise: CircuitExerciseRef }
   >;
+};
+
+// PENDIENTE-CONTRATO: V2 CU-U-09
+/**
+ * El árbol de una rutina (`routine` de los dos detalles del alumno, igual al de `GET /routine/{id}`): el
+ * `RoutineDetailResponseDto` con el circuito de cada vínculo tipado como `CircuitDetail`, que es el
+ * formato de `GET /routine/circuit/{id}` y trae la ficha del catálogo en el `exercise` de cada ejercicio.
+ */
+export type RoutineTree = Omit<RoutineDetail, 'circuits'> & {
+  circuits: Array<
+    Omit<RoutineDetailCircuit, 'circuit'> & { circuit: CircuitDetail }
+  >;
+};
+
+// PENDIENTE-CONTRATO: V2 CU-U-09
+/** Respuesta de `GET /routine/assign-user/{id}`: el contrato con el árbol de la rutina tipado. */
+export type AssignedRoutineDetail = Omit<RoutineAssignedDetail, 'routine'> & {
+  routine: RoutineTree;
+};
+
+// PENDIENTE-CONTRATO: V2 CU-U-09
+/** Respuesta de `GET /routine/assign-plan/{userPlanificationId}/{routineAsignationId}`, con el árbol tipado. */
+export type PlanSessionDetail = Omit<RoutinePlanSessionDetail, 'routine'> & {
+  routine: RoutineTree;
 };
 
 // PENDIENTE-CONTRATO: V1 CU-E-27

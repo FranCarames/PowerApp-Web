@@ -69,6 +69,21 @@ export const queryKeys = {
     week: (userId: string, weekStart: string) =>
       [...queryKeys.routineHome.all, userId, weekStart] as const,
   },
+  /** El detalle de una rutina asignada al alumno, que se abre desde la asignación. */
+  routineDetail: {
+    all: ['routine-detail'] as const,
+    /** Una rutina individual, por el id de su asignación. */
+    individual: (assignmentId: string) =>
+      [...queryKeys.routineDetail.all, 'individual', assignmentId] as const,
+    /** Una rutina de una semana del plan, por la asignación del plan y la de la rutina. */
+    planSession: (userPlanificationId: string, routineAsignationId: string) =>
+      [
+        ...queryKeys.routineDetail.all,
+        'plan',
+        userPlanificationId,
+        routineAsignationId,
+      ] as const,
+  },
   userRms: {
     all: ['user-rms'] as const,
     /** Los RMs registrados de un usuario, de todos sus ejercicios. */
