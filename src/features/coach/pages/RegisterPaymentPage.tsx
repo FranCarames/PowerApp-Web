@@ -13,8 +13,9 @@ import styles from './RegisterPaymentPage.module.css';
 
 /**
  * El alumno que llega elegido por `?alumno=<id>` (desde su detalle o desde el control de membresías)
- * o, si no se le puede registrar un pago, el motivo. Solo se registran pagos de alumnos: el backend no
- * mira el rol, pero un entrenador o un admin no tienen membresía. Uno de cuenta inactiva sí se acepta.
+ * o, si no se le puede registrar un pago, el motivo. Solo se registran pagos de alumnos con la cuenta
+ * abierta: desde el contrato del 24/10 el backend rechaza (400) a un entrenador, a un admin y a una cuenta
+ * cerrada, y el front no los ofrece.
  */
 function usePreselectedStudent(id: string | null): {
   loading: boolean;
@@ -38,6 +39,12 @@ function usePreselectedStudent(id: string | null): {
     return {
       loading: false,
       problem: `${fullName(query.data)} no es un alumno: solo se registran pagos de alumnos.`,
+    };
+  }
+  if (!query.data.active) {
+    return {
+      loading: false,
+      problem: `${fullName(query.data)} tiene la cuenta cerrada: no se puede registrar el pago. Reactivala desde su detalle.`,
     };
   }
   return { loading: false, student: query.data };
@@ -83,7 +90,7 @@ function RegisterPayment({ studentId }: { studentId: string | null }) {
           {preselected.loading && chosen === undefined ? (
             <Skeleton height={68} radius={16} />
           ) : (
-            <StudentPicker student={student} onChange={setChosen} />
+            <StudentPicker student={student} onChange={setChosen} activeOnly />
           )}
         </div>
         {student ? (

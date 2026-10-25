@@ -180,13 +180,15 @@ function StudentDetail({ student }: { student: User }) {
           chevron
           onClick={() => setModal('payments')}
         />
-        <ListItem
-          leading={<Tile icon="plus" />}
-          title="Registrar pago"
-          subtitle="Nuevo pago de membresía"
-          chevron
-          onClick={() => navigate(`/c/pago?alumno=${student.id}`)}
-        />
+        {student.active && (
+          <ListItem
+            leading={<Tile icon="plus" />}
+            title="Registrar pago"
+            subtitle="Nuevo pago de membresía"
+            chevron
+            onClick={() => navigate(`/c/pago?alumno=${student.id}`)}
+          />
+        )}
       </List>
       {student.active ? (
         <Button

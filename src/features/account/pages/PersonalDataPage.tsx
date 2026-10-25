@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 
 import type { User } from '@/api/types';
-import { getErrorMessage, isApiError } from '@/api/errors';
+import { getErrorMessage } from '@/api/errors';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { zodResolver } from '@/shared/lib/zodResolver';
 import {
@@ -89,8 +89,6 @@ function ProfileForm({ user }: { user: User }) {
   const {
     register,
     handleSubmit,
-    setError,
-    setFocus,
     formState: { errors },
   } = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
@@ -99,7 +97,6 @@ function ProfileForm({ user }: { user: User }) {
     values: {
       first_name: user.first_name,
       last_name: user.last_name,
-      email: user.email,
       phone_prefix: user.phone_prefix ?? '+54',
       phone_number: user.phone_number ?? '',
       profile_picture: user.profile_picture ?? '',
@@ -114,26 +111,15 @@ function ProfileForm({ user }: { user: User }) {
         toast.success('Datos actualizados');
         navigate('/cuenta');
       },
-      onError: (error) => {
-        if (isApiError(error) && error.status === 409) {
-          setError('email', {
-            type: 'server',
-            message: 'El email ya está en uso',
-          });
-          setFocus('email');
-        }
-      },
     });
   });
 
-  // Un 409 se muestra en el campo del email; los demás errores, en un aviso arriba.
-  const emailTaken = isApiError(edit.error) && edit.error.status === 409;
   const phoneError =
     errors.phone_prefix?.message ?? errors.phone_number?.message;
 
   return (
     <form onSubmit={onSubmit} noValidate>
-      {edit.isError && !emailTaken && (
+      {edit.isError && (
         <Note tone="err" icon="alert" role="alert" className={styles.error}>
           {getErrorMessage(edit.error)}
         </Note>
@@ -146,13 +132,11 @@ function ProfileForm({ user }: { user: User }) {
           <Input autoComplete="family-name" {...register('last_name')} />
         </Field>
       </Columns>
-      <Field label="Email" error={errors.email?.message}>
-        <Input
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          {...register('email')}
-        />
+      <Field
+        label="Email"
+        hint="Por ahora no se puede cambiar. Es con el que ingresás."
+      >
+        <Input type="email" value={user.email} disabled />
       </Field>
       <PhoneField
         error={phoneError}

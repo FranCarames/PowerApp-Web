@@ -39,9 +39,9 @@ function StudentAvatar({ student }: { student: User }) {
 /**
  * El alumno elegido para una acción del entrenador. Sin elegir, un buscador y la lista de alumnos (de a
  * páginas); elegido, solo su fila con "Cambiar", para que el resto del formulario quede a la vista.
- * Por defecto se ofrecen también los de cuenta inactiva (el backend deja registrarles un pago y el
- * control de membresías los lista); con `activeOnly`, solo los de cuenta abierta (asignarles una
- * planificación a los otros da 400).
+ * Por defecto se ofrecen también los de cuenta inactiva; con `activeOnly`, solo los de cuenta abierta.
+ * Hoy lo usan todas las acciones (asignarles una planificación o una rutina, o registrarles un pago, a
+ * los otros da 400), así que el valor por defecto queda para lo que no lo necesite.
  */
 export function StudentPicker({
   student,
