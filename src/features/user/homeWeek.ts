@@ -39,3 +39,13 @@ export function progressText({
 export function routineLetter(index: number): string {
   return index < 26 ? String.fromCharCode(65 + index) : String(index + 1);
 }
+
+/**
+ * "Semana 3 de 8": la semana del plan sobre su duración. Sin duración fija, o en una semana que la pasa
+ * (el entrenador le fijó al alumno un fin más largo que la plantilla), solo el número: "Semana 10".
+ */
+export function planWeekText(week: number, duration: number): string {
+  return duration > 0 && week <= duration
+    ? `Semana ${week} de ${duration}`
+    : `Semana ${week}`;
+}

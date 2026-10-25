@@ -24,6 +24,7 @@ import {
   individualView,
   planSessionView,
   routineStats,
+  sortCircuitLinks,
   type RoutineView,
 } from '../routineDetail';
 import styles from './RoutineDetailPage.module.css';
@@ -107,7 +108,7 @@ function RoutineScreen({
 function RoutineBody({ view }: { view: RoutineView }) {
   const { routine, finished, notices, planNote, assignment } = view;
   const stats = routineStats(view);
-  const circuits = [...routine.circuits].sort((a, b) => a.order - b.order);
+  const circuits = sortCircuitLinks(routine.circuits);
 
   return (
     <>

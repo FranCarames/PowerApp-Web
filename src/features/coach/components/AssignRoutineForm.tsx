@@ -54,8 +54,9 @@ export function AssignRoutineForm({
       { routine_id: routine.id, user_id: student.id, date },
       {
         onSuccess: () => {
+          // El CU pide confirmar con el día y el nombre de la rutina.
           toast.success(
-            `Rutina asignada · ${fullName(student)} · ${formatDate(date)}`,
+            `${routine.name} asignada a ${fullName(student)} · ${formatDate(date)}`,
           );
           navigate(returnTo, { state: returnState });
         },

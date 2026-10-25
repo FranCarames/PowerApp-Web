@@ -74,7 +74,10 @@ export function StudentRoutinesModal({
   function confirmRemove(target: RoutineAssignedListItem) {
     remove.mutate(target.id, {
       onSuccess: () => {
-        toast.success('Rutina quitada');
+        // El CU pide mostrar la asignación que se quitó.
+        toast.success(
+          `Rutina quitada · ${target.routine.name} · ${formatDate(target.date)}`,
+        );
         setRemoving(null);
       },
       onError: (error) => {

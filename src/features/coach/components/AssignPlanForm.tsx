@@ -123,8 +123,12 @@ export function AssignPlanForm({
         confirm_overlap: overlapping !== null,
       },
       {
-        onSuccess: () => {
-          toast.success(`Planificación asignada · ${fullName(student)}`);
+        onSuccess: (saved) => {
+          // El CU pide confirmar con las fechas y el nombre de la planificación (las del backend: el fin
+          // puede ser el que calculó).
+          toast.success(
+            `${saved.planification.name || 'Planificación'} asignada a ${fullName(student)} · del ${formatDate(saved.start_date)} al ${formatDate(saved.end_date)}`,
+          );
           navigate(returnTo);
         },
         onError: (error) => {
