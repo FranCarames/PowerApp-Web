@@ -123,6 +123,8 @@ export function ExerciseForm({ exercise, groups }: ExerciseFormProps) {
         <Note tone="err" icon="alert" role="alert" className={styles.error}>
           {getErrorMessage(save.error, {
             404: 'No encontramos el ejercicio o alguno de sus músculos. Recargá la pantalla e intentá de nuevo.',
+            // En este formulario un 409 solo puede ser el nombre repetido.
+            409: 'Ya hay un ejercicio con ese nombre. Elegí otro.',
           })}
         </Note>
       )}

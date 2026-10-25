@@ -788,7 +788,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/planification/user/{id}": {
+    "/api/v1/planification/user/set-active/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["PlanificationController_setUserPlanificationActive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/planification/user/{userId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -798,38 +814,6 @@ export interface paths {
         get: operations["PlanificationController_getUserPlanifications"];
         put?: never;
         post?: never;
-        delete: operations["PlanificationController_deleteUserPlanification"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/planification/user/{id}/active": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["PlanificationController_getActiveUserPlanification"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/planification/user/edit/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["PlanificationController_editUserPlanification"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1022,6 +1006,182 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["RoutineController_setCircuitActive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/assign-user": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RoutineController_assignRoutineToUser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/assign-user/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["RoutineController_getAssignedRoutineById"];
+        put?: never;
+        post?: never;
+        delete: operations["RoutineController_removeRoutineFromUser"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/assign-user/{id}/finished": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RoutineController_markExerciseFinished"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/assign-user/{id}/finished/{routineExerciseId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["RoutineController_unmarkExerciseFinished"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/assigned/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["RoutineController_getAssignedRoutines"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/assigned-plan/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["RoutineController_getAssignedPlan"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/home/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["RoutineController_getRoutineHome"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/assign-plan/{userPlanificationId}/{routineAsignationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["RoutineController_getPlanSessionDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/assign-plan/{userPlanificationId}/{routineAsignationId}/finished": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RoutineController_markPlanExerciseFinished"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/assign-plan/{userPlanificationId}/{routineAsignationId}/finished/{routineExerciseId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["RoutineController_unmarkPlanExerciseFinished"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/history/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["RoutineController_getTrainingHistory"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1242,10 +1402,11 @@ export interface components {
             /** @example secret123 */
             password: string;
             /**
+             * @description Sólo se acepta `user`: el registro siempre crea un alumno
              * @default user
              * @enum {string}
              */
-            role: "user" | "coach" | "admin";
+            role: "user";
             /** @example +54 */
             phone_prefix: string;
             /** @example 1123456789 */
@@ -1256,6 +1417,46 @@ export interface components {
             email: string;
             /** @example secret123 */
             password: string;
+        };
+        LoginResponseDto: {
+            /** @example uuid-1234 */
+            id: string;
+            /** @example Juan */
+            first_name: string;
+            /** @example Pérez */
+            last_name: string;
+            /** @example juan@example.com */
+            email: string;
+            /** @example false */
+            email_verified: boolean;
+            /**
+             * @default user
+             * @enum {string}
+             */
+            role: "user" | "coach" | "admin";
+            /** @example https://... */
+            profile_picture?: string;
+            /** @example +54 */
+            phone_prefix?: string;
+            /** @example 1123456789 */
+            phone_number?: string;
+            /** @example false */
+            phone_verified: boolean;
+            /**
+             * @description Cuenta activa (no relacionado con si la membresía está vigente)
+             * @example true
+             */
+            active: boolean;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            coach?: components["schemas"]["Coach"];
+            /**
+             * @description true si se ingresó con la contraseña temporal (CU-U-04): el cliente tiene que llevar al cambio de contraseña (CU-U-05) antes de continuar. Viene siempre.
+             * @example false
+             */
+            password_change_required: boolean;
         };
         RecoverPasswordDto: {
             /** @example juan@example.com */
@@ -1587,8 +1788,11 @@ export interface components {
             number_of_routines: number;
             /** @example fuerza */
             type?: string;
-            /** @example 12 semanas */
-            duration?: string;
+            /**
+             * @description Duración en semanas. 0 = sin duración fija
+             * @example 12
+             */
+            duration: number;
             /** @example true */
             active: boolean;
             /**
@@ -1620,7 +1824,15 @@ export interface components {
              * @example uuid-1234
              */
             id: string;
-            /** @example 1 */
+            /**
+             * @description Semana del plan en la que va la rutina
+             * @example 1
+             */
+            week: number;
+            /**
+             * @description Posición dentro de la semana. Etiqueta de orden: puede repetirse
+             * @example 1
+             */
             order: number;
             routine: components["schemas"]["PlanificationRoutineResponseDto"];
         };
@@ -1641,8 +1853,11 @@ export interface components {
             number_of_routines: number;
             /** @example fuerza */
             type?: string;
-            /** @example 12 semanas */
-            duration?: string;
+            /**
+             * @description Duración en semanas. 0 = sin duración fija
+             * @example 12
+             */
+            duration: number;
             /** @example true */
             active: boolean;
             /**
@@ -1654,7 +1869,7 @@ export interface components {
             created_at: string;
             /** Format: date-time */
             updated_at: string;
-            /** @description Rutinas del plan, ordenadas por order. Vacío hasta que exista CU-E-12 */
+            /** @description Rutinas vigentes del plan, ordenadas por week, order y fecha de asignación. La lista es plana: el cliente agrupa por semana. Vacía si no tiene ninguna */
             routines: components["schemas"]["PlanificationAsignationResponseDto"][];
         };
         CreatePlanificationDto: {
@@ -1675,8 +1890,11 @@ export interface components {
             description?: string;
             /** @example fuerza */
             type?: string;
-            /** @example 12 semanas */
-            duration?: string;
+            /**
+             * @description Duración del plan en semanas. 0 = sin duración fija. Si es mayor que 0, limita la semana (week) de las rutinas del plan a 1..duration. Obligatoria, también al editar. Al editar, si es mayor que 0 no puede ser menor que la semana más alta usada por una rutina vigente del plan (400)
+             * @example 12
+             */
+            duration: number;
         };
         EditPlanificationDto: {
             /**
@@ -1696,8 +1914,11 @@ export interface components {
             description?: string;
             /** @example fuerza */
             type?: string;
-            /** @example 12 semanas */
-            duration?: string;
+            /**
+             * @description Duración del plan en semanas. 0 = sin duración fija. Si es mayor que 0, limita la semana (week) de las rutinas del plan a 1..duration. Obligatoria, también al editar. Al editar, si es mayor que 0 no puede ser menor que la semana más alta usada por una rutina vigente del plan (400)
+             * @example 12
+             */
+            duration: number;
         };
         SetPlanificationActiveDto: {
             /**
@@ -1717,8 +1938,11 @@ export interface components {
             number_of_routines: number;
             /** @example fuerza */
             type?: Record<string, never>;
-            /** @example 12 semanas */
-            duration?: Record<string, never>;
+            /**
+             * @description Duración en semanas. 0 = sin duración fija
+             * @example 12
+             */
+            duration: number;
             /** @example true */
             active: boolean;
             /** Format: date-time */
@@ -1735,7 +1959,12 @@ export interface components {
              */
             routine_id: string;
             /**
-             * @description Posición dentro del plan. Si se omite, la asignación va al final. Si se manda una posición ya ocupada se persiste igual: no se desplaza el resto y el order puede quedar duplicado
+             * @description Semana del plan en la que va la rutina. Si la planificación tiene duración mayor que 0, no puede superarla (400)
+             * @example 1
+             */
+            week: number;
+            /**
+             * @description Posición dentro de la semana. Si se omite, la asignación va al final de esa semana. Si se manda una posición ya ocupada se persiste igual: no se desplaza el resto y el order puede quedar duplicado
              * @example 1
              */
             order?: number;
@@ -1744,7 +1973,12 @@ export interface components {
             /** @example uuid-1234 */
             planification_id: string;
             /**
-             * @description Se asignan al final del plan, consecutivas y en el orden del array. Se permiten ids repetidos: crean una asignación cada uno
+             * @description Semana del plan en la que van todas las rutinas del lote (una semana por lote). Si la planificación tiene duración mayor que 0, no puede superarla (400)
+             * @example 1
+             */
+            week: number;
+            /**
+             * @description Se asignan al final de esa semana, consecutivas y en el orden del array. Se permiten ids repetidos: crean una asignación cada uno
              * @example [
              *       "uuid-1234",
              *       "uuid-5678"
@@ -1754,12 +1988,17 @@ export interface components {
         };
         SetRoutineAsignationActiveDto: {
             /**
-             * @description false da de baja la asignación y le borra el order; true la reactiva
+             * @description false da de baja la asignación y la rutina CONSERVA su semana y su orden; true la reactiva
              * @example false
              */
             active: boolean;
             /**
-             * @description Sólo válido con active = true: la posición con la que vuelve. Si se omite, vuelve al final. Mandarlo con active = false es un 400
+             * @description Sólo válido con active = true: la semana con la que vuelve. Si se omite, vuelve a la que tenía. Si la semana resultante queda fuera de la duración actual del plan, es un 400. Mandarlo con active = false es un 400
+             * @example 2
+             */
+            week?: number;
+            /**
+             * @description Sólo válido con active = true: la posición con la que vuelve, tal cual (puede repetirse). Si se omite, vuelve a su lugar; con week y sin order, va al final de esa semana. Mandarlo con active = false es un 400
              * @example 2
              */
             order?: number;
@@ -1771,8 +2010,16 @@ export interface components {
             routine_id: string;
             /** @example uuid-1234 */
             planification_id: string;
-            /** @example 1 */
-            order?: Record<string, never>;
+            /**
+             * @description Posición dentro de la semana. Etiqueta de orden: puede repetirse
+             * @example 1
+             */
+            order: number;
+            /**
+             * @description Semana del plan en la que va la rutina
+             * @example 1
+             */
+            week: number;
             /** @example true */
             active: boolean;
             /** Format: date-time */
@@ -1790,46 +2037,110 @@ export interface components {
              */
             routine_asignation_ids: string[];
             /**
-             * @description Al reactivar en lote, cada asignación vuelve al final de su planificación
+             * @description Al reactivar en lote, cada asignación vuelve a su lugar (su semana y su orden). Si alguna queda fuera de la duración actual de su plan, es un 400 y no se aplica ninguna
              * @example false
              */
             active: boolean;
         };
-        UserPlanification: {
-            /** @example uuid-1234 */
-            id: string;
-            /** @example uuid-1234 */
-            user_id: string;
-            /** @example uuid-1234 */
-            coach_id?: string;
-            /** @example uuid-1234 */
-            planification_id?: string;
-            /** @example Plan personalizado para el alumno */
-            description?: string;
-            /** @example 3 */
-            number_of_routines?: number;
-            /** @example fuerza */
-            type?: string;
-            /** @example Foco en técnica */
-            coach_note?: string;
-            /** @example 8 semanas */
-            duration?: string;
+        AssignPlanificationToUserDto: {
             /**
-             * Format: date-time
-             * @example 2024-01-01
+             * @description Planificación (plantilla) a asignar. Tiene que estar activa y tener al menos una rutina vigente
+             * @example uuid-1234
+             */
+            planification_id: string;
+            /**
+             * @description Alumno destinatario. Tiene que ser un usuario con rol user y la cuenta abierta
+             * @example uuid-1234
+             */
+            user_id: string;
+            /**
+             * @description Día de inicio, en formato YYYY-MM-DD (sin hora). Puede ser pasado o futuro: el servidor no calcula "hoy". La semana 1 del plan es la de lunes a domingo que lo contiene
+             * @example 2026-10-22
              */
             start_date: string;
             /**
-             * Format: date-time
-             * @example 2024-03-01
+             * @description Día de fin, inclusive (YYYY-MM-DD). Si se omite, es el domingo de la semana duration de la plantilla (en el ejemplo, 4 semanas desde el lunes 19/10). Obligatorio si la plantilla tiene duración 0. No puede ser anterior a start_date (400). Puede ser más corto o más largo que la duración, y no hace falta que sea domingo
+             * @example 2026-11-15
+             */
+            end_date?: string;
+            /**
+             * @description Nota del entrenador para el alumno. Para no dejar nota, se omite: la cadena vacía da 400
+             * @example Foco en técnica
+             */
+            coach_note?: string;
+            /**
+             * @description true para asignarla aunque se pise con otra planificación activa del alumno: las dos conviven. Sin esto, el solapamiento da 409 con las que se pisan
+             * @default false
+             * @example true
+             */
+            confirm_overlap: boolean;
+        };
+        UserPlanificationPlanificationDto: {
+            /** @example uuid-1234 */
+            id: string;
+            /** @example Fuerza 4 semanas */
+            name: string | null;
+            /**
+             * @description Duración de la plantilla en semanas (0 = sin duración fija). Es la de hoy: editarla no mueve el fin de la asignación
+             * @example 4
+             */
+            duration: number;
+            /**
+             * @description Si la plantilla sigue activa. Darla de baja no saca las asignaciones que ya tenía
+             * @example true
+             */
+            active: boolean;
+        };
+        UserPlanificationResponseDto: {
+            /**
+             * @description Id de la User_Planification
+             * @example uuid-1234
+             */
+            id: string;
+            /** @example uuid-1234 */
+            user_id: string;
+            /**
+             * @description El coach que la asignó
+             * @example uuid-1234
+             */
+            coach_id: string;
+            /** @example uuid-1234 */
+            planification_id: string;
+            /**
+             * @description Día de inicio (YYYY-MM-DD, sin hora). La semana 1 del plan es la de lunes a domingo que lo contiene
+             * @example 2026-10-22
+             */
+            start_date: string;
+            /**
+             * @description Día de fin, inclusive (YYYY-MM-DD, sin hora). Queda guardado: editar la duración de la plantilla no lo mueve
+             * @example 2026-11-15
              */
             end_date: string;
-            /** @example true */
+            /** @example Foco en técnica */
+            coach_note: string | null;
+            /**
+             * @description false si el coach la quitó (E-14)
+             * @example true
+             */
             active: boolean;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
             updated_at: string;
+            planification: components["schemas"]["UserPlanificationPlanificationDto"];
+        };
+        AssignPlanificationOverlapResponseDto: {
+            /** @example El alumno ya tiene una planificación en esas fechas. Reenviá con confirm_overlap: true para asignarla igual. */
+            error: string;
+            /** @description Las asignaciones activas del alumno cuyo rango se pisa con el nuevo (los dos extremos inclusivos), de la más nueva a la más vieja */
+            overlapping: components["schemas"]["UserPlanificationResponseDto"][];
+        };
+        SetUserPlanificationActiveDto: {
+            /**
+             * @description false para quitarle la planificación al alumno (baja lógica), true para reincorporarla con sus mismas fechas. Pedir el estado que ya tiene da 400
+             * @example false
+             */
+            active: boolean;
         };
         RoutineListItemResponseDto: {
             /** @example uuid-1234 */
@@ -2211,7 +2522,445 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
         };
-        UserRM: {
+        AssignRoutineToUserDto: {
+            /**
+             * @description Rutina a asignar. Tiene que estar activa
+             * @example uuid-1234
+             */
+            routine_id: string;
+            /**
+             * @description Alumno destinatario. Tiene que ser un usuario con rol user y la cuenta abierta
+             * @example uuid-1234
+             */
+            user_id: string;
+            /**
+             * @description Día en que el alumno hace la rutina, en formato YYYY-MM-DD (sin hora). Puede ser pasado o futuro: el servidor no calcula "hoy". Un alumno no puede tener la misma rutina dos veces el mismo día (409)
+             * @example 2026-10-20
+             */
+            date: string;
+        };
+        RoutineAssignUserRoutineDto: {
+            /** @example uuid-1234 */
+            id: string;
+            /** @example Dia A - Piernas */
+            name: string;
+        };
+        RoutineAssignUserResponseDto: {
+            /**
+             * @description Id de la Routine_Asignation_User
+             * @example uuid-1234
+             */
+            id: string;
+            /** @example uuid-1234 */
+            routine_id: string;
+            /** @example uuid-1234 */
+            user_id: string;
+            /**
+             * @description Día en que el alumno hace la rutina (YYYY-MM-DD, sin hora)
+             * @example 2026-10-20
+             */
+            date: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            routine: components["schemas"]["RoutineAssignUserRoutineDto"];
+        };
+        RoutineAssignedFinishedDto: {
+            /**
+             * @description Id del Routine_Exercise que el alumno marcó como hecho. El cliente cruza el árbol de la rutina por este id (en el árbol es el campo id de cada ejercicio)
+             * @example uuid-1234
+             */
+            routine_exercise_id: string;
+            /**
+             * @description Nota del alumno sobre ese ejercicio (hasta 100 caracteres); null si no dejó ninguna
+             * @example Me costó la última serie
+             */
+            user_note: string | null;
+            /**
+             * @description Día en que el alumno hizo el ejercicio (YYYY-MM-DD, sin hora). Lo indica al marcar y lo puede corregir
+             * @example 2026-10-20
+             */
+            finished_at: string;
+            /**
+             * Format: date-time
+             * @description Cuándo se registró la marca
+             */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        RoutineAssignedDetailResponseDto: {
+            /**
+             * @description Id de la Routine_Asignation_User
+             * @example uuid-1234
+             */
+            id: string;
+            /** @example uuid-1234 */
+            routine_id: string;
+            /** @example uuid-1234 */
+            user_id: string;
+            /**
+             * @description Día en que el alumno hace la rutina (YYYY-MM-DD, sin hora)
+             * @example 2026-10-20
+             */
+            date: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** @description El mismo árbol que GET /routine/:id. Los circuitos y ejercicios dados de baja sólo aparecen si el alumno completó algo de ellos en esta asignación; de un circuito que el entrenador sacó de la rutina se ven únicamente los ejercicios completados */
+            routine: components["schemas"]["RoutineDetailResponseDto"];
+            /** @description Los ejercicios que el alumno ya marcó como hechos en esta asignación, con su nota */
+            finished: components["schemas"]["RoutineAssignedFinishedDto"][];
+        };
+        MarkExerciseFinishedDto: {
+            /**
+             * @description Id del Routine_Exercise que el alumno hizo (en el árbol del detalle es el campo id de cada ejercicio). El hecho es por ejercicio, no por serie: el tildado serie por serie es de la interfaz
+             * @example uuid-1234
+             */
+            routine_exercise_id: string;
+            /**
+             * @description Día en que el alumno hizo el ejercicio, en formato YYYY-MM-DD (sin hora). Obligatorio al marcar un ejercicio que todavía no estaba marcado (400 si falta). En uno ya marcado, si viene y cambia, lo corrige; si se omite, no se toca. Permite marcar en diferido. No se valida contra ninguna fecha: el servidor no calcula "hoy"
+             * @example 2026-10-20
+             */
+            finished_at?: string;
+            /**
+             * @description Nota del alumno sobre el ejercicio. Si se omite, no se toca la nota (en un ejercicio nuevo queda sin nota). La cadena vacía la borra
+             * @example Me costó la última serie
+             */
+            user_note?: string;
+        };
+        RoutineAssignedUnfinishedResponseDto: {
+            /**
+             * @description El ejercicio que se desmarcó (el id del path, en minúscula)
+             * @example uuid-1234
+             */
+            routine_exercise_id: string;
+            /**
+             * @description Siempre false. Desmarcar es idempotente: también responde 200 si el ejercicio no estaba marcado
+             * @example false
+             */
+            finished: boolean;
+        };
+        RoutineAssignedRoutineDto: {
+            /** @example uuid-1234 */
+            id: string;
+            /** @example Dia A - Piernas */
+            name: string;
+            /**
+             * @description false si el entrenador dio de baja la rutina después de asignarla: la asignación existe y se puede ejecutar, el flag es informativo
+             * @example true
+             */
+            active: boolean;
+        };
+        RoutineAssignedProgressDto: {
+            /**
+             * @description Ejercicios que el alumno ya marcó como hechos en esta asignación
+             * @example 2
+             */
+            finished: number;
+            /**
+             * @description Ejercicios que el alumno ve en el detalle: los activos de los circuitos activos de la rutina (cada uno una vez) más los dados de baja que completó en esta asignación
+             * @example 5
+             */
+            total: number;
+        };
+        RoutineAssignedListItemResponseDto: {
+            /**
+             * @description Id de la Routine_Asignation_User
+             * @example uuid-1234
+             */
+            id: string;
+            /** @example uuid-1234 */
+            routine_id: string;
+            /** @example uuid-1234 */
+            user_id: string;
+            /**
+             * @description Día en que el alumno hace la rutina (YYYY-MM-DD, sin hora)
+             * @example 2026-10-20
+             */
+            date: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            routine: components["schemas"]["RoutineAssignedRoutineDto"];
+            progress: components["schemas"]["RoutineAssignedProgressDto"];
+        };
+        RoutineAssignedPlanUserPlanificationDto: {
+            /**
+             * @description Id de la User_Planification
+             * @example uuid-1234
+             */
+            id: string;
+            /**
+             * @description Día de inicio (YYYY-MM-DD, sin hora). La semana 1 del plan es la de lunes a domingo que lo contiene
+             * @example 2026-10-22
+             */
+            start_date: string;
+            /**
+             * @description Día de fin, inclusive (YYYY-MM-DD, sin hora). La última semana del plan es la que lo contiene
+             * @example 2026-11-15
+             */
+            end_date: string;
+            /** @example Foco en técnica */
+            coach_note: string | null;
+            planification: components["schemas"]["UserPlanificationPlanificationDto"];
+        };
+        RoutineAssignedPlanRoutineDto: {
+            /**
+             * @description Id de la Routine_Asignation. Con el id de la asignación identifica la sesión del plan
+             * @example uuid-1234
+             */
+            routine_asignation_id: string;
+            /**
+             * @description Posición dentro de la semana. Etiqueta de orden: puede repetirse, y desempata el alta
+             * @example 1
+             */
+            order: number;
+            /**
+             * @description false si el entrenador la quitó del plan (E-12c): sólo aparece si el alumno hizo algo en ella, y sólo con lo que hizo
+             * @example true
+             */
+            active: boolean;
+            routine: components["schemas"]["RoutineAssignedRoutineDto"];
+            /** @description Sobre lo hecho en esta sesión. En una rutina quitada del plan sólo se ve lo completado: finished = total */
+            progress: components["schemas"]["RoutineAssignedProgressDto"];
+        };
+        RoutineAssignedPlanWeekResponseDto: {
+            user_planification: components["schemas"]["RoutineAssignedPlanUserPlanificationDto"];
+            /**
+             * @description Semana del plan: la 1 es la de lunes a domingo que contiene start_date
+             * @example 2
+             */
+            week: number;
+            /**
+             * @description Lunes de esa semana del plan (YYYY-MM-DD), aunque el plan arranque a mitad de semana
+             * @example 2026-10-26
+             */
+            week_start: string;
+            /**
+             * @description Domingo de esa semana del plan (YYYY-MM-DD), aunque el plan termine a mitad de semana
+             * @example 2026-11-01
+             */
+            week_end: string;
+            /** @description Las rutinas de la semana que el alumno ve, por order y alta. Vacío si la semana no tiene ninguna */
+            routines: components["schemas"]["RoutineAssignedPlanRoutineDto"][];
+        };
+        RoutineHomeWeekResponseDto: {
+            /**
+             * @description Lunes de la semana (YYYY-MM-DD)
+             * @example 2026-10-19
+             */
+            week_start: string;
+            /**
+             * @description Domingo de la semana (YYYY-MM-DD)
+             * @example 2026-10-25
+             */
+            week_end: string;
+            /** @description Las rutinas individuales con día en esta semana, por día, nombre de rutina y alta. Iguales a las de GET /routine/assigned/:userId */
+            individual: components["schemas"]["RoutineAssignedListItemResponseDto"][];
+            /** @description La semana del plan de cada asignación activa que cae en esta semana, por nombre de la planificación y alta. Iguales a los grupos de GET /routine/assigned-plan/:userId: repiten week_start y week_end */
+            plan: components["schemas"]["RoutineAssignedPlanWeekResponseDto"][];
+        };
+        RoutinePlanSessionUserPlanificationDto: {
+            /**
+             * @description Id de la User_Planification
+             * @example uuid-1234
+             */
+            id: string;
+            /**
+             * @description Día de inicio (YYYY-MM-DD, sin hora). La semana 1 del plan es la de lunes a domingo que lo contiene
+             * @example 2026-10-22
+             */
+            start_date: string;
+            /**
+             * @description Día de fin, inclusive (YYYY-MM-DD, sin hora). La última semana del plan es la que lo contiene
+             * @example 2026-11-15
+             */
+            end_date: string;
+            /** @example Foco en técnica */
+            coach_note: string | null;
+            planification: components["schemas"]["UserPlanificationPlanificationDto"];
+            /**
+             * @description false si el entrenador quitó la planificación al alumno (E-14): la sesión se puede leer, pero marcar, desmarcar y anotar dan 400
+             * @example true
+             */
+            active: boolean;
+        };
+        RoutinePlanSessionDetailResponseDto: {
+            user_planification: components["schemas"]["RoutinePlanSessionUserPlanificationDto"];
+            /**
+             * @description Id de la Routine_Asignation. Con el id de la asignación identifica la sesión del plan
+             * @example uuid-1234
+             */
+            routine_asignation_id: string;
+            /**
+             * @description Semana del plan: la 1 es la de lunes a domingo que contiene start_date
+             * @example 2
+             */
+            week: number;
+            /**
+             * @description Lunes de esa semana del plan (YYYY-MM-DD), aunque el plan arranque a mitad de semana o la semana caiga después del fin
+             * @example 2026-10-26
+             */
+            week_start: string;
+            /**
+             * @description Domingo de esa semana del plan (YYYY-MM-DD)
+             * @example 2026-11-01
+             */
+            week_end: string;
+            /**
+             * @description Posición dentro de la semana. Etiqueta de orden: puede repetirse
+             * @example 1
+             */
+            order: number;
+            /**
+             * @description false si el entrenador quitó la rutina del plan (E-12c): sólo se ve lo que el alumno completó
+             * @example true
+             */
+            active: boolean;
+            /** @description El mismo árbol que GET /routine/:id. Lo dado de baja aparece sólo si el alumno completó algo de ello en esta sesión; en una rutina quitada del plan se ve únicamente lo completado */
+            routine: components["schemas"]["RoutineDetailResponseDto"];
+            /** @description Los ejercicios que el alumno ya marcó como hechos en esta sesión, con su nota y el día en que los hizo */
+            finished: components["schemas"]["RoutineAssignedFinishedDto"][];
+        };
+        RoutineHistoryRoutineDto: {
+            /** @example uuid-1234 */
+            id: string;
+            /** @example Dia A - Piernas */
+            name: string;
+        };
+        RoutineHistoryCatalogExerciseDto: {
+            /**
+             * @description Exercise.id, el del catálogo: es el que se manda en exercise_id para filtrar
+             * @example uuid-1234
+             */
+            id: string;
+            /** @example Sentadilla */
+            name: string;
+        };
+        RoutineHistorySetDto: {
+            /** @example 1 */
+            set_order: number;
+            /** @example 3 */
+            set_count: number;
+            /** @example 8 */
+            rep_count: number;
+            /** @example 80.5 */
+            weight: number | null;
+            /** @example 75 */
+            rm_perc: number | null;
+            /** @example 7 */
+            rpe: number | null;
+            /** @example 2 */
+            rir: number | null;
+            /** @example false */
+            amrap: boolean;
+            /** @example 60 */
+            amrap_time: number | null;
+            /** @example false */
+            rm: boolean;
+        };
+        RoutineHistoryExerciseDto: {
+            /**
+             * @description Id del Routine_Exercise que el alumno marcó como hecho
+             * @example uuid-1234
+             */
+            routine_exercise_id: string;
+            exercise: components["schemas"]["RoutineHistoryCatalogExerciseDto"];
+            /**
+             * @description Nota del alumno; null si no dejó ninguna
+             * @example Me costó la última serie
+             */
+            user_note: string | null;
+            /**
+             * @description Día en que el alumno hizo el ejercicio (YYYY-MM-DD, sin hora): el que indicó al marcar, no el momento en que marcó. Desde el 21/10 (BE-18); antes era el instante de la marca
+             * @example 2026-10-20
+             */
+            finished_at: string;
+            /** @description La prescripción del coach, ordenada por set_order. Vacía si el ejercicio no tiene series */
+            sets: components["schemas"]["RoutineHistorySetDto"][];
+        };
+        RoutineHistoryIndividualSessionDto: {
+            /**
+             * @description De dónde viene la sesión: una asignación individual (una rutina asignada para un día) (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            source: "individual";
+            /**
+             * @description Id de la Routine_Asignation_User
+             * @example uuid-1234
+             */
+            assignment_id: string;
+            /**
+             * @description Día de la asignación (YYYY-MM-DD, sin hora)
+             * @example 2026-10-20
+             */
+            date: string;
+            routine: components["schemas"]["RoutineHistoryRoutineDto"];
+            /** @description Los ejercicios que el alumno hizo en la sesión, por el día en que los hizo y, dentro del mismo día, en el orden en que los marcó. Incluye los que el coach dio de baja después */
+            exercises: components["schemas"]["RoutineHistoryExerciseDto"][];
+        };
+        RoutineHistoryPlanificationDto: {
+            /**
+             * @description Id de la plantilla (Planification)
+             * @example uuid-1234
+             */
+            id: string;
+            /**
+             * @description Nombre de la plantilla, leído en vivo; null si no tiene
+             * @example Fuerza 4 semanas
+             */
+            name: string | null;
+        };
+        RoutineHistoryPlanSessionDto: {
+            /**
+             * @description De dónde viene la sesión: una rutina de la planificación asignada al alumno (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            source: "plan";
+            /**
+             * @description Id de la User_Planification: la planificación asignada al alumno
+             * @example uuid-1234
+             */
+            user_planification_id: string;
+            /**
+             * @description Id de la Routine_Asignation: la rutina del plan. Con el anterior, identifica la sesión (y es el par del detalle, GET /routine/assign-plan/:userPlanificationId/:routineAsignationId)
+             * @example uuid-1234
+             */
+            routine_asignation_id: string;
+            /**
+             * @description Semana del plan en la que va la rutina
+             * @example 2
+             */
+            week: number;
+            /**
+             * @description La rutina del plan no tiene día: es el día más viejo en que el alumno hizo alguno de los ejercicios que se devuelven (YYYY-MM-DD, sin hora). Con exercise_id, el día en que hizo ese ejercicio
+             * @example 2026-10-20
+             */
+            date: string;
+            planification: components["schemas"]["RoutineHistoryPlanificationDto"];
+            routine: components["schemas"]["RoutineHistoryRoutineDto"];
+            /** @description Los ejercicios que el alumno hizo en la sesión, con la misma forma y el mismo orden que en la sesión individual. Incluye los que el coach quitó del plan después, y los de una planificación que le quitaron al alumno */
+            exercises: components["schemas"]["RoutineHistoryExerciseDto"][];
+        };
+        UserRmExerciseRefDto: {
+            /** @example uuid-1234 */
+            id: string;
+            /** @example Sentadilla */
+            name: string;
+        };
+        UserRmUserRefDto: {
+            /** @example uuid-1234 */
+            id: string;
+            /** @example Juan */
+            first_name: string;
+            /** @example Pérez */
+            last_name: string;
+        };
+        UserRmDetailDto: {
             /** @example uuid-1234 */
             id: string;
             /** @example uuid-1234 */
@@ -2223,7 +2972,8 @@ export interface components {
             /** @example 5 */
             reps: number;
             /**
-             * Format: date-time
+             * Format: date
+             * @description Día calendario, sin hora
              * @example 2024-01-15
              */
             date: string;
@@ -2231,6 +2981,8 @@ export interface components {
             created_at: string;
             /** Format: date-time */
             updated_at: string;
+            exercise: components["schemas"]["UserRmExerciseRefDto"];
+            user: components["schemas"]["UserRmUserRefDto"];
         };
         CalculatePotentialRmDto: {
             /**
@@ -2398,6 +3150,13 @@ export interface operations {
                     "application/json": components["schemas"]["User"];
                 };
             };
+            /** @description Un alumno sólo puede acceder a sus propios datos */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     UsersController_createUser: {
@@ -2423,6 +3182,20 @@ export interface operations {
                     "application/json": components["schemas"]["User"];
                 };
             };
+            /** @description Datos inválidos, o un `role` distinto de `user`: el registro sólo crea alumnos */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ya existe un usuario con ese email */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     UsersController_loginUser: {
@@ -2445,8 +3218,22 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["User"];
+                    "application/json": components["schemas"]["LoginResponseDto"];
                 };
+            };
+            /** @description Credenciales inválidas */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La cuenta está cerrada */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2510,6 +3297,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["User"];
                 };
+            };
+            /** @description Sobre la propia cuenta, o un entrenador sobre alguien que no es alumno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuario no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2633,6 +3434,20 @@ export interface operations {
                     "application/json": components["schemas"]["Membership"];
                 };
             };
+            /** @description Datos inválidos, o ya existe una membresía con esa duración */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ya existe una membresía con ese nombre */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     MembershipController_editMembership: {
@@ -2657,6 +3472,27 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Membership"];
                 };
+            };
+            /** @description Datos inválidos, o otra membresía ya tiene esa duración */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Membresía no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Otra membresía ya tiene ese nombre */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2764,6 +3600,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Del pago más reciente al más viejo */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2771,6 +3608,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["MembershipPayment"][];
                 };
+            };
+            /** @description Un alumno sólo puede acceder a sus propios datos */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuario no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2794,6 +3645,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["MembershipPayment"];
                 };
+            };
+            /** @description Datos inválidos, el destinatario no es un alumno, su cuenta está cerrada o el tipo de membresía está dado de baja */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Alumno (usuario) o tipo de membresía no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2850,6 +3715,7 @@ export interface operations {
             };
         };
         responses: {
+            /** @description El alumno quedó como entrenador. Sobre un entrenador dado de baja lo reactiva, y sobre uno activo edita su email profesional y su CUIL */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2857,6 +3723,27 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["User"];
                 };
+            };
+            /** @description Datos inválidos, o el usuario es un administrador (no se convierte en entrenador) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuario no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description El email profesional o el CUIL ya son de otro entrenador (también de uno dado de baja) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2991,6 +3878,20 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Músculo no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description El músculo está asociado a ejercicios y no se puede eliminar */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     MusclesController_getAllMuscleGroups: {
@@ -3054,6 +3955,13 @@ export interface operations {
                     "application/json": components["schemas"]["MuscleGroup"];
                 };
             };
+            /** @description Ya existe un grupo muscular con ese nombre */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     MusclesController_editMuscleGroup: {
@@ -3079,6 +3987,20 @@ export interface operations {
                     "application/json": components["schemas"]["MuscleGroup"];
                 };
             };
+            /** @description Grupo muscular no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Otro grupo muscular ya tiene ese nombre */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     MusclesController_deleteMuscleGroup: {
@@ -3093,6 +4015,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Grupo muscular no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description El grupo muscular todavía tiene músculos y no se puede eliminar */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3140,6 +4076,13 @@ export interface operations {
                     "application/json": components["schemas"]["Exercise"];
                 };
             };
+            /** @description Ya existe un ejercicio con ese nombre */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     ExerciseController_editExercise: {
@@ -3164,6 +4107,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Exercise"];
                 };
+            };
+            /** @description Otro ejercicio ya tiene ese nombre */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -3207,6 +4157,20 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ejercicio no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description El ejercicio está en uso (en circuitos, ya se entrenó con él o hay RMs registrados) y no se puede eliminar */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3327,6 +4291,13 @@ export interface operations {
                     "application/json": components["schemas"]["PlanificationDetailResponseDto"];
                 };
             };
+            /** @description Datos inválidos (duration obligatoria, entero ≥ 0) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     PlanificationController_editPlanification: {
@@ -3351,6 +4322,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PlanificationDetailResponseDto"];
                 };
+            };
+            /** @description Datos inválidos, planificación de baja, o duración menor que la semana más alta usada por una rutina vigente */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Planificación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -3400,6 +4385,20 @@ export interface operations {
                     "application/json": components["schemas"]["PlanificationDetailResponseDto"];
                 };
             };
+            /** @description Datos inválidos, planificación o rutina de baja, o semana mayor que la duración del plan */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Planificación o rutina no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     PlanificationController_assignRoutinesToPlanification: {
@@ -3422,6 +4421,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PlanificationDetailResponseDto"];
                 };
+            };
+            /** @description Datos inválidos, planificación o alguna rutina de baja, o semana mayor que la duración del plan (no se crea ninguna asignación) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Planificación o alguna rutina no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -3448,6 +4461,20 @@ export interface operations {
                     "application/json": components["schemas"]["RoutineAsignation"];
                 };
             };
+            /** @description week u order junto con active = false, o semana fuera de la duración actual del plan */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Asignación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     PlanificationController_setRoutineAsignationsActive: {
@@ -3471,6 +4498,20 @@ export interface operations {
                     "application/json": components["schemas"]["RoutineAsignation"][];
                 };
             };
+            /** @description Ids repetidos, o alguna asignación quedaría fuera de la duración actual de su plan (no se aplica ninguna) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Alguna asignación no fue encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     PlanificationController_assignPlanificationToUser: {
@@ -3480,19 +4521,54 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignPlanificationToUserDto"];
+            };
+        };
         responses: {
+            /** @description La asignación creada. Sin end_date en el body, el fin es el domingo de la semana duration de la plantilla */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserPlanification"];
+                    "application/json": components["schemas"]["UserPlanificationResponseDto"];
+                };
+            };
+            /** @description Datos inválidos, end_date anterior a start_date, planificación dada de baja o sin rutinas vigentes, planificación de duración 0 sin end_date, fin calculado fuera del calendario, o el destinatario no es un alumno o tiene la cuenta cerrada */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description El usuario no es coach, o no tiene una fila activa en Coach (Tu usuario no está registrado como entrenador.) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Planificación o usuario no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description El alumno tiene otra planificación activa que se pisa con esas fechas (los dos extremos inclusivos). Reenviando con confirm_overlap: true se crea igual */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignPlanificationOverlapResponseDto"];
                 };
             };
         };
     };
-    PlanificationController_getUserPlanifications: {
+    PlanificationController_setUserPlanificationActive: {
         parameters: {
             query?: never;
             header?: never;
@@ -3501,30 +4577,30 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetUserPlanificationActiveDto"];
+            };
+        };
         responses: {
+            /** @description La asignación con su nuevo estado. Quitar sólo apaga active; reincorporar no vuelve a chequear el solapamiento */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserPlanification"][];
+                    "application/json": components["schemas"]["UserPlanificationResponseDto"];
                 };
             };
-        };
-    };
-    PlanificationController_deleteUserPlanification: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
+            /** @description Datos inválidos, o la asignación ya está en ese estado (La planificación del alumno ya está dada de baja. / ya está activa.) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
+            /** @description Asignación no encontrada */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3532,45 +4608,50 @@ export interface operations {
             };
         };
     };
-    PlanificationController_getActiveUserPlanification: {
+    PlanificationController_getUserPlanifications: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description true para incluir también las asignaciones quitadas (E-14) */
+                include_inactive?: boolean;
+            };
             header?: never;
             path: {
-                id: string;
+                /** @description Id del alumno dueño de las asignaciones */
+                userId: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
+            /** @description Las asignaciones del alumno, de la más nueva a la más vieja (inicio y alta, descendentes). Por defecto sólo las activas. Sin asignaciones, un array vacío */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserPlanification"];
+                    "application/json": components["schemas"]["UserPlanificationResponseDto"][];
                 };
             };
-        };
-    };
-    PlanificationController_editUserPlanification: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
+            /** @description El id del alumno no es un UUID válido, o include_inactive no es true ni false */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["UserPlanification"];
+                content?: never;
+            };
+            /** @description Un alumno sólo puede acceder a sus propios datos */
+            403: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content?: never;
+            };
+            /** @description Usuario no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -3862,26 +4943,51 @@ export interface operations {
             };
         };
     };
-    UserRmController_getAllUserRms: {
+    RoutineController_assignRoutineToUser: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignRoutineToUserDto"];
+            };
+        };
         responses: {
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"][];
+                    "application/json": components["schemas"]["RoutineAssignUserResponseDto"];
                 };
+            };
+            /** @description Datos inválidos, rutina dada de baja, o el destinatario no es un alumno o tiene la cuenta cerrada */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rutina o usuario no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description El alumno ya tiene esa rutina asignada ese día */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
-    UserRmController_getUserRmById: {
+    RoutineController_getAssignedRoutineById: {
         parameters: {
             query?: never;
             header?: never;
@@ -3897,7 +5003,552 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"];
+                    "application/json": components["schemas"]["RoutineAssignedDetailResponseDto"];
+                };
+            };
+            /** @description El id no es un UUID válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La asignación es de otro alumno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Asignación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RoutineController_removeRoutineFromUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description La asignación que se borró (borrado físico) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutineAssignUserResponseDto"];
+                };
+            };
+            /** @description El id no es un UUID válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Asignación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description El alumno ya entrenó esta rutina: no se puede quitar */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RoutineController_markExerciseFinished: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarkExerciseFinishedDto"];
+            };
+        };
+        responses: {
+            /** @description Ya estaba marcado (también si dos marcas chocaron): idempotente. Si vinieron user_note o finished_at y cambiaron, se actualizaron; la cadena vacía borra la nota */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutineAssignedFinishedDto"];
+                };
+            };
+            /** @description El ejercicio no estaba marcado: se creó la marca (con la nota, si vino) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutineAssignedFinishedDto"];
+                };
+            };
+            /** @description Datos inválidos, falta finished_at al marcar un ejercicio que no estaba marcado, el ejercicio no pertenece a la rutina de la asignación, o el coach lo sacó de la rutina y todavía no estaba marcado */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La asignación es de otro alumno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Asignación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RoutineController_unmarkExerciseFinished: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Id de la asignación individual */
+                id: string;
+                /** @description Id del Routine_Exercise que se desmarca */
+                routineExerciseId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutineAssignedUnfinishedResponseDto"];
+                };
+            };
+            /** @description Alguno de los ids no es un UUID válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La asignación es de otro alumno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Asignación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RoutineController_getAssignedRoutines: {
+        parameters: {
+            query?: {
+                /** @description Primer día a incluir (inclusive), en formato YYYY-MM-DD. El home del alumno manda el lunes de la semana; el entrenador, nada */
+                from?: string;
+                /** @description Último día a incluir (inclusive), en formato YYYY-MM-DD. El home del alumno manda el domingo de la semana. No puede ser anterior a from (400) */
+                to?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Id del alumno dueño de las asignaciones */
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ordenado por día y nombre de rutina. Sin asignaciones, un array vacío */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutineAssignedListItemResponseDto"][];
+                };
+            };
+            /** @description Id o fecha inválidos, o from posterior a to */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Un alumno sólo puede acceder a sus propios datos */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuario no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RoutineController_getAssignedPlan: {
+        parameters: {
+            query?: {
+                /** @description Primer día a incluir (inclusive), en formato YYYY-MM-DD. El home del alumno manda el lunes de la semana; el entrenador, nada */
+                from?: string;
+                /** @description Último día a incluir (inclusive), en formato YYYY-MM-DD. El home del alumno manda el domingo de la semana. No puede ser anterior a from (400) */
+                to?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Id del alumno dueño de las asignaciones */
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Una entrada por semana de cada plan activo del alumno que se pisa con [from, to], por week_start, nombre de la planificación y alta de la asignación. Sin filtro, todas las semanas. Sin planes, un array vacío */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutineAssignedPlanWeekResponseDto"][];
+                };
+            };
+            /** @description Id o fecha inválidos, from posterior a to, o más de 520 semanas de plan para devolver (pedí un rango más corto con from y to) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Un alumno sólo puede acceder a sus propios datos */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuario no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RoutineController_getRoutineHome: {
+        parameters: {
+            query?: {
+                /** @description Día alrededor del cual se arma el home (YYYY-MM-DD), generalmente hoy. Se redondea al lunes de su semana. Si se omite, es hoy en hora de Argentina */
+                date?: string;
+                /** @description Cantidad de semanas enteras que se devuelven, contando la de date */
+                week?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Id del alumno dueño de las asignaciones */
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Exactamente week semanas, de lunes a domingo, aunque estén vacías. En cada una, las rutinas individuales (las de assigned/:userId) y la semana de cada plan activo (los grupos de assigned-plan/:userId) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutineHomeWeekResponseDto"][];
+                };
+            };
+            /** @description Id o fecha inválidos, week fuera de 1 a 8, el rango termina después del 9999-12-31 o más de 520 semanas de plan para devolver */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Un alumno sólo puede acceder a sus propios datos */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuario no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RoutineController_getPlanSessionDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Id de la asignación de la planificación al alumno (User_Planification) */
+                userPlanificationId: string;
+                /** @description Id de la rutina del plan (Routine_Asignation) */
+                routineAsignationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description También con la asignación quitada (user_planification.active = false): se lee, pero no se puede modificar */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutinePlanSessionDetailResponseDto"];
+                };
+            };
+            /** @description Alguno de los ids no es un UUID válido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La asignación es de otro alumno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Asignación no encontrada, la rutina no pertenece a esta planificación, o el entrenador la quitó del plan y el alumno no hizo nada en ella */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RoutineController_markPlanExerciseFinished: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Id de la asignación de la planificación al alumno (User_Planification) */
+                userPlanificationId: string;
+                /** @description Id de la rutina del plan (Routine_Asignation) */
+                routineAsignationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarkExerciseFinishedDto"];
+            };
+        };
+        responses: {
+            /** @description Ya estaba marcado (también si dos marcas chocaron): idempotente. Si vinieron user_note o finished_at y cambiaron, se actualizaron; la cadena vacía borra la nota. También en una rutina que el entrenador quitó del plan */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutineAssignedFinishedDto"];
+                };
+            };
+            /** @description El ejercicio no estaba marcado: se creó la marca (con la nota, si vino) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutineAssignedFinishedDto"];
+                };
+            };
+            /** @description Datos inválidos, la planificación fue quitada (no se puede modificar), falta finished_at al marcar un ejercicio que no estaba marcado, el ejercicio no pertenece a la rutina, o el entrenador lo sacó de la rutina o quitó la rutina del plan y todavía no estaba marcado */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La asignación es de otro alumno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Asignación no encontrada, o la rutina no pertenece a esta planificación */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RoutineController_unmarkPlanExerciseFinished: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Id de la asignación de la planificación al alumno (User_Planification) */
+                userPlanificationId: string;
+                /** @description Id de la rutina del plan (Routine_Asignation) */
+                routineAsignationId: string;
+                /** @description Id del Routine_Exercise que se desmarca */
+                routineExerciseId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoutineAssignedUnfinishedResponseDto"];
+                };
+            };
+            /** @description Alguno de los ids no es un UUID válido, o la planificación fue quitada (no se puede modificar) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description La asignación es de otro alumno */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Asignación no encontrada, o la rutina no pertenece a esta planificación */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RoutineController_getTrainingHistory: {
+        parameters: {
+            query?: {
+                /** @description Id de un ejercicio del catálogo (Exercise.id, no el Routine_Exercise). Con él, sólo vuelven las sesiones donde el alumno hizo ese ejercicio y, en cada una, únicamente ese ejercicio (CU-E-07). Si no coincide ninguna, el array viene vacío */
+                exercise_id?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Id del alumno dueño de las asignaciones */
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Las sesiones con al menos un ejercicio hecho, de la más nueva a la más vieja (día descendente, nombre de rutina y alta), las individuales y las de las planificaciones juntas: se distinguen por source. Sin historial, un array vacío */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": (components["schemas"]["RoutineHistoryIndividualSessionDto"] | components["schemas"]["RoutineHistoryPlanSessionDto"])[];
+                };
+            };
+            /** @description El id del alumno o el exercise_id no son UUID válidos */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuario no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UserRmController_getAllUserRms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserRmDetailDto"][];
+                };
+            };
+        };
+    };
+    UserRmController_getUserRmById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Hoy devuelve un array (vacío si no existe); BE-32 lo pasa a objeto y 404 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserRmDetailDto"][];
                 };
             };
         };
@@ -3937,8 +5588,15 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"][];
+                    "application/json": components["schemas"]["UserRmDetailDto"][];
                 };
+            };
+            /** @description Un alumno sólo puede acceder a sus propios datos */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -3961,10 +5619,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"][];
+                    "application/json": components["schemas"]["UserRmDetailDto"][];
                 };
             };
-            /** @description Un alumno sólo puede consultar sus propios RMs */
+            /** @description Un alumno sólo puede acceder a sus propios datos */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3989,7 +5647,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"][];
+                    "application/json": components["schemas"]["UserRmDetailDto"][];
                 };
             };
         };
@@ -4042,7 +5700,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"];
+                    "application/json": components["schemas"]["UserRmDetailDto"];
                 };
             };
         };
@@ -4062,12 +5720,12 @@ export interface operations {
             };
         };
         responses: {
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRM"];
+                    "application/json": components["schemas"]["UserRmDetailDto"];
                 };
             };
         };

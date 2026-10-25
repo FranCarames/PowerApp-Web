@@ -25,6 +25,7 @@ import {
 } from '@/shared/ui';
 
 import { useRegisterPayment } from '../hooks/useRegisterPayment';
+import { registerPaymentErrorMessage } from '../paymentErrors';
 import styles from './PaymentForm.module.css';
 
 /** Una fecha `days` días después de hoy, como texto ("7 Nov 2026"). */
@@ -39,9 +40,11 @@ function dateIn(days: number): string {
  * cambiarlo, el formulario arranca de nuevo. El tipo empieza en el de su último pago (si todavía se
  * ofrece), porque casi siempre se renueva el mismo.
  *
- * Solo se ofrecen los tipos activos: `GET /membership/all` trae también los dados de baja y el
- * backend no valida `active` al registrar el pago. El resumen es solo una vista previa: el
- * vencimiento lo calcula el backend, que cuenta desde el día del pago.
+ * Solo se ofrecen los tipos activos: `GET /membership/all` trae también los dados de baja, y desde el
+ * contrato del 24/10 el backend rechaza un pago de uno de ellos (400). El alumno llega con la cuenta
+ * abierta (lo asegura `RegisterPaymentPage`); si la cierran mientras tanto, el backend responde 400 y
+ * `registerPaymentErrorMessage` lo explica. El resumen es solo una vista previa: el vencimiento lo
+ * calcula el backend, que cuenta desde el día del pago.
  */
 export function PaymentForm({ student }: { student: User }) {
   const navigate = useNavigate();
@@ -95,12 +98,6 @@ export function PaymentForm({ student }: { student: User }) {
         <Note tone="warn" icon="alert" className={styles.note}>
           Su membresía actual vence el {formatDate(last.expired_at)}. El pago
           nuevo cuenta desde hoy: no se suman los días que le quedan.
-        </Note>
-      )}
-      {!student.active && (
-        <Note tone="warn" icon="alert" className={styles.note}>
-          La cuenta está inactiva. El pago se registra igual, pero no va a poder
-          ingresar hasta que la reactives.
         </Note>
       )}
       {types.data && options.length === 0 && (
@@ -157,10 +154,7 @@ export function PaymentForm({ student }: { student: User }) {
       )}
       {failed && (
         <Note tone="err" icon="alert" role="alert" className={styles.note}>
-          {getErrorMessage(register.error, {
-            400: 'Ese tipo de membresía ya no existe. Elegí otro.',
-            404: 'El alumno ya no existe. Elegí a otro.',
-          })}
+          {registerPaymentErrorMessage(register.error)}
         </Note>
       )}
       <Button disabled={!type} loading={register.isPending} onClick={confirm}>

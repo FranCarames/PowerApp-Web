@@ -24,8 +24,11 @@ import {
   VisuallyHidden,
 } from '@/shared/ui';
 
+import { StudentHistoryModal } from '../components/StudentHistoryModal';
 import { StudentPaymentsModal } from '../components/StudentPaymentsModal';
+import { StudentPlansModal } from '../components/StudentPlansModal';
 import { StudentRmsModal } from '../components/StudentRmsModal';
+import { StudentRoutinesModal } from '../components/StudentRoutinesModal';
 import styles from './StudentDetailPage.module.css';
 
 const BACK = '/c/alumnos';
@@ -87,7 +90,9 @@ function StudentDetail({ student }: { student: User }) {
   const navigate = useNavigate();
   const toast = useToast();
   const setActive = useSetUserActive();
-  const [modal, setModal] = useState<'rms' | 'payments' | null>(null);
+  const [modal, setModal] = useState<
+    'rms' | 'history' | 'payments' | 'plans' | 'routines' | null
+  >(null);
   const [confirming, setConfirming] = useState(false);
   const name = fullName(student);
 
@@ -147,11 +152,26 @@ function StudentDetail({ student }: { student: User }) {
           chevron
           onClick={() => setModal('rms')}
         />
-        {/* El historial de entrenamientos llega con T43. */}
         <ListItem
           leading={<Tile icon="list" />}
           title="Historial de entrenamientos"
-          subtitle="Próximamente"
+          subtitle="Sesiones completadas"
+          chevron
+          onClick={() => setModal('history')}
+        />
+        <ListItem
+          leading={<Tile icon="calendar" />}
+          title="Planificaciones"
+          subtitle="Asignar o quitar"
+          chevron
+          onClick={() => setModal('plans')}
+        />
+        <ListItem
+          leading={<Tile icon="dumbbell" />}
+          title="Rutinas puntuales"
+          subtitle="Asignar o quitar"
+          chevron
+          onClick={() => setModal('routines')}
         />
         <ListItem
           leading={<Tile icon="wallet" />}
@@ -160,13 +180,15 @@ function StudentDetail({ student }: { student: User }) {
           chevron
           onClick={() => setModal('payments')}
         />
-        <ListItem
-          leading={<Tile icon="plus" />}
-          title="Registrar pago"
-          subtitle="Nuevo pago de membresía"
-          chevron
-          onClick={() => navigate(`/c/pago?alumno=${student.id}`)}
-        />
+        {student.active && (
+          <ListItem
+            leading={<Tile icon="plus" />}
+            title="Registrar pago"
+            subtitle="Nuevo pago de membresía"
+            chevron
+            onClick={() => navigate(`/c/pago?alumno=${student.id}`)}
+          />
+        )}
       </List>
       {student.active ? (
         <Button
@@ -193,10 +215,32 @@ function StudentDetail({ student }: { student: User }) {
         open={modal === 'rms'}
         onClose={() => setModal(null)}
       />
+      <StudentHistoryModal
+        studentId={student.id}
+        studentName={name}
+        open={modal === 'history'}
+        onClose={() => setModal(null)}
+      />
       <StudentPaymentsModal
         studentId={student.id}
         open={modal === 'payments'}
         onClose={() => setModal(null)}
+      />
+      <StudentPlansModal
+        studentId={student.id}
+        studentName={name}
+        studentActive={student.active}
+        open={modal === 'plans'}
+        onClose={() => setModal(null)}
+        onAssign={() => navigate(`/c/alumnos/${student.id}/asignar`)}
+      />
+      <StudentRoutinesModal
+        studentId={student.id}
+        studentName={name}
+        studentActive={student.active}
+        open={modal === 'routines'}
+        onClose={() => setModal(null)}
+        onAssign={() => navigate(`/c/alumnos/${student.id}/asignar-rutina`)}
       />
       <ConfirmDialog
         open={confirming}

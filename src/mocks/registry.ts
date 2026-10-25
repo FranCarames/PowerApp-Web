@@ -1,10 +1,7 @@
 import type { HttpMethod, PathsFor } from '@/api/contractTypes';
 
 // Qué endpoints se mockean. Con `VITE_USE_MOCKS=true`, MSW intercepta solo los que acá tienen
-// `mock: true`; todo lo demás va al backend real.
-//
-// Solo figuran los endpoints que tienen o tuvieron un mock: lo que no está acá es real. Cuando el
-// backend implementa un endpoint, se pasa a `mock: false` y el handler queda por si hace falta.
+// `mock: true`; todo lo demás va al backend real. Lo que no figura acá es real.
 
 /** Un endpoint del contrato: el método y el path tal como figuran en `paths`. */
 type ContractEndpoint = {
@@ -28,83 +25,11 @@ interface PendingEntry {
 
 type RegistryEntry = ContractEntry | PendingEntry;
 
-export const registry: readonly RegistryEntry[] = [
-  // Entrenadores y ejercicios (públicos): solo con la sesión de una cuenta de demo (ver handlers/coaches.ts)
-  { method: 'get', path: '/api/v1/coach/all', mock: true },
-  { method: 'get', path: '/api/v1/coach/get/{id}', mock: true },
-  { method: 'get', path: '/api/v1/exercise/all', mock: true },
-  { method: 'get', path: '/api/v1/exercise/{id}', mock: true },
-  { method: 'post', path: '/api/v1/exercise/create', mock: true },
-  { method: 'post', path: '/api/v1/exercise/edit/{id}', mock: true },
-  { method: 'delete', path: '/api/v1/exercise/{id}', mock: true },
-  { method: 'get', path: '/api/v1/muscles/all', mock: true },
-  { method: 'get', path: '/api/v1/muscles/mg/all', mock: true },
-  { method: 'post', path: '/api/v1/muscles/create', mock: true },
-  { method: 'post', path: '/api/v1/muscles/edit/{id}', mock: true },
-  { method: 'delete', path: '/api/v1/muscles/{id}', mock: true },
-  { method: 'post', path: '/api/v1/muscles/mg/create', mock: true },
-  { method: 'post', path: '/api/v1/muscles/mg/edit/{id}', mock: true },
-  { method: 'delete', path: '/api/v1/muscles/mg/{id}', mock: true },
-  // Alta y baja de un entrenador: solo el Admin de demo, por su token falso (ver handlers/coaches.ts)
-  { method: 'post', path: '/api/v1/coach/promote_user', mock: true },
-  { method: 'post', path: '/api/v1/coach/delete_coach/{id}', mock: true },
-  // Editar un entrenador no está en el contrato: es un mock pendiente (B8, T37)
-  {
-    method: 'post',
-    path: '/api/v1/coach/edit/{id}',
-    pending: 'B8',
-    mock: true,
-  },
-  // Circuitos: apagados el 6/10, el backend ya los tiene completos y probados (T44, primer tramo). Van al backend
-  // real también con las cuentas de demo, cuyo token falso el backend rechaza. Los handlers quedan hasta que T44
-  // los borre. `routine/all-plus` es de rutinas, pero lo necesita el listado de circuitos para contar en cuántas
-  // rutinas se usa cada uno.
-  { method: 'get', path: '/api/v1/routine/circuit/all', mock: false },
-  { method: 'get', path: '/api/v1/routine/circuit/all-plus', mock: false },
-  { method: 'get', path: '/api/v1/routine/circuit/{id}', mock: false },
-  { method: 'post', path: '/api/v1/routine/circuit/create', mock: false },
-  { method: 'post', path: '/api/v1/routine/circuit/edit/{id}', mock: false },
-  {
-    method: 'post',
-    path: '/api/v1/routine/circuit/set-active/{id}',
-    mock: false,
-  },
-  { method: 'get', path: '/api/v1/routine/all-plus', mock: false },
-  // Rutinas y planificaciones: solo las cuentas de demo; las de verdad pasan al backend real
-  { method: 'get', path: '/api/v1/routine/all', mock: true },
-  { method: 'get', path: '/api/v1/planification/all', mock: true },
-  {
-    method: 'get',
-    path: '/api/v1/planification/user/{id}/active',
-    mock: true,
-  },
-  // Membresías (tipos)
-  { method: 'get', path: '/api/v1/membership/all', mock: true },
-  { method: 'post', path: '/api/v1/membership/create', mock: true },
-  { method: 'post', path: '/api/v1/membership/edit/{id}', mock: true },
-  { method: 'post', path: '/api/v1/membership/set-active/{id}', mock: true },
-  { method: 'get', path: '/api/v1/membership/type/users', mock: true },
-  // Resumen de estados: solo las cuentas de demo; las de verdad pasan al backend real (ver handlers/memberships.ts)
-  { method: 'get', path: '/api/v1/membership/status/summary', mock: true },
-  { method: 'get', path: '/api/v1/membership/status/users', mock: true },
-  // Registrar un pago: solo las cuentas de demo (ver handlers/memberships.ts)
-  { method: 'post', path: '/api/v1/membership/payment/register', mock: true },
-  // Pagos: solo los de las cuentas de demo; los demás ids pasan al backend real (ver handlers/payments.ts)
-  { method: 'get', path: '/api/v1/membership/payment/user/{id}', mock: true },
-  // RMs: solo las cuentas de demo; los de verdad pasan al backend real (ver handlers/userRms.ts)
-  { method: 'get', path: '/api/v1/user_rm/user/{id}', mock: true },
-  { method: 'post', path: '/api/v1/user_rm/potential', mock: true },
-  { method: 'post', path: '/api/v1/user_rm/create', mock: true },
-  { method: 'post', path: '/api/v1/user_rm/edit/{id}', mock: true },
-  { method: 'delete', path: '/api/v1/user_rm/{id}', mock: true },
-  // Usuarios: solo las cuentas de demo; los demás emails pasan al backend real (ver handlers/users.ts)
-  { method: 'get', path: '/api/v1/users/all', mock: true },
-  { method: 'post', path: '/api/v1/users/set-active/{id}', mock: true },
-  { method: 'post', path: '/api/v1/users/login', mock: true },
-  { method: 'post', path: '/api/v1/users/change-password', mock: true },
-  { method: 'get', path: '/api/v1/users/get/{id}', mock: true },
-  { method: 'post', path: '/api/v1/users/edit', mock: true },
-];
+// Vacío desde T44: el backend de Render publica todo lo que el front usa, así que no hay ningún mock y las
+// cuentas de demo dejaron de existir (el backend rechaza su token falso). Los handlers y las fixtures que había
+// se borraron: siguen en el historial de git. Para sumar un mock: la fixture, el handler con `mockEndpoint`
+// en `handlers/<dominio>.ts` (y en `handlers/index.ts`) y su entrada acá con `mock: true` (README, "Backend y mocks").
+export const registry: readonly RegistryEntry[] = [];
 
 /** La clave de un endpoint: la misma forma que `PUBLIC_OPERATIONS` ("get /api/v1/users/all"). */
 export function endpointKey(method: HttpMethod, path: string): string {

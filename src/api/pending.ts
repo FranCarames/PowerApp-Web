@@ -2,36 +2,23 @@ import type { paths } from './schema';
 import type {
   CircuitDetailResponse,
   CircuitExerciseResponse,
-  Coach,
   Exercise,
   Muscle,
   MuscleGroup,
-  User,
-  UserPlanification,
-  UserRm,
+  RoutineAssignedDetail,
+  RoutineDetail,
+  RoutineDetailCircuit,
+  RoutinePlanSessionDetail,
 } from './types';
 
-// Tipos provisionales de lo que el contrato (openapi.json) todavía no tiene: las dependencias B1 a
-// B9 de PLAN.md, sección 4.1. Cada uno lleva `// PENDIENTE-CONTRATO: <id> <CU>`. Cuando el contrato
-// aparece, se borra el provisional, se regeneran los tipos (`npm run api:gen`) y se ajusta el código
-// que lo usaba.
+// Tipos provisionales de lo que el contrato (openapi.json) declara mal o no declara: los puntos V1,
+// V2 y V9 de PLAN.md, sección 4.3. Cada uno lleva `// PENDIENTE-CONTRATO: <id> <CU>`. Cuando el
+// contrato lo corrige, se borra el provisional, se regeneran los tipos (`npm run api:gen`) y se
+// ajusta el código que lo usaba.
 //
-// Acá solo está lo que el PLAN deja tipar sin inventar: los nombres de los campos salen de las
-// entidades del contrato. Del resto (B1 a B6) el PLAN dice qué necesita el front, pero no cómo se
-// llaman los campos ni los endpoints: lo tipa la tarea que lo usa (B1: T38; B2: T39 y T40; B3 y B4:
-// T40; B5: T42 y T38; B6: T43). B9 lo tipó T09, con un nombre de campo propuesto por el front.
-
-// PENDIENTE-CONTRATO: B7 CU-E-13
-/**
- * Body de `POST /planification/user/assign` y de `POST /planification/user/edit/{id}`: alumno,
- * planificación, fechas y nota. Los campos y su opcionalidad son los de `UserPlanification`.
- * Falta lo que B7 también pide y el PLAN no define: cómo se informa un solapamiento con un plan
- * vigente y cómo se confirma igual.
- */
-export type UserPlanificationRequest = Pick<
-  UserPlanification,
-  'user_id' | 'planification_id' | 'start_date' | 'end_date' | 'coach_note'
->;
+// Las dependencias B1 a B9 (rutinas del alumno, ejecución, rutina puntual, historial, planificaciones
+// de un alumno, editar entrenador y contraseña temporal) ya están en el contrato: sus tipos salen de
+// `types.ts` y no hay provisionales.
 
 // PENDIENTE-CONTRATO: V2 CU-E-22
 /**
@@ -61,23 +48,42 @@ export type CircuitDetail = Omit<CircuitDetailResponse, 'exercises'> & {
   >;
 };
 
-// PENDIENTE-CONTRATO: B8 CU-A-18
+// PENDIENTE-CONTRATO: V2 CU-U-09
 /**
- * Body de `POST /coach/edit/{id}` para editar un entrenador: sus dos campos editables, `coach_email` y
- * `cuil`. El endpoint no existe en el contrato (ni en el `CoachController` del backend al 6/10): el
- * path, la forma del body y la respuesta (el `Coach` ya guardado) son una propuesta del front, con el
- * mismo estilo que `POST /membership/edit/{id}` y `POST /muscles/edit/{id}`.
+ * El árbol de una rutina (`routine` de los dos detalles del alumno, igual al de `GET /routine/{id}`): el
+ * `RoutineDetailResponseDto` con el circuito de cada vínculo tipado como `CircuitDetail`, que es el
+ * formato de `GET /routine/circuit/{id}` y trae la ficha del catálogo en el `exercise` de cada ejercicio.
  */
-export type EditCoachRequest = Pick<Coach, 'coach_email' | 'cuil'>;
+export type RoutineTree = Omit<RoutineDetail, 'circuits'> & {
+  circuits: Array<
+    Omit<RoutineDetailCircuit, 'circuit'> & { circuit: CircuitDetail }
+  >;
+};
 
-// PENDIENTE-CONTRATO: B9 CU-U-02
+// PENDIENTE-CONTRATO: V2 CU-U-09
 /**
- * Respuesta de `POST /users/login`: el `User` de siempre más el aviso de que entró con una contraseña
- * temporal y tiene que cambiarla. El contrato todavía no lo trae: el nombre `password_change_required`
- * es una propuesta del front y se ajusta cuando Fran defina el contrato. Falta o `false` es una
- * contraseña común. Mientras el backend no lo mande, solo lo manda el mock de las cuentas de demo.
+ * El árbol de la rutina en los dos detalles del alumno: el de `RoutineTree`, salvo el `order` de cada
+ * vínculo. Un circuito que el entrenador sacó de la rutina después de que el alumno hizo algo de él se
+ * sigue mandando (CU-U-09), con `order: null`: el backend lo apaga sin posición. El contrato declara el
+ * `order` como número porque, para el entrenador, los vínculos apagados no se devuelven.
  */
-export type LoginResponse = User & { password_change_required?: boolean };
+export type StudentRoutineTree = Omit<RoutineTree, 'circuits'> & {
+  circuits: Array<
+    Omit<RoutineTree['circuits'][number], 'order'> & { order: number | null }
+  >;
+};
+
+// PENDIENTE-CONTRATO: V2 CU-U-09
+/** Respuesta de `GET /routine/assign-user/{id}`: el contrato con el árbol de la rutina tipado. */
+export type AssignedRoutineDetail = Omit<RoutineAssignedDetail, 'routine'> & {
+  routine: StudentRoutineTree;
+};
+
+// PENDIENTE-CONTRATO: V2 CU-U-09
+/** Respuesta de `GET /routine/assign-plan/{userPlanificationId}/{routineAsignationId}`, con el árbol tipado. */
+export type PlanSessionDetail = Omit<RoutinePlanSessionDetail, 'routine'> & {
+  routine: StudentRoutineTree;
+};
 
 // PENDIENTE-CONTRATO: V1 CU-E-27
 /** Los estados que acepta el filtro `status` de `GET /membership/status/users`, los del contrato. */
@@ -113,21 +119,6 @@ export interface StudentsByMembershipStatus {
   students: StudentMembership[];
 }
 
-// PENDIENTE-CONTRATO: V10 CU-E-04
-/**
- * Un RM tal como lo manda `GET /user_rm/user/{id}`: el `UserRM` del contrato pero sin `user_id` ni
- * `exercise_id`, con el ejercicio (`id` y `name`) y el usuario (`id`, `first_name` y `last_name`)
- * anidados. El backend recorta las columnas con un `select` (`getAllUserRmsByUserId`) y el Swagger no
- * lo refleja. `date` es un día sin hora ("2026-10-01").
- */
-export type UserRmWithExercise = Pick<
-  UserRm,
-  'id' | 'weight' | 'reps' | 'date' | 'created_at' | 'updated_at'
-> & {
-  exercise: { id: string; name: string };
-  user: { id: string; first_name: string; last_name: string };
-};
-
 // PENDIENTE-CONTRATO: V9 CU-A-01
 /**
  * Un músculo tal como lo trae un ejercicio en `exercisedMuscles`: el `id` es el del músculo, no el
@@ -143,11 +134,32 @@ export interface ExerciseMuscle {
 
 // PENDIENTE-CONTRATO: V9 CU-A-01
 /**
- * Respuesta de `GET /exercise/all` y `GET /exercise/{id}`: el `Exercise` del contrato más sus
- * músculos. El Swagger no declara `exercisedMuscles`, pero el backend lo manda siempre.
+ * Un ejercicio con sus músculos, como los manda `GET /exercise/all`: el `Exercise` del contrato más
+ * `exercisedMuscles`, que el Swagger no declara. `GET /exercise/{id}` los manda distinto
+ * (`ExerciseDetailResponse`) y `useExercise` lo lleva a esta forma.
  */
 export type ExerciseWithMuscles = Exercise & {
   exercisedMuscles: ExerciseMuscle[];
+};
+
+// PENDIENTE-CONTRATO: V9 CU-A-05
+/**
+ * Un elemento de `exercisedMuscles` en `GET /exercise/{id}`. A diferencia del listado, el backend
+ * no lo aplana: manda el vínculo `Exercised_Muscle` tal cual, con el músculo anidado en `muscle`.
+ * El `id` de este nivel es el del vínculo, no el del músculo, y no sirve para `exercised_muscles_ids`.
+ */
+export interface ExercisedMuscleLink {
+  id: string;
+  muscle: ExerciseMuscle;
+}
+
+// PENDIENTE-CONTRATO: V9 CU-A-05
+/**
+ * Respuesta de `GET /exercise/{id}` tal como llega. Los músculos pueden venir como vínculos o ya
+ * aplanados (la forma del listado), por si el backend unifica los dos.
+ */
+export type ExerciseDetailResponse = Exercise & {
+  exercisedMuscles: Array<ExercisedMuscleLink | ExerciseMuscle>;
 };
 
 // PENDIENTE-CONTRATO: V9 CU-A-01

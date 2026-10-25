@@ -4,6 +4,8 @@ import { api, request } from '@/api/client';
 import type { CircuitDetail } from '@/api/pending';
 import { queryKeys } from '@/api/queryKeys';
 
+import { routinesPlusQuery } from './useRoutines';
+
 /**
  * `GET /routine/circuit/all-plus`: los circuitos con sus ejercicios (el `id` y el nombre de cada uno,
  * en orden) y la cantidad de ejercicios, ordenados por nombre. Con `includeInactive` trae también los
@@ -62,8 +64,7 @@ export interface CircuitUsage {
  */
 export function useCircuitUsage() {
   return useQuery({
-    queryKey: queryKeys.routines.listPlus(false),
-    queryFn: ({ signal }) => api.get('/api/v1/routine/all-plus', { signal }),
+    ...routinesPlusQuery(false),
     select: (routines) => {
       const usage = new Map<string, CircuitUsage[]>();
       for (const { id, name, circuits } of routines) {

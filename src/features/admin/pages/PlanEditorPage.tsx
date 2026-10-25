@@ -1,13 +1,11 @@
-import { SectionPlaceholder } from '@/shared/ui';
+import { useParams } from 'react-router';
 
-// PLACEHOLDER hasta el bloque C2: T24 (editor de planificación) lo reemplaza.
+import { PlanEditor } from '@/features/catalog/components/PlanEditor';
+
+/** Alta y edición de una planificación (CU-E-09 a CU-E-12), en `/a/planes/nuevo` y `/a/planes/:id`. */
 export function PlanEditorPage() {
-  return (
-    <SectionPlaceholder
-      eyebrow="Sistémicas"
-      title="Planificación"
-      icon="calendar"
-      back="/a/planes"
-    />
-  );
+  const { id } = useParams();
+  // La ruta siempre trae el id: `nuevo` para el alta.
+  if (!id) return null;
+  return <PlanEditor id={id} basePath="/a/planes" />;
 }

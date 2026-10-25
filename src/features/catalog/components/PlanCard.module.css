@@ -1,0 +1,104 @@
+/* La tarjeta es el ancla del botón que abre el editor, que se estira sobre toda ella (`.open::after`). */
+.card {
+  position: relative;
+  transition: border-color 0.15s;
+}
+
+.card:hover {
+  border-color: var(--border2);
+}
+
+/* El foco del botón que abre el editor se dibuja alrededor de la tarjeta entera, que es lo que abre. */
+.card:has(.open:focus-visible) {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+
+/* Un botón con el contenido de la tarjeta, alineado a la izquierda y sin la tipografía de un botón. */
+.open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+}
+
+.open:focus-visible {
+  outline: none;
+}
+
+/* El área que se toca para abrir el editor es la tarjeta entera, menos "Asignar" (que queda encima). */
+.open::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+/* Una planificación dada de baja se ve apagada, como una rutina o un circuito inactivos. */
+.inactive {
+  opacity: 0.65;
+}
+
+/* El nombre con la flecha: la fila del prototipo, con el nombre en Barlow Condensed de 22 px. */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--fD);
+  font-size: 22px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* Una fila vieja sin nombre (la columna admite null): se lo dice en gris. */
+.unnamed {
+  color: var(--tm);
+  font-style: italic;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--tm);
+}
+
+.sub {
+  display: block;
+  font-size: 12px;
+  color: var(--tm);
+  margin-top: 2px;
+}
+
+/* La descripción, hasta dos líneas: una larga (el backend admite 1000 caracteres) no estira la tarjeta. */
+.description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  color: var(--ts);
+  margin-top: 8px;
+}
+
+/* La píldora con las rutinas, 12 px bajo el detalle, como el prototipo; con "Asignar" a la derecha. */
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* La píldora y "Asignar" por encima del área que abre el editor. */
+.routines,
+.assign {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}

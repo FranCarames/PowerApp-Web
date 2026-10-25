@@ -1,0 +1,68 @@
+.group {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+/* La tarjeta del plan del prototipo (u-home): nombre en color de marca, la semana y el porcentaje. */
+.plan {
+  display: grid;
+  gap: 10px;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.titles {
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--pri);
+  overflow-wrap: anywhere;
+}
+
+.sub {
+  font-size: 12px;
+  color: var(--tm);
+  margin-top: 2px;
+}
+
+.percent {
+  font-family: var(--fM);
+  font-size: 28px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--pri);
+}
+
+.coachNote {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ts);
+  overflow-wrap: anywhere;
+}
+
+.coachNote b {
+  color: var(--tp);
+  font-weight: 600;
+}
+
+.empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--tm);
+}

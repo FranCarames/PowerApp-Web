@@ -82,3 +82,59 @@ export function formatDaysUntil(days: number): string {
   const text = `${count} ${count === 1 ? 'día' : 'días'}`;
   return days < 0 ? `hace ${text}` : text;
 }
+
+const WEEKDAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+/** Un día de calendario (`YYYY-MM-DD`) movido `days` días, sin pasar por la zona horaria. */
+export function addDays(day: string, days: number): string {
+  const date = parseDate(day);
+  date.setDate(date.getDate() + days);
+  return toCalendarDay(date);
+}
+
+/** Si el texto es un día de calendario que existe: "2026-02-30" no lo es. */
+export function isCalendarDay(value: string): boolean {
+  return DATE_ONLY.test(value) && toCalendarDay(parseDate(value)) === value;
+}
+
+/** El lunes de la semana (de lunes a domingo) que contiene el día. */
+export function mondayOf(day: string): string {
+  return addDays(day, -((parseDate(day).getDay() + 6) % 7));
+}
+
+/** Cuántas semanas hay de la semana de `from` a la de `to`: 0 es la misma, 1 la siguiente y -1 la anterior. */
+export function weeksBetween(from: string, to: string): number {
+  const days =
+    (parseDate(mondayOf(to)).getTime() - parseDate(mondayOf(from)).getTime()) /
+    86_400_000;
+  // El redondeo absorbe la hora de más o de menos de un cambio de horario.
+  return Math.round(days / 7);
+}
+
+/**
+ * "19 – 25 Oct", "26 Oct – 1 Nov" o "28 Dic – 3 Ene 2027": el rango de dos días de calendario. El año
+ * se agrega solo si el rango no termina en el año en curso.
+ */
+export function formatDayRange(from: string, to: string): string {
+  const start = parseDate(from);
+  const end = parseDate(to);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return '';
+  const sameMonth =
+    start.getMonth() === end.getMonth() &&
+    start.getFullYear() === end.getFullYear();
+  const startText = sameMonth
+    ? String(start.getDate())
+    : `${start.getDate()} ${SHORT_MONTHS[start.getMonth()]}`;
+  const year =
+    end.getFullYear() === new Date().getFullYear()
+      ? ''
+      : ` ${end.getFullYear()}`;
+  return `${startText} – ${end.getDate()} ${SHORT_MONTHS[end.getMonth()]}${year}`;
+}
+
+/** "Mié 22 Oct": el día de la semana abreviado, el día y el mes de un día de calendario. */
+export function formatWeekdayDate(day: string): string {
+  const date = parseDate(day);
+  if (Number.isNaN(date.getTime())) return '';
+  return `${WEEKDAYS[date.getDay()]} ${date.getDate()} ${SHORT_MONTHS[date.getMonth()]}`;
+}

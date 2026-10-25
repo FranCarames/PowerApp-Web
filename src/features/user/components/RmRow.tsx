@@ -1,4 +1,4 @@
-import type { UserRmWithExercise } from '@/api/pending';
+import type { UserRm } from '@/api/types';
 import { formatDate } from '@/shared/lib/dates';
 import { formatDecimal } from '@/shared/lib/format';
 import { IconButton, ListItem, Tile } from '@/shared/ui';
@@ -6,9 +6,9 @@ import { IconButton, ListItem, Tile } from '@/shared/ui';
 import styles from './RmRow.module.css';
 
 interface RmRowProps {
-  rm: UserRmWithExercise;
-  onEdit: (rm: UserRmWithExercise) => void;
-  onDelete: (rm: UserRmWithExercise) => void;
+  rm: UserRm;
+  onEdit: (rm: UserRm) => void;
+  onDelete: (rm: UserRm) => void;
 }
 
 /** Un RM registrado: las repeticiones y la fecha, el peso, y los botones de editar y eliminar. */

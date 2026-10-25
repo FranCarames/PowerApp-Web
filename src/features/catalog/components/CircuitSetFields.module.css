@@ -5,6 +5,21 @@
   border-radius: 12px;
   padding: 12px;
   margin-top: 10px;
+  /* Las columnas dependen del ancho del bloque, no del de la pantalla: con los botones − y + cada campo pide lugar. */
+  container-type: inline-size;
+}
+
+/* Un campo por fila en el celular; dos columnas cuando el bloque tiene lugar para los botones de ambos. */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 10px;
+}
+
+@container (min-width: 440px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .head {

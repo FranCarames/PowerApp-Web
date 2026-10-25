@@ -1,12 +1,15 @@
-import { SectionPlaceholder } from '@/shared/ui';
+import { PlanList } from '@/features/catalog/components/PlanList';
+import { PageHeader } from '@/shared/ui';
 
-// PLACEHOLDER hasta el bloque C2: T23 (listado de planificaciones) lo reemplaza.
+/**
+ * Planificaciones del Admin (CU-E-08): el listado compartido con el Entrenador (`PlanList`), bajo su
+ * encabezado. Tocar una planificación abre su editor en `/a/planes/:id` (T24).
+ */
 export function PlansPage() {
   return (
-    <SectionPlaceholder
-      eyebrow="Sistémicas"
-      title="Planificaciones"
-      icon="calendar"
-    />
+    <>
+      <PageHeader eyebrow="Sistémicas" title="Planificaciones" />
+      <PlanList basePath="/a/planes" />
+    </>
   );
 }

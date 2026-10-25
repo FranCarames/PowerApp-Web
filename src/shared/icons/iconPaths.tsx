@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 // Íconos del prototipo (PowerApp-Docs: UI Front/powerapp-prototype-web.html, const ICONS),
 // con el mismo trazado, convertido a JSX. Todos viven en una grilla de 24×24.
 // `eyeOff` no está en el prototipo: lo necesita PasswordInput para mostrar el estado "visible".
+// `minus` tampoco: es la mitad de `plus`, para el botón − de NumberStepper.
 export const ICON_PATHS = {
   home: (
     <>
@@ -59,6 +60,7 @@ export const ICON_PATHS = {
     </>
   ),
   plus: <path d="M12 5v14M5 12h14" />,
+  minus: <path d="M5 12h14" />,
   chev: <path d="M9 6l6 6-6 6" />,
   chevL: <path d="M15 6l-6 6 6 6" />,
   check: <path d="M5 12l5 5 9-10" />,

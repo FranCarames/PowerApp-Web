@@ -1,0 +1,13 @@
+.note {
+  margin-bottom: 14px;
+}
+
+.skeleton {
+  margin-bottom: 14px;
+}
+
+/* Hasta elegir un alumno, el resto del formulario espera. */
+.hint {
+  font-size: 13px;
+  color: var(--tm);
+}

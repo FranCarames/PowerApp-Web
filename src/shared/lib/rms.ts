@@ -1,17 +1,25 @@
-import type { UserRmWithExercise } from '@/api/pending';
+import type { UserRm } from '@/api/types';
 
 /** Los RMs de un ejercicio, del más reciente al más antiguo. */
 export interface ExerciseRms {
   exerciseId: string;
   name: string;
-  rms: UserRmWithExercise[];
+  rms: UserRm[];
 }
 
 /** Primero el de la fecha más reciente; si es el mismo día, el cargado más tarde. */
-function newestFirst(a: UserRmWithExercise, b: UserRmWithExercise): number {
+function newestFirst(a: UserRm, b: UserRm): number {
   return (
     b.date.localeCompare(a.date) || b.created_at.localeCompare(a.created_at)
   );
+}
+
+/** Los RMs de un ejercicio del catálogo (por el `id` de la ficha), del más reciente al más antiguo. */
+export function rmsOfExercise(
+  rms: readonly UserRm[],
+  exerciseId: string,
+): UserRm[] {
+  return rms.filter((rm) => rm.exercise.id === exerciseId).sort(newestFirst);
 }
 
 /**
@@ -19,9 +27,7 @@ function newestFirst(a: UserRmWithExercise, b: UserRmWithExercise): number {
  * uno con su ejercicio (`id` y `name`). Los ejercicios van por orden alfabético y, dentro de cada
  * uno, del RM más reciente al más antiguo.
  */
-export function groupRmsByExercise(
-  rms: readonly UserRmWithExercise[],
-): ExerciseRms[] {
+export function groupRmsByExercise(rms: readonly UserRm[]): ExerciseRms[] {
   const byExercise = new Map<string, ExerciseRms>();
   for (const rm of rms) {
     const group = byExercise.get(rm.exercise.id);

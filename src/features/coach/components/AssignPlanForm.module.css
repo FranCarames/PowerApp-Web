@@ -1,0 +1,11 @@
+/* La ayuda de las fechas, pegada a los campos: lo que pasa sin fecha de fin y qué es la semana 1. */
+.hint {
+  margin: -6px 0 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--tm);
+}
+
+.error {
+  margin-bottom: 14px;
+}

@@ -1,0 +1,76 @@
+.card {
+  padding: 14px;
+}
+
+/* .row del prototipo: el ícono, el nombre con su detalle y los botones. */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.sub {
+  font-size: 12px;
+  color: var(--tm);
+  margin-top: 2px;
+}
+
+.actions {
+  display: flex;
+  flex-shrink: 0;
+}
+
+/* Subir y bajar son la misma flecha girada. */
+.up {
+  transform: rotate(-90deg);
+}
+
+.down {
+  transform: rotate(90deg);
+}
+
+/* Los ejercicios, de a uno por línea, 10 px bajo el encabezado. */
+.exercises {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.exercise {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ts);
+}
+
+.exerciseName {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.series {
+  font-family: var(--fM);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.empty {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--tm);
+}

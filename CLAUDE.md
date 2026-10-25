@@ -81,7 +81,7 @@ src/
   features/
     auth/         login, registro, recuperar y cambiar contraseña
     account/      Mi cuenta, compartida por los tres roles, y los hooks de datos de usuarios que usan varios roles
-    catalog/      Ejercicios, músculos y circuitos que usan varios roles (hooks; el buscador de ejercicios y, de los circuitos, el listado, el editor y su formulario); lo propio de cada rol vive en su feature
+    catalog/      Ejercicios, músculos, circuitos y rutinas que usan varios roles (hooks; el buscador de ejercicios; de los circuitos, el listado, el editor y su formulario; de las rutinas, el listado y el editor; de las planificaciones, el listado y el editor); lo propio de cada rol vive en su feature
     user/         pantallas del rol Usuario
     coach/        pantallas del rol Entrenador
     admin/        pantallas del rol Admin
@@ -147,14 +147,14 @@ Tokens, copiados del prototipo. Van en `src/shared/styles/tokens.css`:
 | Rol | Tabs | Notas |
 |---|---|---|
 | Usuario | Rutina, RMs, Timer, Perfil | Progreso se suma solo si sobra tiempo (T45). |
-| Entrenador | Alumnos, Planes, Rutinas, Perfil | Rutinas tiene segmentos Rutinas \| Circuitos, que son dos rutas (`/c/rutinas` y `/c/circuitos`) y dejan la tab marcada. Se entra a Membresías desde un botón con badge en la top bar de Mis Alumnos. |
-| Admin | Inicio, Usuarios, Ejercicios, Rutinas, Más (tab bar de mobile) | En desktop, la barra lateral tiene tres grupos: Inicio, Usuarios y Entrenadores; "Entrenamiento" (Ejercicios, Circuitos, Rutinas y Planificaciones); y "Configuración" (Catálogo, Membresías y Perfil). "Más" (`/a/mas`) lleva a Planificaciones, Circuitos, Entrenadores, Catálogo, Membresías y Mi cuenta, y queda marcada en toda pantalla que no esté en la tab bar. Catálogo tiene segmentos Músculos \| Grupos musculares. Músculos, grupos, tipos de membresía (alta y edición) y la edición de entrenadores van en modales, sin ruta propia. Rutinas y Planificaciones muestran un placeholder hasta el bloque C2. |
+| Entrenador | Alumnos, Planes, Rutinas, Perfil | Rutinas tiene segmentos Rutinas \| Circuitos, que son dos rutas (`/c/rutinas` y `/c/circuitos`) y dejan la tab marcada. Planes y Rutinas montan los listados y editores de `features/catalog`, los mismos del Admin. Asignar a alumnos es solo del Entrenador (al Admin el backend le responde 403): "Asignar" en cada planificación vigente y "Asignar a alumno" en el editor de rutina, que los componentes compartidos muestran solo si el rol les pasa `onAssign`. Desde el detalle del alumno también se asigna y se quita: los modales "Planificaciones" y "Rutinas puntuales". Se entra a Membresías desde un botón con badge en la top bar de Mis Alumnos. |
+| Admin | Inicio, Usuarios, Ejercicios, Rutinas, Más (tab bar de mobile) | En desktop, la barra lateral tiene tres grupos: Inicio, Usuarios y Entrenadores; "Entrenamiento" (Ejercicios, Circuitos, Rutinas y Planificaciones); y "Configuración" (Catálogo, Membresías y Perfil). "Más" (`/a/mas`) lleva a Planificaciones, Circuitos, Entrenadores, Catálogo, Membresías y Mi cuenta, y queda marcada en toda pantalla que no esté en la tab bar. Catálogo tiene segmentos Músculos \| Grupos musculares. Músculos, grupos, tipos de membresía (alta y edición) y la edición de entrenadores van en modales, sin ruta propia. |
 
 Rutas:
 
 - **Auth:** `/login`, `/registro`, `/recuperar`, `/cambiar-contrasena`.
-- **Usuario:** `/u/plan`, `/u/rutina/:id`, `/u/ejercicio/:id`, `/u/rms`, `/u/calculadora`, `/u/wiki`, `/u/wiki/:id`, `/u/timer`.
-- **Entrenador:** `/c/alumnos`, `/c/alumnos/:id`, `/c/membresias`, `/c/pago`, `/c/planes`, `/c/planes/:id`, `/c/rutinas`, `/c/rutinas/:id`, `/c/circuitos`, `/c/circuitos/:id`.
+- **Usuario:** `/u/plan`, `/u/rutina/:id` (una rutina individual), `/u/rutina/plan/:userPlanificationId/:routineAsignationId` (una rutina de una semana del plan), `/u/rutina/:id/ejercicio/:routineExerciseId` y `/u/rutina/plan/:userPlanificationId/:routineAsignationId/ejercicio/:routineExerciseId` (un ejercicio de esas rutinas: sale del mismo detalle y necesita saber de qué asignación es, así que cuelga de su ruta; `routineExerciseId` es el `id` del ejercicio en el árbol de la rutina, no el del catálogo), `/u/rms`, `/u/calculadora`, `/u/wiki`, `/u/wiki/:id`, `/u/timer`.
+- **Entrenador:** `/c/alumnos`, `/c/alumnos/:id`, `/c/membresias`, `/c/pago`, `/c/planes`, `/c/planes/:id`, `/c/planes/:id/asignar`, `/c/alumnos/:id/asignar`, `/c/rutinas`, `/c/rutinas/:id`, `/c/rutinas/:id/asignar`, `/c/alumnos/:id/asignar-rutina`, `/c/circuitos`, `/c/circuitos/:id`.
 - **Admin:** `/a/inicio`, `/a/usuarios`, `/a/entrenadores`, `/a/convertir`, `/a/ejercicios`, `/a/ejercicios/:id`, `/a/circuitos`, `/a/circuitos/:id`, `/a/rutinas`, `/a/rutinas/:id`, `/a/planes`, `/a/planes/:id`, `/a/catalogo`, `/a/membresias`, `/a/mas`.
 - **Cuenta (los tres roles):** `/cuenta`, `/cuenta/datos`, `/cuenta/pagos`. El historial de pagos solo se muestra para el rol Usuario.
 
@@ -166,7 +166,7 @@ Las rutas de alta usan `nuevo` como id, por ejemplo `/c/circuitos/nuevo`.
 
 - **Bajas lógicas:** se hacen con `POST .../set-active/:id` y `{ "active": false }` en usuarios, membresías (tipos), planificaciones, rutinas, circuitos y asignaciones rutina-planificación. Antes de ejecutarlas, pedí confirmación aclarando que es una baja lógica. Donde aplique, ofrecé reactivar.
 - **Entrenadores:** no se dan de baja con `set-active` (solo cambia `User.active`, no el `Coach`) sino con `POST /coach/delete_coach/:id`, que es la baja lógica del `Coach` y además le devuelve a su usuario el rol `user`: el entrenador vuelve a ser alumno y sale del listado. Pedí confirmación aclarándolo. Se lo reactiva volviendo a convertirlo con `POST /coach/promote_user`, que reactiva su `Coach` y pisa el email y el CUIL.
-- **Borrado físico:** `DELETE` existe solo para RMs, ejercicios, músculos y grupos musculares. El backend puede rechazarlo por integridad referencial; en ese caso, mostrá el motivo.
+- **Borrado físico:** `DELETE` existe solo para RMs, ejercicios, músculos, grupos musculares y las rutinas puntuales de un alumno (`DELETE /routine/assign-user/:id`). El backend puede rechazarlo por integridad referencial; en ese caso, mostrá el motivo.
 - **Alumnos:** no existe vínculo entrenador-alumno. "Alumnos" son los usuarios con `role=user`. `GET /users/all` pagina con `{ data, total, page, limit, totalPages }`.
 - **Circuitos:** son piezas independientes y reutilizables. Editar un circuito afecta a todas las rutinas que lo usan, así que avisalo antes de guardar. Un ejercicio no se puede repetir dentro de un circuito. Un circuito sí puede repetirse dentro de una rutina.
 - **Edición por lista completa:** `EditRoutineDto.circuits` y `EditCircuitDto.exercises` reemplazan la lista entera. En rutinas, un ítem con `id` (el id del Routine_Circuit, no el del circuito) es un vínculo que se mantiene. Un ítem sin `id` es un vínculo nuevo. Lo que no se manda se da de baja.
@@ -178,6 +178,15 @@ Las rutas de alta usan `nuevo` como id, por ejemplo `/c/circuitos/nuevo`.
   - Rangos: `set_count` de 1 a 20, `rep_count` de 1 a 1000, `weight` de 0.01 a 1000, `rpe` de 1 a 10, `rir` de 0 a 10 y `rm_perc` de 1 a 125.
   - El editor muestra todos los campos a la vista.
 - **Planificación:** `number_of_routines` es la meta que declara el entrenador y `routine_count` es lo que efectivamente está asignado. Mostrá los dos.
+- **Asignar una planificación a un alumno (User_Planification):** solo la hace el Entrenador (al Admin el backend le responde 403), a un alumno con la cuenta abierta y con una planificación activa que tenga al menos una rutina vigente.
+  - `POST /planification/user/assign` manda `planification_id`, `user_id`, `start_date`, `end_date` (opcional: sin él, lo calcula el backend; con un plan de duración 0 es obligatorio), `coach_note` (opcional, hasta 100 caracteres; vacía no se manda) y `confirm_overlap`. Las fechas son días `YYYY-MM-DD`.
+  - Si se pisa con otra asignación vigente del alumno, responde 409 con `overlapping[]`: mostralas y, si el entrenador confirma, reenviá con `confirm_overlap: true`. Las dos conviven.
+  - No hay edición: para cambiar las fechas se quita (`POST /planification/user/set-active/:id`, baja lógica con confirmación) y se asigna de nuevo. Reincorporar no revisa el solapamiento.
+- **Asignar una rutina puntual a un alumno (Routine_Asignation_User):** una rutina para **un día**, sin planificación (CU-E-19 y CU-E-20). Solo la ofrece el Entrenador (el Admin no ve los botones), a un alumno con la cuenta abierta y con una rutina vigente.
+  - `POST /routine/assign-user` manda `routine_id`, `user_id` y `date`, un día `YYYY-MM-DD` (el día en que el alumno la hace), que puede ser pasado o futuro. Un alumno y un día por asignación: son tantas asignaciones como días.
+  - 409 si el alumno ya tiene esa rutina ese día (una rutina **distinta** el mismo día sí se acepta); 400 si la rutina está dada de baja o el destinatario no es un alumno con la cuenta abierta; 404 si la rutina o el alumno no existen.
+  - Quitar es `DELETE /routine/assign-user/:id`, una baja **física** y no un `set-active`: pedí confirmación aclarando que es un borrado definitivo y que no se reincorpora. Si el alumno ya la entrenó (`progress.finished > 0`) es 409 y no se ofrece Quitar, para no perder su historial; 404 si ya no existe.
+  - El listado de un alumno es `GET /routine/assigned/:userId`, de la fecha más vieja a la más nueva. Una rutina dada de baja después de asignarla sigue ahí, con `routine.active: false`.
 - **Rutinas dentro de un plan (Routine_Asignation):** su id no es el de la rutina.
   - `order` puede repetirse.
   - Quitar una rutina le borra el `order` y no renumera al resto.
@@ -189,7 +198,7 @@ Las rutas de alta usan `nuevo` como id, por ejemplo `/c/circuitos/nuevo`.
   - Registrar un pago manda solo `user_id` y `membership_id`; el vencimiento lo calcula el backend (hoy más la duración, al final del día) y no suma los días que le quedaban a una membresía vigente. Un pago no se puede anular.
   - "Eliminar" un tipo de membresía es una baja lógica.
 - **Recuperar contraseña:** mostrá el mismo mensaje de confirmación exista o no el email.
-- **Contraseña temporal:** si el login indica que se usó la temporal, forzá el cambio de contraseña antes de cualquier otra pantalla. El flag está pendiente de contrato (B9 en PLAN).
+- **Contraseña temporal:** si el login indica que se usó la temporal, forzá el cambio de contraseña antes de cualquier otra pantalla. El flag es `password_change_required` en la respuesta del login (B9, ya en el contrato desde el 17/10).
 - **Registro:** siempre manda `role: user`. Después del alta, volvé al login, como indica CU-U-01.
 - **Contraseñas:** validá con las reglas del DTO: mínimo 6 caracteres y máximo 50.
 - **CUIL** (al convertir un alumno en entrenador): se envía con 11 dígitos sin guiones. Se puede mostrar con máscara.

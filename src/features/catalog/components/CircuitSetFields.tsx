@@ -1,7 +1,8 @@
-import { useFormContext, useWatch } from 'react-hook-form';
+import type { ComponentProps } from 'react';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 
 import { formatSetBlock } from '@/shared/lib/sets';
-import { Chip, Columns, Field, IconButton, Input, Select } from '@/shared/ui';
+import { Chip, Field, IconButton, NumberStepper, Select } from '@/shared/ui';
 
 import type { CircuitInput } from '../circuitSchema';
 import styles from './CircuitSetFields.module.css';
@@ -16,16 +17,62 @@ interface CircuitSetFieldsProps {
   onRemove: () => void;
 }
 
+type SetBase = `exercises.${number}.sets.${number}`;
+
 /** Un valor del formulario como número, o `undefined` si todavía no es uno válido (para el resumen). */
 function toNumber(text: string): number | undefined {
   const value = Number(text.replace(',', '.'));
   return text.trim() !== '' && Number.isFinite(value) ? value : undefined;
 }
 
+type StepperFieldProps = Omit<
+  ComponentProps<typeof NumberStepper>,
+  'name' | 'value' | 'onChange'
+> & {
+  base: SetBase;
+  name:
+    | 'set_count'
+    | 'rep_count'
+    | 'weight'
+    | 'rm_perc'
+    | 'effort_value'
+    | 'amrap_time';
+  /** A qué bloque pertenece, para los nombres accesibles de los botones: "bloque 1 de Sentadilla". */
+  owner: string;
+  error?: string;
+  hint?: string;
+};
+
+/** Un campo numérico del bloque, con su etiqueta y los botones − y +. */
+function StepperField({
+  base,
+  name,
+  label,
+  owner,
+  error,
+  hint,
+  ...stepper
+}: StepperFieldProps) {
+  const { control } = useFormContext<CircuitInput>();
+
+  return (
+    <Field label={label} error={error} hint={hint}>
+      <Controller
+        control={control}
+        name={`${base}.${name}`}
+        render={({ field }) => (
+          <NumberStepper {...field} label={`${label}, ${owner}`} {...stepper} />
+        )}
+      />
+    </Field>
+  );
+}
+
 /**
  * Un bloque de series de un ejercicio, con todos sus campos a la vista: series y repeticiones, peso,
  * intensidad (RPE o RIR, uno u otro), % del RM, AMRAP con su tiempo y RM. Una fila es un bloque de series
  * iguales: 3 series de 8 repeticiones son un bloque. El encabezado lo resume en una línea.
+ * Los números se ajustan con los botones − y +, o escribiéndolos.
  */
 export function CircuitSetFields({
   exerciseIndex,
@@ -37,10 +84,12 @@ export function CircuitSetFields({
   const {
     register,
     setValue,
+    trigger,
     control,
     formState: { errors },
   } = useFormContext<CircuitInput>();
-  const base = `exercises.${exerciseIndex}.sets.${setIndex}` as const;
+  const base: SetBase = `exercises.${exerciseIndex}.sets.${setIndex}`;
+  const owner = `bloque ${setIndex + 1} de ${exerciseName}`;
   const fieldErrors = errors.exercises?.[exerciseIndex]?.sets?.[setIndex];
   const values = useWatch({ control, name: base });
 
@@ -56,16 +105,26 @@ export function CircuitSetFields({
     rm: values.rm,
   });
   const effortLabel = values.effort === 'rir' ? 'RIR (0 a 10)' : 'RPE (1 a 10)';
+  const effortRange: [number, number] =
+    values.effort === 'rir' ? [0, 10] : [1, 10];
 
   function toggle(name: 'amrap' | 'rm') {
-    setValue(`${base}.${name}`, !values[name], {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    // El tiempo solo vale con AMRAP: al apagarlo, se vacía.
-    if (name === 'amrap' && values.amrap) {
+    const turningOn = !values[name];
+    setValue(`${base}.${name}`, turningOn, { shouldDirty: true });
+    if (turningOn) {
+      // Un AMRAP y un intento de RM son una sola serie, y con 1 repetición el AMRAP queda "sin objetivo":
+      // arrancan en 1×1 y después se pueden cambiar.
+      setValue(`${base}.set_count`, '1', { shouldDirty: true });
+      setValue(`${base}.rep_count`, '1', { shouldDirty: true });
+    } else if (name === 'amrap') {
+      // El tiempo solo vale con AMRAP: al apagarlo, se vacía.
       setValue(`${base}.amrap_time`, '', { shouldDirty: true });
     }
+    void trigger(
+      turningOn
+        ? [`${base}.set_count`, `${base}.rep_count`, `${base}.${name}`]
+        : `${base}.${name}`,
+    );
   }
 
   return (
@@ -85,49 +144,59 @@ export function CircuitSetFields({
           />
         )}
       </div>
-      <Columns>
-        <Field label="Series" error={fieldErrors?.set_count?.message}>
-          <Input
-            inputMode="numeric"
-            maxLength={2}
-            autoComplete="off"
-            {...register(`${base}.set_count`)}
-          />
-        </Field>
-        <Field
+      <div className={styles.grid}>
+        <StepperField
+          base={base}
+          name="set_count"
+          label="Series"
+          owner={owner}
+          error={fieldErrors?.set_count?.message}
+          min={1}
+          max={20}
+          maxLength={2}
+        />
+        <StepperField
+          base={base}
+          name="rep_count"
           label="Repeticiones"
+          owner={owner}
           error={fieldErrors?.rep_count?.message}
           hint={values.amrap ? 'Objetivo. 1 = sin objetivo' : undefined}
-        >
-          <Input
-            inputMode="numeric"
-            maxLength={4}
-            autoComplete="off"
-            {...register(`${base}.rep_count`)}
-          />
-        </Field>
-      </Columns>
-      <Columns>
-        <Field label="Peso (kg)" error={fieldErrors?.weight?.message}>
-          <Input
-            inputMode="decimal"
-            maxLength={7}
-            autoComplete="off"
-            placeholder="Opcional"
-            {...register(`${base}.weight`)}
-          />
-        </Field>
-        <Field label="% del RM" error={fieldErrors?.rm_perc?.message}>
-          <Input
-            inputMode="numeric"
-            maxLength={3}
-            autoComplete="off"
-            placeholder="Opcional"
-            {...register(`${base}.rm_perc`)}
-          />
-        </Field>
-      </Columns>
-      <Columns>
+          min={1}
+          max={1000}
+          maxLength={4}
+        />
+      </div>
+      <div className={styles.grid}>
+        <StepperField
+          base={base}
+          name="weight"
+          label="Peso (kg)"
+          owner={owner}
+          error={fieldErrors?.weight?.message}
+          min={0.01}
+          max={1000}
+          step={2.5}
+          decimals={2}
+          optional
+          maxLength={7}
+          placeholder="Opcional"
+        />
+        <StepperField
+          base={base}
+          name="rm_perc"
+          label="% del RM"
+          owner={owner}
+          error={fieldErrors?.rm_perc?.message}
+          min={1}
+          max={125}
+          step={5}
+          optional
+          maxLength={3}
+          placeholder="Opcional"
+        />
+      </div>
+      <div className={styles.grid}>
         <Field label="Intensidad">
           <Select
             {...register(`${base}.effort`, {
@@ -141,19 +210,18 @@ export function CircuitSetFields({
             <option value="rir">RIR</option>
           </Select>
         </Field>
-        <Field
+        <StepperField
+          base={base}
+          name="effort_value"
           label={values.effort === 'none' ? 'Valor' : effortLabel}
+          owner={owner}
           error={fieldErrors?.effort_value?.message}
-        >
-          <Input
-            inputMode="numeric"
-            maxLength={2}
-            autoComplete="off"
-            disabled={values.effort === 'none'}
-            {...register(`${base}.effort_value`)}
-          />
-        </Field>
-      </Columns>
+          min={effortRange[0]}
+          max={effortRange[1]}
+          maxLength={2}
+          disabled={values.effort === 'none'}
+        />
+      </div>
       <div className={styles.flags}>
         <Chip
           tone="acc"
@@ -172,18 +240,19 @@ export function CircuitSetFields({
         </div>
       )}
       {values.amrap && (
-        <Field
+        <StepperField
+          base={base}
+          name="amrap_time"
           label="Tiempo del AMRAP (segundos)"
+          owner={owner}
           error={fieldErrors?.amrap_time?.message}
           hint="Opcional. Vacío: hasta el fallo."
-        >
-          <Input
-            inputMode="numeric"
-            maxLength={5}
-            autoComplete="off"
-            {...register(`${base}.amrap_time`)}
-          />
-        </Field>
+          min={1}
+          max={99_999}
+          step={10}
+          optional
+          maxLength={5}
+        />
       )}
     </div>
   );

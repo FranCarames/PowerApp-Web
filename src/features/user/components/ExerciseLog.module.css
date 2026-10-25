@@ -1,0 +1,38 @@
+/* El "Hecho" y la nota del alumno van pegados entre sí y a los botones. */
+.done {
+  margin-bottom: 10px;
+}
+
+.doneText {
+  display: block;
+  min-width: 0;
+}
+
+.doneTitle {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ok);
+}
+
+.doneDay {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--ts);
+}
+
+/* La nota la escribe el alumno: una larga y sin espacios no tiene que desbordar el aviso. */
+.userNote {
+  margin-bottom: 10px;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  margin-top: 4px;
+}
+
+.other {
+  margin-top: 12px;
+  text-align: center;
+}

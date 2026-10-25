@@ -1,0 +1,32 @@
+/* Las rutinas elegidas, sobre el buscador. */
+.picked {
+  margin-bottom: 8px;
+}
+
+.pickedTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ts);
+  margin-bottom: 6px;
+}
+
+/* La lista de rutinas desplaza por su cuenta: así el botón de agregar queda a la vista aunque haya muchas. */
+.list {
+  max-height: min(260px, 34vh);
+  overflow-y: auto;
+  margin: 12px -4px 12px;
+  padding: 2px 4px;
+}
+
+.hint {
+  margin: 0 0 14px;
+  font-size: 12px;
+  color: var(--tm);
+}
+
+/* Los botones, apilados al pie, como las acciones de un <Modal>. */
+.actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}

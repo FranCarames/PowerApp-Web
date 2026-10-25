@@ -20,10 +20,20 @@ export const queryKeys = {
   },
   planifications: {
     all: ['planifications'] as const,
-    list: () => [...queryKeys.planifications.all, 'list'] as const,
-    /** La planificación vigente de un alumno. */
-    userActive: (userId: string) =>
-      [...queryKeys.planifications.all, 'user-active', userId] as const,
+    /** Las planificaciones sistémicas (`all`), solo las vigentes o con las dadas de baja. */
+    list: (includeInactive = false) =>
+      [...queryKeys.planifications.all, 'list', { includeInactive }] as const,
+    /** Una planificación con sus rutinas vigentes (el detalle). */
+    detail: (id: string) =>
+      [...queryKeys.planifications.all, 'detail', id] as const,
+    /** Las planificaciones asignadas a un alumno, con o sin las que se quitaron. */
+    ofUser: (userId: string, includeInactive = false) =>
+      [
+        ...queryKeys.planifications.all,
+        'user',
+        userId,
+        { includeInactive },
+      ] as const,
   },
   routines: {
     all: ['routines'] as const,
@@ -43,6 +53,8 @@ export const queryKeys = {
     /** Las rutinas con sus circuitos (`all-plus`), con o sin las dadas de baja. */
     listPlus: (includeInactive: boolean) =>
       [...queryKeys.routines.all, 'list-plus', { includeInactive }] as const,
+    /** Una rutina con sus circuitos completos (el detalle). */
+    detail: (id: string) => [...queryKeys.routines.all, 'detail', id] as const,
   },
   memberships: {
     all: ['memberships'] as const,
@@ -56,6 +68,41 @@ export const queryKeys = {
     /** Los alumnos cuya membresía está en ese estado. */
     studentsByStatus: (status: string) =>
       [...queryKeys.memberships.all, 'students-by-status', status] as const,
+  },
+  /** Las rutinas puntuales de un alumno (CU-E-19 y CU-E-20): las que el entrenador le asignó para un día. */
+  assignedRoutines: {
+    all: ['assigned-routines'] as const,
+    /** Todas las de un alumno, sin filtrar por días. */
+    byUser: (userId: string) =>
+      [...queryKeys.assignedRoutines.all, 'user', userId] as const,
+  },
+  /** El home del alumno: las rutinas de una semana, del plan y las individuales. */
+  routineHome: {
+    all: ['routine-home'] as const,
+    /** La semana que empieza ese lunes (`YYYY-MM-DD`). */
+    week: (userId: string, weekStart: string) =>
+      [...queryKeys.routineHome.all, userId, weekStart] as const,
+  },
+  /** El detalle de una rutina asignada al alumno, que se abre desde la asignación. */
+  routineDetail: {
+    all: ['routine-detail'] as const,
+    /** Una rutina individual, por el id de su asignación. */
+    individual: (assignmentId: string) =>
+      [...queryKeys.routineDetail.all, 'individual', assignmentId] as const,
+    /** Una rutina de una semana del plan, por la asignación del plan y la de la rutina. */
+    planSession: (userPlanificationId: string, routineAsignationId: string) =>
+      [
+        ...queryKeys.routineDetail.all,
+        'plan',
+        userPlanificationId,
+        routineAsignationId,
+      ] as const,
+  },
+  /** El historial de entrenamientos de un alumno (lo ve el entrenador), completo o filtrado por un ejercicio del catálogo. */
+  trainingHistory: {
+    all: ['training-history'] as const,
+    byUser: (userId: string, exerciseId: string | null = null) =>
+      [...queryKeys.trainingHistory.all, userId, { exerciseId }] as const,
   },
   userRms: {
     all: ['user-rms'] as const,

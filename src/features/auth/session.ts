@@ -8,7 +8,7 @@ export interface Session {
   user: User;
   /**
    * El usuario entró con una contraseña temporal. Hasta que la cambie, la única pantalla permitida es
-   * /cambiar-contrasena. Lo marca el login (el campo de la respuesta es B9, pendiente de contrato).
+   * /cambiar-contrasena. Lo marca el login (`password_change_required` de la respuesta).
    */
   passwordChangeRequired?: boolean;
 }

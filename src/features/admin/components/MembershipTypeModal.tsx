@@ -125,6 +125,7 @@ function MembershipTypeForm({
             ? 'Ya hay un tipo de membresía con esa duración. Elegí otra o editá ese tipo.'
             : getErrorMessage(save.error, {
                 404: 'La membresía ya no existe. Cerrá esta ventana y volvé a intentar.',
+                409: 'Ya hay un tipo de membresía con ese nombre. Elegí otro o editá ese tipo.',
               })}
         </Note>
       )}

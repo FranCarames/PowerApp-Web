@@ -1,0 +1,9 @@
+/* Una rutina hecha (o quitada del plan) se apaga, como las "done" del prototipo. */
+.dim {
+  opacity: 0.62;
+}
+
+/* El nombre lo escribe el entrenador: uno largo y sin espacios no tiene que desbordar la fila. */
+.name {
+  overflow-wrap: anywhere;
+}
