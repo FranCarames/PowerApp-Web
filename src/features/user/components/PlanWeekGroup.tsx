@@ -2,6 +2,7 @@ import type { RoutineAssignedPlanWeek } from '@/api/types';
 import { Card, FiberBar, List, Pill } from '@/shared/ui';
 
 import {
+  planWeekText,
   progressPercent,
   progressText,
   routineLetter,
@@ -28,10 +29,7 @@ export function PlanWeekGroup({ group, onOpenRoutine }: PlanWeekGroupProps) {
   const name = planification.name ?? 'Planificación';
   const progress = sumProgress(routines.map((routine) => routine.progress));
   const percent = progressPercent(progress);
-  const weekText =
-    planification.duration > 0
-      ? `Semana ${week} de ${planification.duration}`
-      : `Semana ${week}`;
+  const weekText = planWeekText(week, planification.duration);
 
   return (
     <section aria-label={name} className={styles.group}>

@@ -19,3 +19,8 @@ export function matchesSearch(text: string, search: string): boolean {
   const needle = normalizeText(search.trim());
   return needle === '' || normalizeText(text).includes(needle);
 }
+
+/** Una lista en una frase: "A", "A y B", "A, B y C". */
+export function joinWithAnd(items: readonly string[]): string {
+  return new Intl.ListFormat('es', { type: 'conjunction' }).format(items);
+}

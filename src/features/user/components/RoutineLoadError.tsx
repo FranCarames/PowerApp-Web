@@ -26,17 +26,17 @@ export function RoutineLoadError({ query }: { query: RoutineQuery }) {
   }
   if (isApiError(error) && (error.status === 404 || error.status === 400)) {
     // El backend distingue la rutina que el entrenador quitó del plan sin que el alumno hiciera nada.
-    const removed = error.serverMessage?.includes('quitada') ?? false;
-    return (
-      <ErrorState
-        title="No encontramos la rutina"
-        message={
-          removed
-            ? 'Tu entrenador la quitó del plan y no hiciste nada en ella.'
-            : 'Puede que tu entrenador la haya cambiado. Volvé al inicio y buscala de nuevo.'
-        }
-      />
-    );
+    const server = error.serverMessage ?? '';
+    let message =
+      'Puede que tu entrenador la haya cambiado. Volvé al inicio y buscala de nuevo.';
+    if (server.includes('quitada')) {
+      message = 'Tu entrenador la quitó del plan y no hiciste nada en ella.';
+    } else if (server.includes('no pertenece')) {
+      // CU-U-09: la rutina del enlace no es de esa planificación.
+      message =
+        'Esa rutina no es de tu planificación. Volvé al inicio y abrila desde ahí.';
+    }
+    return <ErrorState title="No encontramos la rutina" message={message} />;
   }
   return (
     <ErrorState

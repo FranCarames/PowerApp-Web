@@ -118,7 +118,10 @@ function EditCircuit({
   const circuit = useCircuit(id);
   // Las rutinas que lo usan, para el aviso. Si no llega, el aviso no sale y no se bloquea nada.
   const usage = useCircuitUsage();
-  const notFound = isApiError(circuit.error) && circuit.error.status === 404;
+  // Un id que no es un UUID da 400, y uno que no existe, 404: los dos son "no lo encontramos".
+  const notFound =
+    isApiError(circuit.error) &&
+    (circuit.error.status === 404 || circuit.error.status === 400);
 
   return (
     <Layout isNew={false} basePath={basePath} routineReturn={routineReturn}>
@@ -139,7 +142,7 @@ function EditCircuit({
               ? 'No hay ningún circuito con ese enlace. Volvé a la lista.'
               : getErrorMessage(circuit.error)
           }
-          // Un 404 se repetiría igual: no se ofrece reintentar.
+          // Un 404 o un 400 se repetirían igual: no se ofrece reintentar.
           onRetry={notFound ? undefined : () => void circuit.refetch()}
           retrying={circuit.isRefetching}
         />

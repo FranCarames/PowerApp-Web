@@ -88,7 +88,10 @@ function EditExercise({ id }: { id: string }) {
   const exercise = useExercise(id);
   const groups = useMuscleGroups();
   const failed = [exercise, groups].find((query) => query.isError);
-  const notFound = isApiError(exercise.error) && exercise.error.status === 404;
+  // Un id que no es un UUID da 400, y uno que no existe, 404: los dos son "no lo encontramos".
+  const notFound =
+    isApiError(exercise.error) &&
+    (exercise.error.status === 404 || exercise.error.status === 400);
 
   return (
     <Layout isNew={false}>
@@ -102,7 +105,7 @@ function EditExercise({ id }: { id: string }) {
               ? 'Puede que ya se haya eliminado. Volvé a la lista.'
               : getErrorMessage(failed.error)
           }
-          // Un 404 se repetiría igual: no se ofrece reintentar.
+          // Un 404 o un 400 se repetirían igual: no se ofrece reintentar.
           onRetry={
             notFound
               ? undefined

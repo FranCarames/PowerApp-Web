@@ -1,4 +1,19 @@
 import { getErrorMessage, isApiError } from '@/api/errors';
+import { joinWithAnd } from '@/shared/lib/text';
+
+/**
+ * Las rutinas dadas de baja que nombra el servidor al rechazar un alta (CU-E-12a y CU-E-12b): "La rutina
+ * 'Día A' está dada de baja…" con una, y "Estas rutinas están dadas de baja y no pueden asignarse: 'Día A',
+ * 'Día B'." con varias. Si el texto no tiene esa forma, ninguna.
+ */
+function inactiveRoutineNames(server: string): string[] {
+  const one = /^La rutina '(.+)' está dada de baja/.exec(server);
+  if (one?.[1]) return [one[1]];
+  const several = /dadas de baja y no pueden asignarse: '(.+)'\.?$/.exec(
+    server,
+  );
+  return several?.[1] ? several[1].split("', '") : [];
+}
 
 /**
  * Qué dice un error de guardar o cambiar una planificación. Los 400 y 404 del plan y de sus rutinas
@@ -18,10 +33,18 @@ export function planErrorMessage(error: unknown): string {
   if (server.includes('supera la duración')) {
     return `La semana ${week ?? 'elegida'} supera la duración del plan. Elegí una semana válida.`;
   }
-  if (server.includes('La planificación') && server.includes('de baja')) {
+  if (server.startsWith('La planificación') && server.includes('de baja')) {
     return 'La planificación está dada de baja y no se puede cambiar. Reactivala primero.';
   }
   if (server.includes('de baja')) {
+    // El CU pide decir cuál es: el servidor las nombra.
+    const names = inactiveRoutineNames(server);
+    if (names.length === 1) {
+      return `${names[0]} está dada de baja y no se puede agregar. Sacala de la selección e intentá de nuevo.`;
+    }
+    if (names.length > 1) {
+      return `${joinWithAnd(names)} están dadas de baja y no se pueden agregar. Sacalas de la selección e intentá de nuevo.`;
+    }
     return 'Alguna de las rutinas está dada de baja y no se puede agregar. Sacala de la selección e intentá de nuevo.';
   }
   return getErrorMessage(error, {

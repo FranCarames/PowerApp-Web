@@ -61,15 +61,28 @@ export type RoutineTree = Omit<RoutineDetail, 'circuits'> & {
 };
 
 // PENDIENTE-CONTRATO: V2 CU-U-09
+/**
+ * El árbol de la rutina en los dos detalles del alumno: el de `RoutineTree`, salvo el `order` de cada
+ * vínculo. Un circuito que el entrenador sacó de la rutina después de que el alumno hizo algo de él se
+ * sigue mandando (CU-U-09), con `order: null`: el backend lo apaga sin posición. El contrato declara el
+ * `order` como número porque, para el entrenador, los vínculos apagados no se devuelven.
+ */
+export type StudentRoutineTree = Omit<RoutineTree, 'circuits'> & {
+  circuits: Array<
+    Omit<RoutineTree['circuits'][number], 'order'> & { order: number | null }
+  >;
+};
+
+// PENDIENTE-CONTRATO: V2 CU-U-09
 /** Respuesta de `GET /routine/assign-user/{id}`: el contrato con el árbol de la rutina tipado. */
 export type AssignedRoutineDetail = Omit<RoutineAssignedDetail, 'routine'> & {
-  routine: RoutineTree;
+  routine: StudentRoutineTree;
 };
 
 // PENDIENTE-CONTRATO: V2 CU-U-09
 /** Respuesta de `GET /routine/assign-plan/{userPlanificationId}/{routineAsignationId}`, con el árbol tipado. */
 export type PlanSessionDetail = Omit<RoutinePlanSessionDetail, 'routine'> & {
-  routine: RoutineTree;
+  routine: StudentRoutineTree;
 };
 
 // PENDIENTE-CONTRATO: V1 CU-E-27

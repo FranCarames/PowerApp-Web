@@ -88,7 +88,10 @@ function FormSkeleton() {
 
 function EditPlan({ id, basePath }: PlanEditorProps) {
   const plan = usePlanification(id);
-  const notFound = isApiError(plan.error) && plan.error.status === 404;
+  // Un id que no es un UUID da 400, y uno que no existe, 404: los dos son "no la encontramos".
+  const notFound =
+    isApiError(plan.error) &&
+    (plan.error.status === 404 || plan.error.status === 400);
 
   return (
     <Layout isNew={false} basePath={basePath}>
@@ -113,7 +116,7 @@ function EditPlan({ id, basePath }: PlanEditorProps) {
               ? 'No hay ninguna planificación con ese enlace. Volvé a la lista.'
               : getErrorMessage(plan.error)
           }
-          // Un 404 se repetiría igual: no se ofrece reintentar.
+          // Un 404 o un 400 se repetirían igual: no se ofrece reintentar.
           onRetry={notFound ? undefined : () => void plan.refetch()}
           retrying={plan.isRefetching}
         />

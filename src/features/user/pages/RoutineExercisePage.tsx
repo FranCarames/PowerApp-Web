@@ -44,6 +44,7 @@ import {
   usePlanRoutine,
 } from '../hooks/useRoutineDetail';
 import {
+  circuitTitle,
   exerciseAccess,
   findRoutineExercise,
   individualView,
@@ -178,11 +179,7 @@ function ExerciseScreen({
   return (
     <>
       <PageHeader
-        eyebrow={
-          found
-            ? `Circuito ${found.circuit.order} · ${found.circuit.circuit.name}`
-            : undefined
-        }
+        eyebrow={found ? circuitTitle(found.circuit) : undefined}
         title={found?.exercise.exercise.name ?? 'Ejercicio'}
         back={routinePath(assignment)}
         backState={state}

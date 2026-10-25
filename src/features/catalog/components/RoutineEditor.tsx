@@ -117,7 +117,10 @@ function EditRoutine({
   restoreDraft,
 }: RoutineEditorProps & { restoreDraft: boolean }) {
   const routine = useRoutine(id);
-  const notFound = isApiError(routine.error) && routine.error.status === 404;
+  // Un id que no es un UUID da 400, y uno que no existe, 404: los dos son "no la encontramos".
+  const notFound =
+    isApiError(routine.error) &&
+    (routine.error.status === 404 || routine.error.status === 400);
 
   return (
     <Layout isNew={false} basePath={basePath}>
@@ -137,7 +140,7 @@ function EditRoutine({
               ? 'No hay ninguna rutina con ese enlace. Volvé a la lista.'
               : getErrorMessage(routine.error)
           }
-          // Un 404 se repetiría igual: no se ofrece reintentar.
+          // Un 404 o un 400 se repetirían igual: no se ofrece reintentar.
           onRetry={notFound ? undefined : () => void routine.refetch()}
           retrying={routine.isRefetching}
         />

@@ -8,6 +8,11 @@ import { fullName } from '@/shared/lib/fullName';
 import { zodResolver } from '@/shared/lib/zodResolver';
 import { Button, Note, useToast } from '@/shared/ui';
 
+import {
+  DUPLICATE_COACH_MESSAGE,
+  duplicateCoachField,
+  takenCoachField,
+} from '../coachErrors';
 import { useConvertToCoach } from '../hooks/useConvertToCoach';
 import {
   coachDataSchema,
@@ -22,7 +27,7 @@ interface ConvertFormProps {
   student: User | null;
   /** Su registro de Coach anterior, si ya fue entrenador: el formulario arranca con esos datos. */
   previous: Coach | undefined;
-  /** Los registros de Coach que ya existen, para avisar de un email repetido antes de mandarlo. */
+  /** Los registros de Coach que ya existen, para avisar de un email o un CUIL repetido antes de mandarlo. */
   coaches: Coach[] | undefined;
 }
 
@@ -52,16 +57,11 @@ export function ConvertForm({ student, previous, coaches }: ConvertFormProps) {
   const onSubmit = handleSubmit((values) => {
     if (!student || convert.isPending) return;
 
-    // La columna es única y un email repetido es un 500 que, además, deja al usuario con el rol y sin
-    // sus datos (el backend cambia el rol antes de guardar el `Coach`): si ya se conoce, no se manda.
-    const takenByOther = coaches?.some(
-      ({ id, coach_email }) =>
-        id !== student.id && coach_email.toLowerCase() === values.coach_email,
-    );
-    if (takenByOther) {
-      setError('coach_email', {
-        message: 'Ya hay otro entrenador con ese email profesional',
-      });
+    // El email y el CUIL no se repiten entre entrenadores, ni con uno dado de baja (CU-A-17): si ya se
+    // sabe que otro los usa, no se manda. El backend responde lo mismo con un 409.
+    const taken = takenCoachField(coaches, student.id, values);
+    if (taken) {
+      setError(taken, { message: DUPLICATE_COACH_MESSAGE[taken] });
       return;
     }
 
@@ -72,12 +72,26 @@ export function ConvertForm({ student, previous, coaches }: ConvertFormProps) {
           toast.success(`${fullName(student)} ahora es entrenador`);
           navigate('/a/entrenadores');
         },
+        onError: (error) => {
+          // El CU pide decir cuál está repetido: va junto a su campo.
+          const duplicate = duplicateCoachField(error);
+          if (duplicate) {
+            setError(duplicate, {
+              type: 'server',
+              message: DUPLICATE_COACH_MESSAGE[duplicate],
+            });
+          }
+        },
       },
     );
   });
 
   // El error es de un intento con este alumno: al elegir a otro, no corresponde.
-  const failed = convert.isError && convert.variables.user_id === student?.id;
+  // Un dato repetido ya se muestra junto a su campo.
+  const failed =
+    convert.isError &&
+    convert.variables.user_id === student?.id &&
+    !duplicateCoachField(convert.error);
 
   return (
     <form onSubmit={onSubmit} noValidate>
@@ -98,10 +112,8 @@ export function ConvertForm({ student, previous, coaches }: ConvertFormProps) {
         <Note tone="err" icon="alert" role="alert" className={styles.note}>
           {getErrorMessage(convert.error, {
             404: 'El alumno ya no existe. Elegí a otro de la lista.',
-            // El contrato del 24/10 documenta el email o el CUIL repetido (también de un entrenador dado de baja) como 409.
+            // Un 409 que no dice cuál de los dos está repetido.
             409: 'Ya hay otro entrenador con ese email profesional o con ese CUIL.',
-            // Hasta entonces era un 500, con el rol ya cambiado: queda por si el backend lo sigue dando.
-            500: 'No se pudo completar la conversión. Puede que el email profesional ya lo use otro entrenador. Revisá en Entrenadores cómo quedó la cuenta antes de volver a intentar.',
           })}
         </Note>
       )}

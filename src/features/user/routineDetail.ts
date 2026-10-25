@@ -2,11 +2,13 @@ import type {
   AssignedRoutineDetail,
   CircuitDetail,
   PlanSessionDetail,
-  RoutineTree,
+  StudentRoutineTree,
 } from '@/api/pending';
 import { queryKeys } from '@/api/queryKeys';
 import type { RoutineAssignedFinished } from '@/api/types';
 import { formatWeekdayDate } from '@/shared/lib/dates';
+
+import { planWeekText } from './homeWeek';
 
 /** Un ejercicio de una rutina del alumno: el del árbol, con su ficha del catálogo y sus bloques de series. */
 export type RoutineExercise = CircuitDetail['exercises'][number];
@@ -52,7 +54,7 @@ export interface RoutineNotice {
  * o de una semana del plan: las dos respuestas se llevan a esta misma forma.
  */
 export interface RoutineView {
-  routine: RoutineTree;
+  routine: StudentRoutineTree;
   /** De qué asignación es, para marcar lo que el alumno hace y para abrir sus ejercicios. */
   assignment: RoutineAssignment;
   /** Lo que el alumno hizo, por el id de cada ejercicio del árbol (`routine_exercise_id`). */
@@ -85,15 +87,40 @@ export function exerciseAccess(view: RoutineView): ExerciseAccess {
   return view.frozen ? 'frozen' : 'open';
 }
 
+/** Un circuito de la rutina del alumno: el vínculo, con su posición y su circuito. */
+export type RoutineCircuitLink = StudentRoutineTree['circuits'][number];
+
+/**
+ * Los circuitos de la rutina en orden. Los que el entrenador sacó de la rutina (`order: null`, porque ya no
+ * ocupan una posición) van al final, como los manda el backend.
+ */
+export function sortCircuitLinks(
+  circuits: readonly RoutineCircuitLink[],
+): RoutineCircuitLink[] {
+  return [...circuits].sort((a, b) => {
+    if (a.order === null || b.order === null) {
+      return Number(a.order === null) - Number(b.order === null);
+    }
+    return a.order - b.order;
+  });
+}
+
+/**
+ * Cómo se nombra un circuito de la rutina: "Circuito 1 · Empuje" por su lugar en ella. Uno que el
+ * entrenador sacó de la rutina ya no tiene lugar: "Sacado de la rutina · Empuje".
+ */
+export function circuitTitle({ order, circuit }: RoutineCircuitLink): string {
+  return order === null
+    ? `Sacado de la rutina · ${circuit.name}`
+    : `Circuito ${order} · ${circuit.name}`;
+}
+
 /** Un ejercicio de la rutina por su `routine_exercise_id`, con el circuito donde aparece primero. */
 export function findRoutineExercise(
-  routine: RoutineTree,
+  routine: StudentRoutineTree,
   routineExerciseId: string,
-):
-  | { exercise: RoutineExercise; circuit: RoutineTree['circuits'][number] }
-  | undefined {
-  const circuits = [...routine.circuits].sort((a, b) => a.order - b.order);
-  for (const circuit of circuits) {
+): { exercise: RoutineExercise; circuit: RoutineCircuitLink } | undefined {
+  for (const circuit of sortCircuitLinks(routine.circuits)) {
     const exercise = circuit.circuit.exercises.find(
       ({ id }) => id === routineExerciseId,
     );
@@ -131,10 +158,7 @@ export function planSessionView(detail: PlanSessionDetail): RoutineView {
   const { user_planification: assignment, week } = detail;
   const { planification } = assignment;
   const planName = planification.name ?? 'Planificación';
-  const weekText =
-    planification.duration > 0
-      ? `Semana ${week} de ${planification.duration}`
-      : `Semana ${week}`;
+  const weekText = planWeekText(week, planification.duration);
 
   const notices: RoutineNotice[] = [];
   if (!assignment.active) {
