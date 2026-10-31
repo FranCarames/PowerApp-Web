@@ -3724,7 +3724,7 @@ export interface operations {
                     "application/json": components["schemas"]["User"];
                 };
             };
-            /** @description Datos inválidos, o el usuario es un administrador (no se convierte en entrenador) */
+            /** @description Datos inválidos; el usuario es un administrador (no se convierte en entrenador); o es un alumno con la cuenta inactiva (se reactiva primero desde Usuarios). Un entrenador con la cuenta inactiva sí se edita (CU-A-18) */
             400: {
                 headers: {
                     [name: string]: unknown;

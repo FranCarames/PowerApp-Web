@@ -11,6 +11,8 @@ import { Button, Note, useToast } from '@/shared/ui';
 import {
   DUPLICATE_COACH_MESSAGE,
   duplicateCoachField,
+  notConvertibleMessage,
+  notConvertibleReason,
   takenCoachField,
 } from '../coachErrors';
 import { useConvertToCoach } from '../hooks/useConvertToCoach';
@@ -91,6 +93,9 @@ export function ConvertForm({ student, previous, coaches }: ConvertFormProps) {
     convert.isError &&
     convert.variables.user_id === student?.id &&
     !duplicateCoachField(convert.error);
+  // Si el backend lo rechazó porque la cuenta se cerró (o es un admin) con el formulario abierto, el
+  // aviso dice el motivo. Los usuarios ya se piden de nuevo (`useConvertToCoach`) y el alumno sale de la lista.
+  const notConvertible = failed ? notConvertibleReason(convert.error) : null;
 
   return (
     <form onSubmit={onSubmit} noValidate>
@@ -109,11 +114,13 @@ export function ConvertForm({ student, previous, coaches }: ConvertFormProps) {
       )}
       {failed && (
         <Note tone="err" icon="alert" role="alert" className={styles.note}>
-          {getErrorMessage(convert.error, {
-            404: 'El alumno ya no existe. Elegí a otro de la lista.',
-            // Un 409 que no dice cuál de los dos está repetido.
-            409: 'Ya hay otro entrenador con ese email profesional o con ese CUIL.',
-          })}
+          {notConvertible && student
+            ? notConvertibleMessage(notConvertible, fullName(student))
+            : getErrorMessage(convert.error, {
+                404: 'El alumno ya no existe. Elegí a otro de la lista.',
+                // Un 409 que no dice cuál de los dos está repetido.
+                409: 'Ya hay otro entrenador con ese email profesional o con ese CUIL.',
+              })}
         </Note>
       )}
       <CoachDataFields register={register} errors={errors} />

@@ -6,7 +6,6 @@ import { getErrorMessage } from '@/api/errors';
 import type { User } from '@/api/types';
 import { UserList } from '@/features/account/components/UserList';
 import { useUser } from '@/features/account/hooks/useUser';
-import { ROLE_LABEL } from '@/features/auth/roles';
 import { fullName } from '@/shared/lib/fullName';
 import { useDebouncedValue } from '@/shared/lib/useDebouncedValue';
 import {
@@ -23,6 +22,7 @@ import {
 } from '@/shared/ui';
 
 import { ConvertForm } from '../components/ConvertForm';
+import { notConvertibleMessage } from '../coachErrors';
 import { coachesQuery } from '../hooks/useCoaches';
 import styles from './ConvertPage.module.css';
 
@@ -49,14 +49,10 @@ function usePreselectedStudent(id: string | null): {
   const name = fullName(user);
   if (user.role === 'coach') return { problem: `${name} ya es entrenador.` };
   if (user.role !== 'user') {
-    return {
-      problem: `${name} es ${ROLE_LABEL[user.role].toLowerCase()} y no se puede convertir.`,
-    };
+    return { problem: notConvertibleMessage('admin', name) };
   }
   if (!user.active) {
-    return {
-      problem: `La cuenta de ${name} está inactiva. Reactivala desde Usuarios para poder convertirla en entrenador.`,
-    };
+    return { problem: notConvertibleMessage('inactive', name) };
   }
   return { student: user };
 }
