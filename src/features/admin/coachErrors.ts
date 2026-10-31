@@ -36,6 +36,41 @@ export function takenCoachField(
   return null;
 }
 
+/** Por qué el backend no convierte a alguien en entrenador (CU-A-17): un 400 de `promote_user`. */
+export type NotConvertibleReason = 'inactive' | 'admin';
+
+const NOT_CONVERTIBLE_SERVER_MESSAGE: Record<NotConvertibleReason, string> = {
+  inactive: 'No se puede convertir en entrenador a una cuenta inactiva.',
+  admin: 'No se puede convertir en entrenador a un administrador.',
+};
+
+/**
+ * El aviso de cada motivo, con el nombre de a quien se quiso convertir. Lo usan la pantalla (al elegir
+ * a alguien que ya se sabe que no se puede) y el formulario (cuando el backend lo rechaza).
+ */
+export function notConvertibleMessage(
+  reason: NotConvertibleReason,
+  name: string,
+): string {
+  return reason === 'inactive'
+    ? `La cuenta de ${name} está inactiva. Reactivala desde Usuarios para poder convertirla en entrenador.`
+    : `${name} es admin y no se puede convertir.`;
+}
+
+/**
+ * Qué motivo dice un 400 de `promote_user` (BE-41): el texto exacto del servidor, que no se muestra tal
+ * cual. `null` si no es un 400 o es otro (datos inválidos).
+ */
+export function notConvertibleReason(
+  error: unknown,
+): NotConvertibleReason | null {
+  if (!isApiError(error) || error.status !== 400) return null;
+  const reason = (
+    Object.keys(NOT_CONVERTIBLE_SERVER_MESSAGE) as NotConvertibleReason[]
+  ).find((key) => NOT_CONVERTIBLE_SERVER_MESSAGE[key] === error.serverMessage);
+  return reason ?? null;
+}
+
 /**
  * Qué dato repetido dice un 409 de `promote_user` ("Ya existe un entrenador con ese email profesional" o
  * "… con ese CUIL"). Se reconoce por el texto del servidor, que no se muestra tal cual. `null` si no es un
