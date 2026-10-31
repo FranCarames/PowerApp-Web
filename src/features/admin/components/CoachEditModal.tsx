@@ -141,7 +141,6 @@ function CoachEditForm({
   const {
     register,
     handleSubmit,
-    setValue,
     setError,
     formState: { errors },
   } = useForm<CoachDataInput, unknown, CoachDataValues>({
@@ -205,11 +204,7 @@ function CoachEditForm({
           })}
         </Note>
       )}
-      <CoachDataFields
-        register={register}
-        setValue={setValue}
-        errors={errors}
-      />
+      <CoachDataFields register={register} errors={errors} />
     </form>
   );
 }
