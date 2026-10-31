@@ -43,7 +43,6 @@ export function ConvertForm({ student, previous, coaches }: ConvertFormProps) {
   const {
     register,
     handleSubmit,
-    setValue,
     setError,
     formState: { errors },
   } = useForm<CoachDataInput, unknown, CoachDataValues>({
@@ -117,11 +116,7 @@ export function ConvertForm({ student, previous, coaches }: ConvertFormProps) {
           })}
         </Note>
       )}
-      <CoachDataFields
-        register={register}
-        setValue={setValue}
-        errors={errors}
-      />
+      <CoachDataFields register={register} errors={errors} />
       <Button type="submit" disabled={!student} loading={convert.isPending}>
         Convertir en entrenador
       </Button>
