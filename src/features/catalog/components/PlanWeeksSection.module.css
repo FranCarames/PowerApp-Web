@@ -1,0 +1,28 @@
+/* .p-weeks del prototipo: el marco de las semanas del plan. */
+.section {
+  min-width: 0;
+}
+
+/* Lo que explica la sección, bajo su título. */
+.intro {
+  margin: -4px 0 14px;
+  font-size: 12px;
+  color: var(--tm);
+}
+
+/* Las tarjetas de las semanas: apiladas en el celular y, desde 960 px, en una grilla a la derecha de los datos. */
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+@media (min-width: 960px) {
+  /* Alineada con la parte de arriba de los datos, que está al lado. */
+  .section > :first-child {
+    margin-top: 0;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}

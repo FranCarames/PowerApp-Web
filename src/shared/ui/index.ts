@@ -28,6 +28,7 @@ export { PhoneField } from './PhoneField';
 export { Pill } from './Pill';
 export { SearchInput } from './SearchInput';
 export { SectionHeader } from './SectionHeader';
+export { SelectMark } from './SelectMark';
 export { Segmented } from './Segmented';
 export { Select } from './Select';
 export { Skeleton } from './Skeleton';

@@ -12,7 +12,6 @@ import {
 import { usePlanification } from '../hooks/usePlanification';
 import styles from './PlanEditor.module.css';
 import { PlanForm } from './PlanForm';
-import { PlanRoutines } from './PlanRoutines';
 import { PlanStatusActions } from './PlanStatusActions';
 
 interface PlanEditorProps {
@@ -23,10 +22,10 @@ interface PlanEditorProps {
 }
 
 /**
- * La pantalla de alta y edición de una planificación (CU-E-09 a CU-E-12), la misma del Admin
- * (`/a/planes/:id`) y del Entrenador (`/c/planes/:id`): el encabezado, la cabecera del plan, sus
- * rutinas por semana y, al editar, eliminar o reactivar. Un plan nuevo solo tiene la cabecera: las
- * rutinas se le agregan una vez creado.
+ * La pantalla de alta y edición de una planificación (CU-E-09 a CU-E-12f), la misma del Admin
+ * (`/a/planes/:id`) y del Entrenador (`/c/planes/:id`): el encabezado y, en `PlanForm`, la cabecera del plan
+ * con sus semanas. Un plan nuevo arma sus semanas en pantalla y las guarda junto con la cabecera; uno
+ * guardado cambia sus rutinas al instante y, abajo, se lo puede eliminar o reactivar.
  */
 export function PlanEditor({ id, basePath }: PlanEditorProps) {
   return id === 'nuevo' ? (
@@ -54,9 +53,14 @@ function Layout({
         title="Planificación"
         back={basePath}
       />
-      <div className={styles.narrow}>{children}</div>
+      {children}
     </>
   );
+}
+
+/** El ancho de los formularios de una columna, para lo que todavía no tiene las dos del editor. */
+function Narrow({ children }: { children: ReactNode }) {
+  return <div className={styles.narrow}>{children}</div>;
 }
 
 function SkeletonField() {
@@ -104,24 +108,28 @@ function EditPlan({ id, basePath }: PlanEditorProps) {
               poder cambiarla.
             </Note>
           )}
-          <PlanForm basePath={basePath} plan={plan.data} />
-          <PlanRoutines plan={plan.data} />
-          <PlanStatusActions plan={plan.data} basePath={basePath} />
+          <PlanForm basePath={basePath} plan={plan.data}>
+            <PlanStatusActions plan={plan.data} basePath={basePath} />
+          </PlanForm>
         </>
       ) : plan.isError ? (
-        <ErrorState
-          title={notFound ? 'No encontramos la planificación' : undefined}
-          message={
-            notFound
-              ? 'No hay ninguna planificación con ese enlace. Volvé a la lista.'
-              : getErrorMessage(plan.error)
-          }
-          // Un 404 o un 400 se repetirían igual: no se ofrece reintentar.
-          onRetry={notFound ? undefined : () => void plan.refetch()}
-          retrying={plan.isRefetching}
-        />
+        <Narrow>
+          <ErrorState
+            title={notFound ? 'No encontramos la planificación' : undefined}
+            message={
+              notFound
+                ? 'No hay ninguna planificación con ese enlace. Volvé a la lista.'
+                : getErrorMessage(plan.error)
+            }
+            // Un 404 o un 400 se repetirían igual: no se ofrece reintentar.
+            onRetry={notFound ? undefined : () => void plan.refetch()}
+            retrying={plan.isRefetching}
+          />
+        </Narrow>
       ) : (
-        <FormSkeleton />
+        <Narrow>
+          <FormSkeleton />
+        </Narrow>
       )}
     </Layout>
   );

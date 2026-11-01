@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 // con el mismo trazado, convertido a JSX. Todos viven en una grilla de 24×24.
 // `eyeOff` no está en el prototipo: lo necesita PasswordInput para mostrar el estado "visible".
 // `minus` tampoco: es la mitad de `plus`, para el botón − de NumberStepper.
+// `grip`, `copy`, `chevU` y `chevD` sí son del prototipo: los usa el editor de planificaciones por semanas.
 export const ICON_PATHS = {
   home: (
     <>
@@ -63,6 +64,24 @@ export const ICON_PATHS = {
   minus: <path d="M5 12h14" />,
   chev: <path d="M9 6l6 6-6 6" />,
   chevL: <path d="M15 6l-6 6 6 6" />,
+  chevU: <path d="M6 15l6-6 6 6" />,
+  chevD: <path d="M6 9l6 6 6-6" />,
+  grip: (
+    <>
+      <circle cx="9" cy="6" r="1.1" />
+      <circle cx="15" cy="6" r="1.1" />
+      <circle cx="9" cy="12" r="1.1" />
+      <circle cx="15" cy="12" r="1.1" />
+      <circle cx="9" cy="18" r="1.1" />
+      <circle cx="15" cy="18" r="1.1" />
+    </>
+  ),
+  copy: (
+    <>
+      <rect x="9" y="9" width="12" height="12" rx="2" />
+      <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+    </>
+  ),
   check: <path d="M5 12l5 5 9-10" />,
   x: <path d="M6 6l12 12M18 6L6 18" />,
   edit: <path d="M4 20h4L19 9l-4-4L4 16z" />,

@@ -24,6 +24,14 @@ export function planErrorMessage(error: unknown): string {
   const server = isApiError(error) ? (error.serverMessage ?? '') : '';
   const week = /semana (\d+)/.exec(server)?.[1];
 
+  if (server.includes('La lista no coincide')) {
+    // CU-E-12e: la semana cambió por otro lado mientras se reordenaba. Es el texto del servidor, ya en español.
+    return `La lista no coincide con las rutinas vigentes de la semana ${week ?? 'elegida'}. Recargá la planificación.`;
+  }
+  if (server.includes('no tiene rutinas para repetir')) {
+    // CU-E-12f: la semana de origen se vació por otro lado mientras se elegía a dónde copiarla.
+    return `La semana ${week ?? 'elegida'} no tiene rutinas para repetir. Recargá la planificación.`;
+  }
   if (server.includes('la duración no puede ser menor')) {
     return `La planificación tiene rutinas en la semana ${week ?? 'más alta'}: la duración no puede ser menor. Quitá esas rutinas o dejá una duración mayor.`;
   }

@@ -1,0 +1,201 @@
+/* .card.pwk del prototipo: una semana del plan. */
+.card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-width: 0;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+/* "Semana 2", "1 de 3" y el botón de plegar, en una línea. */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+}
+
+.title {
+  font-family: var(--fD);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.count {
+  flex: 1;
+  font-family: var(--fM);
+  font-size: 12px;
+  color: var(--ts);
+  white-space: nowrap;
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Una rutina de la semana: grabber, posición, nombre y quitar. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 4px;
+  background: var(--el);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  transition: box-shadow 0.1s;
+}
+
+/* La fila que se está arrastrando, y la línea que marca dónde se soltaría. */
+.dragging {
+  border-color: var(--acc);
+  background: #22263a;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+}
+
+.dropBefore {
+  box-shadow: 0 -3px 0 var(--acc);
+}
+
+.dropAfter {
+  box-shadow: 0 3px 0 var(--acc);
+}
+
+/* El asa para arrastrar. `touch-action: none` evita que el dedo desplace la página en vez de mover la fila. */
+.grab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 40px;
+  border-radius: 8px;
+  color: var(--ts);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+@media (hover: hover) {
+  .grab:hover:not(:disabled) {
+    color: var(--tp);
+    background: var(--card);
+  }
+}
+
+.grab:active:not(:disabled) {
+  cursor: grabbing;
+}
+
+.grab:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pos {
+  flex-shrink: 0;
+  width: 16px;
+  font-family: var(--fM);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--acc);
+}
+
+.label {
+  display: grid;
+  flex: 1;
+  justify-items: start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.name {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+/* Una rutina dada de baja sigue en el plan, pero se ve apagada. */
+.inactive {
+  opacity: 0.7;
+}
+
+/* Una fila al elegir rutinas para quitarlas en lote: toda ella es el interruptor. */
+.pick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 48px;
+  padding: 4px 10px 4px 12px;
+  text-align: left;
+  color: var(--tp);
+  background: var(--el);
+  border: 1px solid transparent;
+  border-radius: 12px;
+}
+
+.picked {
+  border-color: var(--pri);
+}
+
+/* Un hueco por llenar: el lugar que falta para llegar a las rutinas por semana. */
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 4px 12px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tp);
+  border: 1px dashed var(--border2);
+  border-radius: 12px;
+}
+
+@media (hover: hover) {
+  .slot:hover:not(:disabled) {
+    border-color: var(--acc);
+  }
+}
+
+.slot:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.slot svg {
+  flex-shrink: 0;
+  color: var(--acc);
+}
+
+.slotPos {
+  flex-shrink: 0;
+  width: 16px;
+  font-family: var(--fM);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ts);
+}
+
+/* «Agregar otra rutina»: la semana ya llenó sus huecos, y agregar más es opcional. */
+.more {
+  font-weight: 500;
+  color: var(--ts);
+}
+
+.repeat {
+  justify-self: start;
+  border: 1px solid var(--border);
+  color: var(--ts);
+}

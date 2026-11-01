@@ -1,0 +1,57 @@
+/* Las semanas donde se puede repetir: una fila con casilla por cada una. Desplaza por su cuenta si son muchas. */
+.fieldset {
+  display: grid;
+  gap: 8px;
+  max-height: min(340px, 42vh);
+  min-width: 0;
+  margin: 16px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  border: 0;
+}
+
+/* .rep-row del prototipo: la fila entera es el interruptor. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.row input {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  accent-color: var(--pri);
+}
+
+.text {
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+
+.week {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.hint {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--tm);
+}
+
+/* Los botones, apilados al pie, como las acciones de un <Modal>. */
+.actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
