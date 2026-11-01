@@ -160,7 +160,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos, o un `role` distinto de `user`: el registro sólo crea alumnos"
+            "description": "Datos inválidos (incluye un teléfono que no cumple el formato: el código de país es \"+\" y de 1 a 4 dígitos, y el número sólo tiene dígitos, sin espacios ni guiones), o un `role` distinto de `user`: el registro sólo crea alumnos"
           },
           "409": {
             "description": "Ya existe un usuario con ese email"
@@ -362,6 +362,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Datos inválidos (incluye un teléfono que no cumple el formato: el código de país es \"+\" y de 1 a 4 dígitos, y el número sólo tiene dígitos, sin espacios ni guiones; sólo se valida el campo que viene en el body)"
           },
           "409": {
             "description": "El email ya está en uso por otro usuario"
@@ -1660,7 +1663,7 @@
         },
         "responses": {
           "201": {
-            "description": "",
+            "description": "La planificación creada, con las rutinas de cada semana en routines (order 1, 2, 3… por semana). Sin weeks, routines es []",
             "content": {
               "application/json": {
                 "schema": {
@@ -1670,7 +1673,61 @@
             }
           },
           "400": {
-            "description": "Datos inválidos (duration obligatoria, entero ≥ 0)"
+            "description": "Datos inválidos (duration obligatoria, entero ≥ 0; weeks: week ≥ 1 y de 1 a 50 routine_ids por semana). O: «Una semana aparece más de una vez.»; «La semana N supera la duración de la planificación (D semanas).» (la primera de weeks, en el orden recibido); «Estas rutinas están dadas de baja y no pueden asignarse: <nombres>.». No se crea nada: ni la planificación ni ninguna rutina",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Una semana aparece más de una vez."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "«Algunas rutinas no fueron encontradas». No se crea nada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Algunas rutinas no fueron encontradas"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error al crear la planificación. No se crea nada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Error al crear la planificación."
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1853,6 +1910,192 @@
           },
           "404": {
             "description": "Planificación o alguna rutina no encontrada"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/routine/repeat-week": {
+      "post": {
+        "operationId": "PlanificationController_repeatPlanificationWeek",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RepeatPlanificationWeekDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "La planificación actualizada. La semana de origen no cambia; cada semana destino suma las copias al final",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanificationDetailResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos (to_weeks de 1 a 50 semanas distintas entre sí y distintas de from_week). O: «La planificación está dada de baja. Reactivala antes de asignarle rutinas.»; «La semana N supera la duración de la planificación (D semanas).» (primero from_week, después to_weeks en el orden recibido); «La semana N no tiene rutinas para repetir.»; «Estas rutinas están dadas de baja y no pueden asignarse: <nombres>.». No se copia nada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "La semana N no tiene rutinas para repetir."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "«Planificación no encontrada». No se copia nada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Planificación no encontrada"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error al repetir la semana de la planificación. No se copia nada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Error al repetir la semana de la planificación."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Planification"
+        ]
+      }
+    },
+    "/api/v1/planification/routine/reorder": {
+      "post": {
+        "operationId": "PlanificationController_reorderPlanificationWeek",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderPlanificationWeekDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "La planificación actualizada, con la semana renumerada 1, 2, 3… en el orden recibido. Las quitadas y las otras semanas no cambian",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanificationDetailResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos (al menos un id, todos UUID). O: «La planificación está dada de baja. Reactivala antes de asignarle rutinas.»; «La lista no coincide con las rutinas vigentes de la semana N. Recargá la planificación.» (falta alguna, sobra alguna o hay una repetida). No se cambia nada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "La lista no coincide con las rutinas vigentes de la semana N. Recargá la planificación."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "«Planificación no encontrada». No se cambia nada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Planificación no encontrada"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error al reordenar las rutinas de la semana. No se cambia nada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Error al reordenar las rutinas de la semana."
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3977,12 +4220,16 @@
           "phone_prefix": {
             "type": "string",
             "example": "+54",
-            "maxLength": 10
+            "maxLength": 10,
+            "pattern": "^\\+\\d{1,4}$",
+            "description": "Código de país: \"+\" y de 1 a 4 dígitos"
           },
           "phone_number": {
             "type": "string",
             "example": "1123456789",
-            "maxLength": 20
+            "maxLength": 20,
+            "pattern": "^\\d+$",
+            "description": "Sólo dígitos, sin espacios ni guiones"
           }
         },
         "required": [
@@ -4172,12 +4419,16 @@
           "phone_prefix": {
             "type": "string",
             "example": "+54",
-            "maxLength": 10
+            "maxLength": 10,
+            "pattern": "^\\+\\d{1,4}$",
+            "description": "Código de país: \"+\" y de 1 a 4 dígitos"
           },
           "phone_number": {
             "type": "string",
             "example": "1123456789",
-            "maxLength": 20
+            "maxLength": 20,
+            "pattern": "^\\d+$",
+            "description": "Sólo dígitos, sin espacios ni guiones"
           },
           "profile_picture": {
             "type": "string",
@@ -5006,6 +5257,35 @@
           "routines"
         ]
       },
+      "CreatePlanificationWeekDto": {
+        "type": "object",
+        "properties": {
+          "week": {
+            "type": "number",
+            "example": 1,
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "Semana del plan. Si la duración es mayor que 0, no puede superarla (400). No puede repetirse entre las entradas de weeks (400)"
+          },
+          "routine_ids": {
+            "example": [
+              "uuid-1234",
+              "uuid-5678"
+            ],
+            "minItems": 1,
+            "maxItems": 50,
+            "description": "Rutinas de la semana, en orden: quedan con order 1, 2, 3… Se permiten ids repetidos: crean una asignación cada uno. Las semanas vacías no se mandan",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "week",
+          "routine_ids"
+        ]
+      },
       "CreatePlanificationDto": {
         "type": "object",
         "properties": {
@@ -5019,7 +5299,7 @@
             "type": "number",
             "example": 3,
             "minimum": 1,
-            "description": "Rutinas que el entrenador declara para el plan. Es la intención del plan, no el conteo real: ese es routine_count, que sale de las rutinas efectivamente asignadas por CU-E-12"
+            "description": "Rutinas por semana: cuántas rutinas lleva cada semana del plan. Define los huecos de cada semana; no es un tope (una semana puede terminar con más o con menos, o vacía). Es la intención del plan, no el conteo real: ese es routine_count, que sale de las rutinas efectivamente asignadas por CU-E-12"
           },
           "description": {
             "type": "string",
@@ -5038,6 +5318,13 @@
             "minimum": 0,
             "maximum": 2147483647,
             "description": "Duración del plan en semanas. 0 = sin duración fija. Si es mayor que 0, limita la semana (week) de las rutinas del plan a 1..duration. Obligatoria, también al editar. Al editar, si es mayor que 0 no puede ser menor que la semana más alta usada por una rutina vigente del plan (400)"
+          },
+          "weeks": {
+            "description": "Rutinas de cada semana, para crear el plan ya armado (CU-E-09). Sin weeks o con [], el plan se crea sin rutinas. Solo las semanas que tienen rutinas (de 1 a 50 por semana); sin semanas repetidas. Todo o nada: la planificación y sus rutinas se guardan en una sola operación, y si algo falla no se crea ninguna de las dos",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreatePlanificationWeekDto"
+            }
           }
         },
         "required": [
@@ -5059,7 +5346,7 @@
             "type": "number",
             "example": 3,
             "minimum": 1,
-            "description": "Rutinas que el entrenador declara para el plan. Es la intención del plan, no el conteo real: ese es routine_count, que sale de las rutinas efectivamente asignadas por CU-E-12"
+            "description": "Rutinas por semana: cuántas rutinas lleva cada semana del plan. Define los huecos de cada semana; no es un tope (una semana puede terminar con más o con menos, o vacía). Es la intención del plan, no el conteo real: ese es routine_count, que sale de las rutinas efectivamente asignadas por CU-E-12"
           },
           "description": {
             "type": "string",
@@ -5212,6 +5499,74 @@
           "planification_id",
           "week",
           "routine_ids"
+        ]
+      },
+      "RepeatPlanificationWeekDto": {
+        "type": "object",
+        "properties": {
+          "planification_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "from_week": {
+            "type": "number",
+            "example": 1,
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "Semana de origen: se copian sus rutinas vigentes, en su orden. Tiene que tener al menos una (400). Si la planificación tiene duración mayor que 0, no puede superarla (400)"
+          },
+          "to_weeks": {
+            "example": [
+              2,
+              3
+            ],
+            "minItems": 1,
+            "maxItems": 50,
+            "uniqueItems": true,
+            "description": "Semanas destino, distintas entre sí y distintas de from_week. Las copias se suman al final de cada semana, consecutivas, aunque ya tenga rutinas. Si la planificación tiene duración mayor que 0, ninguna puede superarla (400)",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "planification_id",
+          "from_week",
+          "to_weeks"
+        ]
+      },
+      "ReorderPlanificationWeekDto": {
+        "type": "object",
+        "properties": {
+          "planification_id": {
+            "type": "string",
+            "example": "uuid-1234"
+          },
+          "week": {
+            "type": "number",
+            "example": 1,
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "Semana que se reordena"
+          },
+          "routine_asignation_ids": {
+            "example": [
+              "uuid-1234",
+              "uuid-5678"
+            ],
+            "minItems": 1,
+            "description": "Ids de las asignaciones (Routine_Asignation, los routines[].id del detalle) en el orden nuevo. Tienen que ser exactamente las vigentes de la semana, sin faltantes, extras ni repetidos (400): quedan con order 1, 2, 3…",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "planification_id",
+          "week",
+          "routine_asignation_ids"
         ]
       },
       "SetRoutineAsignationActiveDto": {

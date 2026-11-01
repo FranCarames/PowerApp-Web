@@ -5,8 +5,8 @@ import { queryKeys } from '@/api/queryKeys';
 
 /**
  * `GET /planification/{id}`: la planificación con su nombre, descripción, tipo, duración en semanas (0 es
- * sin duración fija), las rutinas que declaró el entrenador (`number_of_routines`) y las asignadas
- * (`routine_count`), y sus **rutinas vigentes** en una lista plana, ordenada por semana y posición: cada
+ * sin duración fija en un plan viejo), las rutinas por semana que declaró el entrenador (`number_of_routines`:
+ * define los huecos de cada semana, no es un tope) y las asignadas (`routine_count`), y sus **rutinas vigentes** en una lista plana, ordenada por semana y posición: cada
  * una con el `id` de su vínculo (no el de la rutina), su `week`, su `order` y la rutina (que puede estar
  * dada de baja y sigue apareciendo). Las rutinas quitadas del plan no vienen. Responde también por un plan
  * dado de baja y 404 si no existe. Es de entrenador y admin. Con `id` `null` no pide nada.

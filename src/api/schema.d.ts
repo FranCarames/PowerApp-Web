@@ -740,6 +740,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/planification/routine/repeat-week": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["PlanificationController_repeatPlanificationWeek"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/planification/routine/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["PlanificationController_reorderPlanificationWeek"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/planification/routine/set-active/{id}": {
         parameters: {
             query?: never;
@@ -1407,9 +1439,15 @@ export interface components {
              * @enum {string}
              */
             role: "user";
-            /** @example +54 */
+            /**
+             * @description Código de país: "+" y de 1 a 4 dígitos
+             * @example +54
+             */
             phone_prefix: string;
-            /** @example 1123456789 */
+            /**
+             * @description Sólo dígitos, sin espacios ni guiones
+             * @example 1123456789
+             */
             phone_number: string;
         };
         LoginUserDto: {
@@ -1485,9 +1523,15 @@ export interface components {
             last_name?: string;
             /** @example juan@example.com */
             email?: string;
-            /** @example +54 */
+            /**
+             * @description Código de país: "+" y de 1 a 4 dígitos
+             * @example +54
+             */
             phone_prefix?: string;
-            /** @example 1123456789 */
+            /**
+             * @description Sólo dígitos, sin espacios ni guiones
+             * @example 1123456789
+             */
             phone_number?: string;
             /** @example https://cdn.powerapp.com/avatars/juan.png */
             profile_picture?: string;
@@ -1872,6 +1916,21 @@ export interface components {
             /** @description Rutinas vigentes del plan, ordenadas por week, order y fecha de asignación. La lista es plana: el cliente agrupa por semana. Vacía si no tiene ninguna */
             routines: components["schemas"]["PlanificationAsignationResponseDto"][];
         };
+        CreatePlanificationWeekDto: {
+            /**
+             * @description Semana del plan. Si la duración es mayor que 0, no puede superarla (400). No puede repetirse entre las entradas de weeks (400)
+             * @example 1
+             */
+            week: number;
+            /**
+             * @description Rutinas de la semana, en orden: quedan con order 1, 2, 3… Se permiten ids repetidos: crean una asignación cada uno. Las semanas vacías no se mandan
+             * @example [
+             *       "uuid-1234",
+             *       "uuid-5678"
+             *     ]
+             */
+            routine_ids: string[];
+        };
         CreatePlanificationDto: {
             /**
              * @description Obligatorio acá aunque la columna sea nullable: no se cargan planificaciones sin nombre
@@ -1879,7 +1938,7 @@ export interface components {
              */
             name: string;
             /**
-             * @description Rutinas que el entrenador declara para el plan. Es la intención del plan, no el conteo real: ese es routine_count, que sale de las rutinas efectivamente asignadas por CU-E-12
+             * @description Rutinas por semana: cuántas rutinas lleva cada semana del plan. Define los huecos de cada semana; no es un tope (una semana puede terminar con más o con menos, o vacía). Es la intención del plan, no el conteo real: ese es routine_count, que sale de las rutinas efectivamente asignadas por CU-E-12
              * @example 3
              */
             number_of_routines: number;
@@ -1895,6 +1954,8 @@ export interface components {
              * @example 12
              */
             duration: number;
+            /** @description Rutinas de cada semana, para crear el plan ya armado (CU-E-09). Sin weeks o con [], el plan se crea sin rutinas. Solo las semanas que tienen rutinas (de 1 a 50 por semana); sin semanas repetidas. Todo o nada: la planificación y sus rutinas se guardan en una sola operación, y si algo falla no se crea ninguna de las dos */
+            weeks?: components["schemas"]["CreatePlanificationWeekDto"][];
         };
         EditPlanificationDto: {
             /**
@@ -1903,7 +1964,7 @@ export interface components {
              */
             name: string;
             /**
-             * @description Rutinas que el entrenador declara para el plan. Es la intención del plan, no el conteo real: ese es routine_count, que sale de las rutinas efectivamente asignadas por CU-E-12
+             * @description Rutinas por semana: cuántas rutinas lleva cada semana del plan. Define los huecos de cada semana; no es un tope (una semana puede terminar con más o con menos, o vacía). Es la intención del plan, no el conteo real: ese es routine_count, que sale de las rutinas efectivamente asignadas por CU-E-12
              * @example 3
              */
             number_of_routines: number;
@@ -1985,6 +2046,40 @@ export interface components {
              *     ]
              */
             routine_ids: string[];
+        };
+        RepeatPlanificationWeekDto: {
+            /** @example uuid-1234 */
+            planification_id: string;
+            /**
+             * @description Semana de origen: se copian sus rutinas vigentes, en su orden. Tiene que tener al menos una (400). Si la planificación tiene duración mayor que 0, no puede superarla (400)
+             * @example 1
+             */
+            from_week: number;
+            /**
+             * @description Semanas destino, distintas entre sí y distintas de from_week. Las copias se suman al final de cada semana, consecutivas, aunque ya tenga rutinas. Si la planificación tiene duración mayor que 0, ninguna puede superarla (400)
+             * @example [
+             *       2,
+             *       3
+             *     ]
+             */
+            to_weeks: number[];
+        };
+        ReorderPlanificationWeekDto: {
+            /** @example uuid-1234 */
+            planification_id: string;
+            /**
+             * @description Semana que se reordena
+             * @example 1
+             */
+            week: number;
+            /**
+             * @description Ids de las asignaciones (Routine_Asignation, los routines[].id del detalle) en el orden nuevo. Tienen que ser exactamente las vigentes de la semana, sin faltantes, extras ni repetidos (400): quedan con order 1, 2, 3…
+             * @example [
+             *       "uuid-1234",
+             *       "uuid-5678"
+             *     ]
+             */
+            routine_asignation_ids: string[];
         };
         SetRoutineAsignationActiveDto: {
             /**
@@ -3182,7 +3277,7 @@ export interface operations {
                     "application/json": components["schemas"]["User"];
                 };
             };
-            /** @description Datos inválidos, o un `role` distinto de `user`: el registro sólo crea alumnos */
+            /** @description Datos inválidos (incluye un teléfono que no cumple el formato: el código de país es "+" y de 1 a 4 dígitos, y el número sólo tiene dígitos, sin espacios ni guiones), o un `role` distinto de `user`: el registro sólo crea alumnos */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3363,6 +3458,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["User"];
                 };
+            };
+            /** @description Datos inválidos (incluye un teléfono que no cumple el formato: el código de país es "+" y de 1 a 4 dígitos, y el número sólo tiene dígitos, sin espacios ni guiones; sólo se valida el campo que viene en el body) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description El email ya está en uso por otro usuario */
             409: {
@@ -4283,6 +4385,7 @@ export interface operations {
             };
         };
         responses: {
+            /** @description La planificación creada, con las rutinas de cada semana en routines (order 1, 2, 3… por semana). Sin weeks, routines es [] */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -4291,12 +4394,41 @@ export interface operations {
                     "application/json": components["schemas"]["PlanificationDetailResponseDto"];
                 };
             };
-            /** @description Datos inválidos (duration obligatoria, entero ≥ 0) */
+            /** @description Datos inválidos (duration obligatoria, entero ≥ 0; weeks: week ≥ 1 y de 1 a 50 routine_ids por semana). O: «Una semana aparece más de una vez.»; «La semana N supera la duración de la planificación (D semanas).» (la primera de weeks, en el orden recibido); «Estas rutinas están dadas de baja y no pueden asignarse: <nombres>.». No se crea nada: ni la planificación ni ninguna rutina */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        /** @example Una semana aparece más de una vez. */
+                        error: string;
+                    };
+                };
+            };
+            /** @description «Algunas rutinas no fueron encontradas». No se crea nada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Algunas rutinas no fueron encontradas */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Error al crear la planificación. No se crea nada */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Error al crear la planificación. */
+                        error: string;
+                    };
+                };
             };
         };
     };
@@ -4435,6 +4567,126 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    PlanificationController_repeatPlanificationWeek: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepeatPlanificationWeekDto"];
+            };
+        };
+        responses: {
+            /** @description La planificación actualizada. La semana de origen no cambia; cada semana destino suma las copias al final */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanificationDetailResponseDto"];
+                };
+            };
+            /** @description Datos inválidos (to_weeks de 1 a 50 semanas distintas entre sí y distintas de from_week). O: «La planificación está dada de baja. Reactivala antes de asignarle rutinas.»; «La semana N supera la duración de la planificación (D semanas).» (primero from_week, después to_weeks en el orden recibido); «La semana N no tiene rutinas para repetir.»; «Estas rutinas están dadas de baja y no pueden asignarse: <nombres>.». No se copia nada */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example La semana N no tiene rutinas para repetir. */
+                        error: string;
+                    };
+                };
+            };
+            /** @description «Planificación no encontrada». No se copia nada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Planificación no encontrada */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Error al repetir la semana de la planificación. No se copia nada */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Error al repetir la semana de la planificación. */
+                        error: string;
+                    };
+                };
+            };
+        };
+    };
+    PlanificationController_reorderPlanificationWeek: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderPlanificationWeekDto"];
+            };
+        };
+        responses: {
+            /** @description La planificación actualizada, con la semana renumerada 1, 2, 3… en el orden recibido. Las quitadas y las otras semanas no cambian */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanificationDetailResponseDto"];
+                };
+            };
+            /** @description Datos inválidos (al menos un id, todos UUID). O: «La planificación está dada de baja. Reactivala antes de asignarle rutinas.»; «La lista no coincide con las rutinas vigentes de la semana N. Recargá la planificación.» (falta alguna, sobra alguna o hay una repetida). No se cambia nada */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example La lista no coincide con las rutinas vigentes de la semana N. Recargá la planificación. */
+                        error: string;
+                    };
+                };
+            };
+            /** @description «Planificación no encontrada». No se cambia nada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Planificación no encontrada */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Error al reordenar las rutinas de la semana. No se cambia nada */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Error al reordenar las rutinas de la semana. */
+                        error: string;
+                    };
+                };
             };
         };
     };

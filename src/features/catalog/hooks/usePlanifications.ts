@@ -22,8 +22,8 @@ export function planificationsQuery(includeInactive: boolean) {
 
 /**
  * `GET /planification/all`: cada planificación con su nombre, descripción, tipo, duración en semanas
- * (0 es sin duración fija), la cantidad de rutinas que declaró el entrenador (`number_of_routines`) y
- * las que tiene asignadas (`routine_count`, solo los vínculos vigentes). **No trae las rutinas**: para
+ * (0 es sin duración fija, en un plan viejo), las rutinas por semana que declaró el entrenador
+ * (`number_of_routines`) y las que tiene asignadas (`routine_count`, solo los vínculos vigentes). **No trae las rutinas**: para
  * eso está el detalle. Las usa el listado de planificaciones (`PlanList`), el del Admin (T23) y el del
  * Entrenador (T49).
  */

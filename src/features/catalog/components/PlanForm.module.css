@@ -1,3 +1,42 @@
+/* .plan-ed del prototipo: los datos, las semanas y el botón. Apilados en el celular. */
+.layout {
+  display: grid;
+  grid-template-areas:
+    'data'
+    'weeks'
+    'acts';
+  align-items: start;
+  min-width: 0;
+}
+
+.data {
+  grid-area: data;
+  min-width: 0;
+}
+
+.weeks {
+  grid-area: weeks;
+  min-width: 0;
+}
+
+.acts {
+  grid-area: acts;
+  min-width: 0;
+  margin-top: 18px;
+}
+
+/* Desde 960 px: los datos a la izquierda (hasta 360 px, con el botón debajo) y las semanas a la derecha. */
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+    grid-template-areas:
+      'data weeks'
+      'acts weeks';
+    grid-template-rows: auto 1fr;
+    column-gap: 28px;
+  }
+}
+
 /* El <fieldset> solo agrupa los campos para apagarlos juntos: sin borde ni relleno propios. */
 .fieldset {
   border: 0;
@@ -6,7 +45,28 @@
   min-width: 0;
 }
 
-/* Lo que pasa después de crear, bajo el botón de guardar. */
+/* La duración y las rutinas por semana, lado a lado. */
+.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* En un celular angosto los dos steppers no entran juntos: uno bajo el otro. */
+@media (max-width: 359px) {
+  .two {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Lo que explica los dos campos, bajo ellos. */
+.hint {
+  margin: -6px 0 4px;
+  font-size: 12px;
+  color: var(--tm);
+}
+
+/* Lo que pasa al crear, bajo el botón. */
 .afterCreate {
   margin: 10px 0 0;
   font-size: 12px;

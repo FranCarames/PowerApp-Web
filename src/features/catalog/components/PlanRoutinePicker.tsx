@@ -30,11 +30,14 @@ import {
   routinesCount,
   weekLimit,
 } from '../planRoutines';
+import { PLAN_WEEK_ROUTINES_MAX } from '../planSchema';
 import styles from './PlanRoutinePicker.module.css';
 
 export interface PlanRoutinePick {
   week: number;
   routineIds: string[];
+  /** Las mismas rutinas, enteras y en el orden en que se eligieron: el alta las muestra antes de guardarlas. */
+  routines: RoutineListItemPlus[];
   /** Solo con una rutina: sin ella, va al final de la semana. */
   order?: number;
 }
@@ -45,6 +48,13 @@ interface PlanRoutinePickerProps {
   duration: number;
   /** La semana con la que arranca el campo. */
   defaultWeek: number;
+  /**
+   * El alta: las rutinas se arman en pantalla, en la semana de la tarjeta que se tocó. No se pide semana ni
+   * posición: van al final de esa semana, en el orden en que se eligen.
+   */
+  draft?: boolean;
+  /** Solo en el alta: cuántas rutinas más admite la semana (el máximo es 50 por semana). */
+  capacity?: number;
   /** Mientras se agrega: el botón queda ocupado y el modal no se cierra. */
   submitting: boolean;
   /** Por qué falló el último intento, ya en español. */
@@ -58,6 +68,9 @@ interface PlanRoutinePickerProps {
  * si es una sola, su posición dentro de la semana (opcional; sin ella va al final). Con varias, se agregan
  * al final de la semana, consecutivas y en el orden en que se eligieron. Una rutina se puede elegir más de
  * una vez: el plan admite repetirla, y cada vez ocupa su lugar.
+ *
+ * Se entra desde un hueco de una semana, así que la semana ya viene elegida. En el alta (`draft`) es la de
+ * la tarjeta y no se puede cambiar: el selector no pide semana ni posición.
  */
 export function PlanRoutinePicker({
   open,
@@ -71,6 +84,7 @@ export function PlanRoutinePicker({
       onClose={onClose}
       blocking={submitting}
       title="Agregar rutinas"
+      description={body.draft ? `Semana ${body.defaultWeek}` : undefined}
     >
       {/* El contenido solo existe con el modal abierto: la selección y los campos arrancan de cero cada vez. */}
       {open && (
@@ -83,6 +97,8 @@ export function PlanRoutinePicker({
 function PickerBody({
   duration,
   defaultWeek,
+  draft = false,
+  capacity = PLAN_WEEK_ROUTINES_MAX,
   submitting,
   error,
   onSubmit,
@@ -107,10 +123,20 @@ function PickerBody({
   for (const { id } of picked) {
     pickedCounts.set(id, (pickedCounts.get(id) ?? 0) + 1);
   }
-  const full = picked.length >= PLAN_BULK_MAX;
-  const single = picked.length === 1;
+  // En el alta lo que entra lo limita la semana (50 en total); al editar, el lote (50 por vez).
+  const limit = draft ? Math.min(PLAN_BULK_MAX, capacity) : PLAN_BULK_MAX;
+  const full = picked.length >= limit;
+  const single = !draft && picked.length === 1;
 
   function submit() {
+    if (draft) {
+      onSubmit({
+        week: defaultWeek,
+        routineIds: picked.map(({ id }) => id),
+        routines: picked,
+      });
+      return;
+    }
     const parsedWeek = parseWeek(week, duration);
     // La posición solo vale con una rutina: en el lote no hay forma de mandarla.
     const parsedOrder = single ? parseOrder(order) : { order: undefined };
@@ -122,6 +148,7 @@ function PickerBody({
     onSubmit({
       week: parsedWeek.week,
       routineIds: picked.map(({ id }) => id),
+      routines: picked,
       order: parsedOrder.order,
     });
   }
@@ -133,23 +160,25 @@ function PickerBody({
           {error}
         </Note>
       )}
-      <Field
-        label="Semana"
-        error={problems.week}
-        hint={
-          duration > 0
-            ? `El plan dura ${duration} semana${duration === 1 ? '' : 's'}.`
-            : 'El plan no tiene duración fija: va cualquier semana.'
-        }
-      >
-        <NumberStepper
+      {!draft && (
+        <Field
           label="Semana"
-          value={week}
-          onChange={setWeek}
-          min={1}
-          max={weekLimit(duration)}
-        />
-      </Field>
+          error={problems.week}
+          hint={
+            duration > 0
+              ? `El plan dura ${duration} semana${duration === 1 ? '' : 's'}.`
+              : 'El plan no tiene duración fija: va cualquier semana.'
+          }
+        >
+          <NumberStepper
+            label="Semana"
+            value={week}
+            onChange={setWeek}
+            min={1}
+            max={weekLimit(duration)}
+          />
+        </Field>
+      )}
       {picked.length > 0 && (
         <div className={styles.picked}>
           <div className={styles.pickedTitle}>
@@ -229,7 +258,9 @@ function PickerBody({
       </div>
       {full && (
         <p className={styles.hint}>
-          Llegaste al máximo de {PLAN_BULK_MAX} rutinas por vez.
+          {draft
+            ? `Una semana admite hasta ${PLAN_WEEK_ROUTINES_MAX} rutinas.`
+            : `Llegaste al máximo de ${PLAN_BULK_MAX} rutinas por vez.`}
         </p>
       )}
       {single ? (
@@ -247,10 +278,11 @@ function PickerBody({
           />
         </Field>
       ) : (
-        picked.length > 1 && (
+        picked.length > (draft ? 0 : 1) && (
           <p className={styles.hint}>
-            Se agregan al final de la semana, una detrás de otra, en el orden en
-            que las elegiste.
+            {draft
+              ? `Se agregan al final de la semana ${defaultWeek}, en el orden en que las elegiste.`
+              : 'Se agregan al final de la semana, una detrás de otra, en el orden en que las elegiste.'}
           </p>
         )
       )}

@@ -1,33 +1,6 @@
-/* Lo que explica la sección, bajo su título. */
+/* Lo que explica la sección «Quitadas del plan». */
 .hint {
   margin: -4px 0 14px;
-  font-size: 12px;
-  color: var(--tm);
-}
-
-/* Una semana: su encabezado y sus rutinas, con aire entre una y otra. */
-.week {
-  margin-bottom: 18px;
-}
-
-/* "Semana 2", cuántas rutinas tiene y el botón para agregar, en una línea. */
-.weekHead {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.weekTitle {
-  font-family: var(--fD);
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.weekCount {
-  flex: 1;
-  min-width: 0;
   font-size: 12px;
   color: var(--tm);
 }
@@ -36,10 +9,15 @@
 .actions {
   display: grid;
   gap: 10px;
-  margin: 4px 0 20px;
+  margin: 14px 0 6px;
 }
 
-/* "Reincorporar todas", bajo la lista de las quitadas. */
+/* «Quitadas del plan», bajo las semanas. */
+.removed {
+  margin-top: 18px;
+}
+
+/* «Reincorporar todas», bajo la lista de las quitadas. */
 .all {
   margin-top: 10px;
 }
