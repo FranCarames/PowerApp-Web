@@ -1,8 +1,11 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref } from 'react';
+import { Link, type To } from 'react-router';
 
 import { Icon } from '@/shared/icons';
+import { cx } from '@/shared/lib/cx';
 
 import { Card } from './Card';
+import cardStyles from './Card.module.css';
 import styles from './ListItem.module.css';
 import { SelectMark } from './SelectMark';
 import type { Tone } from './tone';
@@ -21,6 +24,10 @@ interface ListItemProps {
   tone?: Tone;
   /** Con `onClick` la fila es un botón; sin él, un contenedor. */
   onClick?: () => void;
+  /** Con `to` la fila es un link a otra pantalla (en lugar de `onClick`), como `a.card` del prototipo. */
+  to?: To;
+  /** El link de la fila (con `to`), p. ej. para devolverle el foco al volver de la pantalla a la que lleva. */
+  linkRef?: Ref<HTMLAnchorElement>;
   /** Lista de selección (requiere `onClick`): marca al final, borde de marca y aria-pressed. */
   selected?: boolean;
   className?: string;
@@ -36,6 +43,8 @@ export function ListItem({
   chevron = false,
   tone,
   onClick,
+  to,
+  linkRef,
   selected,
   className,
 }: ListItemProps) {
@@ -52,6 +61,25 @@ export function ListItem({
       {selected !== undefined && <SelectMark checked={selected} />}
     </>
   );
+
+  if (to !== undefined) {
+    return (
+      <Link
+        to={to}
+        ref={linkRef}
+        className={cx(
+          cardStyles.card,
+          cardStyles.click,
+          cardStyles.row,
+          tone && cardStyles[tone],
+          styles.link,
+          className,
+        )}
+      >
+        {content}
+      </Link>
+    );
+  }
 
   if (onClick) {
     return (

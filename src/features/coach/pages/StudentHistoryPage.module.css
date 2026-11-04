@@ -1,0 +1,11 @@
+.loading {
+  display: grid;
+  gap: 14px;
+}
+
+/* En escritorio, las pestañas tienen el ancho de la columna izquierda (spec 5.3), el de `HistoryColumns`. */
+@media (min-width: 960px) {
+  .tabs {
+    max-width: clamp(320px, 46%, 380px);
+  }
+}

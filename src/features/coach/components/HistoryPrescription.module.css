@@ -1,0 +1,14 @@
+/* La prescripción a la derecha de la fila (.data del prototipo, 12 px en negrita). */
+.blocks {
+  flex-shrink: 0;
+  max-width: 60%;
+  display: grid;
+  gap: 2px;
+  justify-items: end;
+  text-align: right;
+  font-family: var(--fM);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}

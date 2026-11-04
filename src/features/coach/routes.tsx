@@ -16,6 +16,7 @@ import { RegisterPaymentPage } from './pages/RegisterPaymentPage';
 import { RoutineEditorPage } from './pages/RoutineEditorPage';
 import { RoutinesPage } from './pages/RoutinesPage';
 import { StudentDetailPage } from './pages/StudentDetailPage';
+import { StudentHistoryPage } from './pages/StudentHistoryPage';
 import { StudentsPage } from './pages/StudentsPage';
 
 /** Pantallas del rol Entrenador, bajo /c. Van dentro de <AppShell> (lo arma el router). */
@@ -23,6 +24,8 @@ export const coachRoutes: RouteObject[] = [
   { index: true, loader: () => redirect('/c/alumnos') },
   { path: 'alumnos', Component: StudentsPage },
   { path: 'alumnos/:id', Component: StudentDetailPage },
+  // El historial de entrenamientos (CU-E-06 y CU-E-07), con ?vista, ?mes y ?ejercicio.
+  { path: 'alumnos/:id/historial', Component: StudentHistoryPage },
   { path: 'alumnos/:id/asignar', Component: AssignStudentPlanPage },
   { path: 'alumnos/:id/asignar-rutina', Component: AssignStudentRoutinePage },
   { path: 'membresias', Component: MembershipsPage },

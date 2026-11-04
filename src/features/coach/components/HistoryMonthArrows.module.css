@@ -1,0 +1,11 @@
+/* .harrows y .harrows .wk del prototipo: las flechas del mes, de 40 px. */
+.arrows {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.arrows > button {
+  width: 40px;
+  height: 40px;
+}

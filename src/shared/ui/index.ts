@@ -35,6 +35,7 @@ export { Skeleton } from './Skeleton';
 export { Spinner } from './Spinner';
 export { Stat } from './Stat';
 export { StatGrid } from './StatGrid';
+export { Tabs } from './Tabs';
 export { Textarea } from './Textarea';
 export { Thumb } from './Thumb';
 export { Tile } from './Tile';

@@ -1,0 +1,30 @@
+/* .seg y .seg.htabs del prototipo: el control segmentado, con un ícono y 42 px de alto en cada pestaña. */
+.tabs {
+  display: flex;
+  background: var(--el);
+  border-radius: 12px;
+  padding: 3px;
+  gap: 2px;
+  margin-bottom: 16px;
+}
+
+.tabs button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 6px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ts);
+  text-align: center;
+}
+
+.tabs button.on {
+  background: var(--card);
+  color: var(--tp);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}

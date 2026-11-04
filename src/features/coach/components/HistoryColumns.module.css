@@ -1,0 +1,30 @@
+/* .hcols, .hleft y .hright del prototipo. */
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.left {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.right {
+  min-width: 0;
+}
+
+@media (min-width: 960px) {
+  /* La izquierda va de 320 a 380 px (spec 10): cerca de los 960 px se achica, para que la lista tenga lugar. */
+  .columns {
+    grid-template-columns: clamp(320px, 46%, 380px) minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .sticky {
+    position: sticky;
+    top: 24px;
+  }
+}

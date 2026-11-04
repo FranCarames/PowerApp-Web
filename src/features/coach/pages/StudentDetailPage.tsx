@@ -1,13 +1,23 @@
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+  useLocation,
+  useNavigate,
+  useNavigationType,
+  useParams,
+} from 'react-router';
 
 import { getErrorMessage, isApiError } from '@/api/errors';
-import type { User } from '@/api/types';
+import type { RoutineHistorySession, User } from '@/api/types';
 import { StudentDetails } from '@/features/account/components/StudentDetails';
 import { useSetUserActive } from '@/features/account/hooks/useSetUserActive';
 import { useUser } from '@/features/account/hooks/useUser';
-import { formatMonthYear } from '@/shared/lib/dates';
+import { formatMonthYear, toCalendarDay } from '@/shared/lib/dates';
 import { fullName } from '@/shared/lib/fullName';
+import {
+  formatRelativeDay,
+  historySummary,
+  plural,
+} from '@/shared/lib/trainingHistory';
 import {
   Avatar,
   Button,
@@ -24,11 +34,13 @@ import {
   VisuallyHidden,
 } from '@/shared/ui';
 
-import { StudentHistoryModal } from '../components/StudentHistoryModal';
+import { HistoryMiniChart } from '../components/HistoryMiniChart';
 import { StudentPaymentsModal } from '../components/StudentPaymentsModal';
 import { StudentPlansModal } from '../components/StudentPlansModal';
 import { StudentRmsModal } from '../components/StudentRmsModal';
 import { StudentRoutinesModal } from '../components/StudentRoutinesModal';
+import { historyPath, returningToRow, takeHistoryClosed } from '../history';
+import { useTrainingHistory } from '../hooks/useTrainingHistory';
 import styles from './StudentDetailPage.module.css';
 
 const BACK = '/c/alumnos';
@@ -86,15 +98,46 @@ function DetailSkeleton() {
   );
 }
 
+/**
+ * El subtítulo de la fila del historial (spec 4): «N sesiones · la última, hoy» o «Todavía no registra
+ * entrenamientos». Mientras carga o si falla, uno genérico: la fila navega igual y el error se ve allá.
+ */
+function historySubtitle(
+  sessions: readonly RoutineHistorySession[] | undefined,
+  today: string,
+): string {
+  if (!sessions) return 'Sesiones y ejercicios hechos';
+  const { total, last } = historySummary(sessions, today);
+  if (total === 0 || last === null) return 'Todavía no registra entrenamientos';
+  return `${plural(total, 'sesión', 'sesiones')} · la última, ${formatRelativeDay(last, today).toLowerCase()}`;
+}
+
 function StudentDetail({ student }: { student: User }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const navigationType = useNavigationType();
   const toast = useToast();
   const setActive = useSetUserActive();
   const [modal, setModal] = useState<
-    'rms' | 'history' | 'payments' | 'plans' | 'routines' | null
+    'rms' | 'payments' | 'plans' | 'routines' | null
   >(null);
   const [confirming, setConfirming] = useState(false);
   const name = fullName(student);
+  // Se pide al cargar, para el subtítulo; la pantalla del historial comparte la consulta.
+  const history = useTrainingHistory(student.id);
+  const today = toCalendarDay();
+  const historyRow = useRef<HTMLAnchorElement>(null);
+
+  // Al volver del historial, con «Volver» o con «atrás», el foco queda en su fila (spec 11).
+  useEffect(() => {
+    const closed = takeHistoryClosed(student.id);
+    if (
+      returningToRow(location.state) ||
+      (closed && navigationType === 'POP')
+    ) {
+      historyRow.current?.focus();
+    }
+  }, [student.id, location.state, navigationType]);
 
   function closeAccount() {
     setActive.mutate(
@@ -155,9 +198,15 @@ function StudentDetail({ student }: { student: User }) {
         <ListItem
           leading={<Tile icon="list" />}
           title="Historial de entrenamientos"
-          subtitle="Sesiones completadas"
+          subtitle={historySubtitle(history.data, today)}
+          trailing={
+            history.data && history.data.length > 0 ? (
+              <HistoryMiniChart sessions={history.data} today={today} />
+            ) : undefined
+          }
           chevron
-          onClick={() => setModal('history')}
+          to={historyPath(student.id)}
+          linkRef={historyRow}
         />
         <ListItem
           leading={<Tile icon="calendar" />}
@@ -213,12 +262,6 @@ function StudentDetail({ student }: { student: User }) {
         studentId={student.id}
         studentName={name}
         open={modal === 'rms'}
-        onClose={() => setModal(null)}
-      />
-      <StudentHistoryModal
-        studentId={student.id}
-        studentName={name}
-        open={modal === 'history'}
         onClose={() => setModal(null)}
       />
       <StudentPaymentsModal

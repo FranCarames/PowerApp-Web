@@ -1,0 +1,44 @@
+/* .hwk, .hwk-h y .hdash del prototipo. */
+.week {
+  margin-bottom: 22px;
+  border-radius: 14px;
+}
+
+/* La semana elegida desde el gráfico, con el contorno violeta (6.2). */
+.highlighted {
+  outline: 2px solid #a78bfa;
+  outline-offset: 6px;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 700;
+  scroll-margin-top: 16px;
+}
+
+.count {
+  font-size: 12px;
+  color: var(--ts);
+  white-space: nowrap;
+}
+
+.sessions {
+  display: grid;
+  gap: 8px;
+}
+
+.empty {
+  padding: 12px 14px;
+  border: 1px dashed var(--border2);
+  border-radius: 14px;
+  font-size: 13px;
+  color: var(--ts);
+}

@@ -1,0 +1,20 @@
+.note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--el);
+  font-size: 13px;
+  line-height: 1.45;
+  color: #d4d8e2;
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+.icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #a78bfa;
+}

@@ -1,0 +1,27 @@
+/* .hhead del prototipo: el título y el subtítulo a la izquierda y las flechas (o la píldora) a la derecha. */
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.titles {
+  min-width: 0;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.large {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--ts);
+}
