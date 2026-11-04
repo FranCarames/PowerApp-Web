@@ -49,6 +49,8 @@ export type RecoverValues = z.input<typeof recoverSchema>;
 /**
  * `CreateUserDto`, menos `role`: el registro siempre manda `user` y no es un campo del formulario.
  * Todos son obligatorios y tienen un largo máximo (nombre y apellido, 50; prefijo, 10; teléfono, 20).
+ * El teléfono además tiene formato (`shared/lib/userFields.ts`): el código de país es "+" y de 1 a 4
+ * dígitos, y el número, solo dígitos; `phone_number` sale sin los espacios y guiones que se escribieron.
  */
 export const registerSchema = z.object({
   first_name: firstNameField,
