@@ -155,7 +155,7 @@ export function ExerciseDetails({ exercise }: { exercise: ExerciseSheetData }) {
 }
 
 /**
- * La ficha de un ejercicio de la wiki (CU-U-15): los músculos que trabaja, la descripción, los tips
+ * La ficha de un ejercicio de la biblioteca (CU-U-15 y CU-E-30): los músculos que trabaja, la descripción, los tips
  * de seguridad y de activación, el video (un link que se abre aparte) y las imágenes. Lo que el
  * ejercicio no trae no se muestra.
  */

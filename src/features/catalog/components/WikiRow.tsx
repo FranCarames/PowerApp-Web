@@ -1,13 +1,14 @@
-import { ExerciseMusclesLine } from '@/features/catalog/components/ExerciseMusclesLine';
-import type { CatalogExercise } from '@/features/catalog/hooks/useExerciseCatalog';
 import { ListItem, Thumb } from '@/shared/ui';
+
+import type { CatalogExercise } from '../hooks/useExerciseCatalog';
+import { ExerciseMusclesLine } from './ExerciseMusclesLine';
 
 interface WikiRowProps {
   exercise: CatalogExercise;
   onOpen: (exercise: CatalogExercise) => void;
 }
 
-/** Un ejercicio de la wiki: su foto, su nombre y sus músculos. Toda la fila abre la ficha. */
+/** Un ejercicio de la biblioteca: su foto, su nombre y sus músculos. Toda la fila abre la ficha. */
 export function WikiRow({ exercise, onOpen }: WikiRowProps) {
   return (
     <ListItem

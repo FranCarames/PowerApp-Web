@@ -1,13 +1,14 @@
 import { redirect, type RouteObject } from 'react-router';
 
+import { WikiExercisePage } from '@/features/catalog/pages/WikiExercisePage';
+import { WikiPage } from '@/features/catalog/pages/WikiPage';
+
 import { CalculatorPage } from './pages/CalculatorPage';
 import { PlanPage } from './pages/PlanPage';
 import { RmsPage } from './pages/RmsPage';
 import { RoutineDetailPage } from './pages/RoutineDetailPage';
 import { RoutineExercisePage } from './pages/RoutineExercisePage';
 import { TimerPage } from './pages/TimerPage';
-import { WikiExercisePage } from './pages/WikiExercisePage';
-import { WikiPage } from './pages/WikiPage';
 
 /** Pantallas del rol Usuario, bajo /u. Van dentro de <AppShell> (lo arma el router). */
 export const userRoutes: RouteObject[] = [
@@ -29,6 +30,7 @@ export const userRoutes: RouteObject[] = [
   { path: 'rms', Component: RmsPage },
   { path: 'calculadora', Component: CalculatorPage },
   { path: 'timer', Component: TimerPage },
-  { path: 'wiki', Component: WikiPage },
-  { path: 'wiki/:id', Component: WikiExercisePage },
+  // La biblioteca de ejercicios es compartida con el Entrenador (`/c/ejercicios`).
+  { path: 'wiki', element: <WikiPage basePath="/u/wiki" back="/u/plan" /> },
+  { path: 'wiki/:id', element: <WikiExercisePage basePath="/u/wiki" /> },
 ];

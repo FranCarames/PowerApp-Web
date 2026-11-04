@@ -1,9 +1,7 @@
-import { useLocation, useNavigate } from 'react-router';
+import type { ReactNode } from 'react';
+import { useLocation, useNavigate, type To } from 'react-router';
 
 import { getErrorMessage } from '@/api/errors';
-import { ExerciseFilters } from '@/features/catalog/components/ExerciseFilters';
-import type { CatalogExercise } from '@/features/catalog/hooks/useExerciseCatalog';
-import { useExerciseSearch } from '@/features/catalog/hooks/useExerciseSearch';
 import {
   EmptyState,
   ErrorState,
@@ -12,7 +10,10 @@ import {
   PageHeader,
 } from '@/shared/ui';
 
+import { ExerciseFilters } from '../components/ExerciseFilters';
 import { WikiRow } from '../components/WikiRow';
+import type { CatalogExercise } from '../hooks/useExerciseCatalog';
+import { useExerciseSearch } from '../hooks/useExerciseSearch';
 import type { WikiLocationState } from '../wikiState';
 
 /** Qué decir cuando no hay ejercicios que mostrar, según lo que se estaba buscando. */
@@ -44,11 +45,21 @@ function EmptyWiki({
   );
 }
 
+interface WikiPageProps {
+  /** De dónde cuelga la ficha: `/u/wiki` (Usuario) o `/c/ejercicios` (Entrenador). */
+  basePath: string;
+  /** Destino de "Volver". Sin él, no se muestra. */
+  back?: To;
+  /** Lo que va entre el encabezado y el buscador: los segmentos del tab Rutinas del Entrenador. */
+  nav?: ReactNode;
+}
+
 /**
- * Wiki de ejercicios del Usuario (CU-U-15): el catálogo con búsqueda por nombre y chips por grupo
- * muscular. Cada ejercicio abre su ficha en `/u/wiki/:id`. La búsqueda y el grupo quedan en la URL.
+ * La biblioteca de ejercicios, solo de lectura: la wiki del Usuario (CU-U-15) y la del Entrenador
+ * (CU-E-30). El catálogo con búsqueda por nombre y chips por grupo muscular. Cada ejercicio abre su
+ * ficha en `<basePath>/:id`. La búsqueda y el grupo quedan en la URL.
  */
-export function WikiPage() {
+export function WikiPage({ basePath, back, nav }: WikiPageProps) {
   const navigate = useNavigate();
   const { search: locationSearch } = useLocation();
   const { catalog, search, setSearch, group, setGroup, visible, searching } =
@@ -56,12 +67,13 @@ export function WikiPage() {
 
   function openExercise({ id }: CatalogExercise) {
     const state: WikiLocationState = { listSearch: locationSearch };
-    void navigate(`/u/wiki/${id}`, { state });
+    void navigate(`${basePath}/${id}`, { state });
   }
 
   return (
     <>
-      <PageHeader eyebrow="Biblioteca" title="Ejercicios" back="/u/plan" />
+      <PageHeader eyebrow="Biblioteca" title="Ejercicios" back={back} />
+      {nav}
       <ExerciseFilters
         search={search}
         onSearch={setSearch}

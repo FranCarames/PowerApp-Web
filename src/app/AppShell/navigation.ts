@@ -47,7 +47,7 @@ const COACH_ROUTINES: NavItem = {
   to: '/c/rutinas',
   label: 'Rutinas',
   icon: 'list',
-  also: ['/c/circuitos'],
+  also: ['/c/circuitos', '/c/ejercicios'],
 };
 
 const HOME: NavItem = { to: '/a/inicio', label: 'Inicio', icon: 'home' };

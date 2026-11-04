@@ -1,22 +1,29 @@
 import { useLocation, useParams } from 'react-router';
 
 import { getErrorMessage, isApiError } from '@/api/errors';
-import { useExercise } from '@/features/catalog/hooks/useExercises';
 import { ErrorState, PageHeader } from '@/shared/ui';
 
 import { ExerciseSheet } from '../components/ExerciseSheet';
 import { ExerciseSheetSkeleton } from '../components/ExerciseSheetSkeleton';
+import { useExercise } from '../hooks/useExercises';
 import { wikiListSearch } from '../wikiState';
 
-/** Ficha de un ejercicio de la wiki (CU-U-15), en `/u/wiki/:id`. */
-export function WikiExercisePage() {
+interface WikiExercisePageProps {
+  /** La lista de la biblioteca, adonde vuelve "Volver": `/u/wiki` (Usuario) o `/c/ejercicios` (Entrenador). */
+  basePath: string;
+}
+
+/**
+ * Ficha de un ejercicio de la biblioteca, solo de lectura (CU-U-15 y CU-E-30), en `<basePath>/:id`.
+ */
+export function WikiExercisePage({ basePath }: WikiExercisePageProps) {
   const { id } = useParams();
   // La ruta siempre trae el id.
   if (!id) return null;
-  return <WikiExercise id={id} />;
+  return <WikiExercise id={id} basePath={basePath} />;
 }
 
-function WikiExercise({ id }: { id: string }) {
+function WikiExercise({ id, basePath }: { id: string; basePath: string }) {
   const { state } = useLocation();
   // Abre al instante con lo que la lista ya trajo y confirma con `GET /exercise/{id}`.
   const query = useExercise(id, { placeholderFromList: true });
@@ -31,7 +38,7 @@ function WikiExercise({ id }: { id: string }) {
       <PageHeader
         eyebrow="Biblioteca"
         title={exercise?.name ?? 'Ejercicio'}
-        back={{ pathname: '/u/wiki', search: wikiListSearch(state) }}
+        back={{ pathname: basePath, search: wikiListSearch(state) }}
       />
       {exercise ? (
         <ExerciseSheet exercise={exercise} />

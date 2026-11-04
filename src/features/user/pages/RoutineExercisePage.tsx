@@ -4,6 +4,11 @@ import { useLocation, useNavigate, useParams } from 'react-router';
 import { getErrorMessage } from '@/api/errors';
 import { useUserRms } from '@/features/account/hooks/useUserRms';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import {
+  ExerciseDetails,
+  ExerciseHero,
+} from '@/features/catalog/components/ExerciseSheet';
+import { ExerciseSheetSkeleton } from '@/features/catalog/components/ExerciseSheetSkeleton';
 import { useExercise } from '@/features/catalog/hooks/useExercises';
 import { cx } from '@/shared/lib/cx';
 import { formatDate } from '@/shared/lib/dates';
@@ -22,11 +27,9 @@ import {
   Columns,
 } from '@/shared/ui';
 
-import { ExerciseDetails, ExerciseHero } from '../components/ExerciseSheet';
 import { ExerciseLog } from '../components/ExerciseLog';
 import { ExerciseRms } from '../components/ExerciseRms';
 import { ExerciseSetList } from '../components/ExerciseSetList';
-import { ExerciseSheetSkeleton } from '../components/ExerciseSheetSkeleton';
 import { RmFormModal } from '../components/RmFormModal';
 import {
   RoutineLoadError,
