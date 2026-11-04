@@ -14,6 +14,7 @@ import {
   Fab,
   List,
   ListSkeleton,
+  Modal,
   useToast,
 } from '@/shared/ui';
 
@@ -59,13 +60,14 @@ function EmptyMuscles({
 
 /**
  * El segmento Músculos del Catálogo (CU-A-07 a CU-A-10): la lista filtrada por la búsqueda, el alta y
- * la edición en un modal, y el borrado con confirmación.
+ * la edición en un modal, y el borrado con confirmación, o un aviso si el músculo está en uso.
  */
 export function MusclesSection({ search }: MusclesSectionProps) {
   const toast = useToast();
   const muscles = useMuscles();
   const groups = useMuscleGroups();
-  // Cuántos ejercicios usa cada músculo, para avisarlo al eliminar. No bloquea nada si no llega.
+  // Cuántos ejercicios usan cada músculo, para no ofrecer eliminar uno en uso. Si no llega, se pide la
+  // confirmación de siempre y, si está en uso, el backend responde 409.
   const exercises = useExercises();
   const remove = useDeleteMuscle();
   const [editing, setEditing] = useState<MuscleWithGroup | 'new' | null>(null);
@@ -93,14 +95,17 @@ export function MusclesSection({ search }: MusclesSectionProps) {
         toast.error(
           getErrorMessage(error, {
             404: 'El músculo ya no existe.',
-            // El backend responde 500 ante cualquier falla de integridad, sin decir el motivo (V7).
-            500: 'No se pudo eliminar el músculo. Puede que todavía lo use otro dato.',
+            // Lo usan ejercicios y el listado estaba viejo: el backend no lo borra (BE-24).
+            409: 'No se puede eliminar el músculo: lo usan ejercicios. Quitalo de ellos antes de eliminarlo.',
           }),
         );
         setToDelete(null);
       },
     });
   }
+
+  // Un músculo que usan ejercicios no se puede eliminar (CU-A-10): no se pide confirmación, se explica.
+  const blocked = usedBy !== undefined && usedBy > 0;
 
   return (
     <>
@@ -137,17 +142,36 @@ export function MusclesSection({ search }: MusclesSectionProps) {
         groups={sortedGroups}
         onClose={() => setEditing(null)}
       />
+      <Modal
+        open={blocked}
+        onClose={() => setToDelete(null)}
+        icon="alert"
+        tone="warn"
+        title="No se puede eliminar"
+        description={
+          toDelete && (
+            <>
+              <b>{toDelete.name}</b> lo usa{usedBy === 1 ? '' : 'n'} {usedBy}{' '}
+              ejercicio{usedBy === 1 ? '' : 's'}: el servidor no deja eliminar
+              un músculo mientras lo usen ejercicios. Quitalo de{' '}
+              {usedBy === 1 ? 'él' : 'ellos'} primero.
+            </>
+          )
+        }
+        actions={
+          <Button variant="ghost" onClick={() => setToDelete(null)}>
+            Entendido
+          </Button>
+        }
+      />
       <ConfirmDialog
-        open={toDelete !== null}
+        open={toDelete !== null && !blocked}
         destructive
         title="Eliminar músculo"
         message={
           toDelete && (
             <>
               ¿Eliminar <b>{toDelete.name}</b>? No se puede deshacer.
-              {usedBy
-                ? ` Lo usa${usedBy === 1 ? '' : 'n'} ${usedBy} ejercicio${usedBy === 1 ? '' : 's'}: se quita de ${usedBy === 1 ? 'él' : 'ellos'}.`
-                : ''}
             </>
           )
         }
