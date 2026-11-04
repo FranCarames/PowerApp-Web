@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { MouseEvent, ReactNode, Ref } from 'react';
 import { Link, type To } from 'react-router';
 
 import { Icon } from '@/shared/icons';
@@ -16,6 +16,15 @@ interface PageHeaderProps {
   back?: To;
   /** El `state` de la navegación de "Volver": lo que la pantalla de destino necesita para saber de dónde viene. */
   backState?: unknown;
+  /** El texto del enlace de volver. Por defecto, "Volver". */
+  backLabel?: string;
+  /**
+   * Al tocar el enlace de volver, antes de navegar. Con `event.preventDefault()` la pantalla navega por
+   * su cuenta (p. ej. `navigate(-1)`), y el enlace sigue teniendo su destino para abrirlo en otra pestaña.
+   */
+  onBack?: (event: MouseEvent<HTMLAnchorElement>) => void;
+  /** El título, para darle el foco al cambiar de vista. Con él, el título lleva `tabIndex={-1}`. */
+  titleRef?: Ref<HTMLHeadingElement>;
   /** Título de la pestaña del navegador. Por defecto es `title`; con `false` no se toca. */
   documentTitle?: string | false;
 }
@@ -27,6 +36,9 @@ export function PageHeader({
   actions,
   back,
   backState,
+  backLabel = 'Volver',
+  onBack,
+  titleRef,
   documentTitle,
 }: PageHeaderProps) {
   return (
@@ -35,15 +47,26 @@ export function PageHeader({
         <title>{`${documentTitle ?? title} · PowerApp`}</title>
       )}
       {back && (
-        <Link to={back} state={backState} className={styles.back}>
+        <Link
+          to={back}
+          state={backState}
+          className={styles.back}
+          onClick={onBack}
+        >
           <Icon name="chevL" size={18} />
-          Volver
+          {backLabel}
         </Link>
       )}
       <div className={styles.top}>
         <div className={styles.heading}>
           {eyebrow && <div className={styles.eyebrow}>{eyebrow}</div>}
-          <h1 className={styles.title}>{title}</h1>
+          <h1
+            ref={titleRef}
+            tabIndex={titleRef ? -1 : undefined}
+            className={styles.title}
+          >
+            {title}
+          </h1>
         </div>
         {actions && <div className={styles.actions}>{actions}</div>}
       </div>

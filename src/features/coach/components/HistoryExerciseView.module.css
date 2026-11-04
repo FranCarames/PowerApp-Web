@@ -1,0 +1,114 @@
+.loading {
+  display: grid;
+  gap: 14px;
+}
+
+.strong {
+  color: var(--tp);
+}
+
+.block {
+  margin-bottom: 22px;
+}
+
+/* .hwk-h del prototipo: el título de la sección y su contador. */
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.count {
+  font-size: 12px;
+  color: var(--ts);
+  white-space: nowrap;
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+}
+
+.noteCard {
+  padding: 12px 14px;
+}
+
+.quote {
+  font-size: 14px;
+  line-height: 1.5;
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+.caption {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--ts);
+  overflow-wrap: anywhere;
+}
+
+.session {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+.sessionHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.info {
+  min-width: 0;
+}
+
+.routine {
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--ts);
+  overflow-wrap: anywhere;
+}
+
+.entry {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.entryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.entryLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ts);
+}
+
+.more {
+  margin-top: 12px;
+}

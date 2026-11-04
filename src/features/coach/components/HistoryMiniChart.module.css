@@ -1,0 +1,31 @@
+/* .mini del prototipo: 8 barras de 5 px de ancho y 26 px de alto como máximo. */
+.mini {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.week {
+  width: 5px;
+  height: 100%;
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.week i {
+  display: block;
+  flex-shrink: 0;
+}
+
+.individual {
+  background: var(--priL);
+}
+
+.plan {
+  background: var(--acc);
+}

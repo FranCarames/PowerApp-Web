@@ -30,3 +30,9 @@
 .chevron {
   color: var(--tm);
 }
+
+/* La fila que es un link (a.card del prototipo): sin el color ni el subrayado de los links. */
+.link {
+  color: inherit;
+  text-decoration: none;
+}

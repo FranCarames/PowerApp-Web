@@ -1,0 +1,10 @@
+/* .hleft .stats y .hleft .stat del prototipo. */
+.stats {
+  gap: 8px;
+}
+
+.stats > .stat {
+  min-width: 0;
+  padding: 12px 6px;
+  overflow-wrap: anywhere;
+}

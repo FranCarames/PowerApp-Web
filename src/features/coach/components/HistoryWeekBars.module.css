@@ -1,0 +1,110 @@
+/* .bars, .bar y .bars.hb del prototipo. */
+.bars {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  height: 150px;
+  margin-top: 14px;
+}
+
+.compact {
+  height: 104px;
+  margin-top: 12px;
+}
+
+.bar {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.bar:disabled {
+  cursor: default;
+}
+
+.count {
+  min-height: 15px;
+  font-family: var(--fM);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.zero {
+  color: var(--tm);
+}
+
+/* La pista: los tramos se apilan desde abajo. */
+.track {
+  flex: 1;
+  width: 100%;
+  max-width: 34px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  background: var(--el);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.compact .track {
+  max-width: 30px;
+}
+
+.track > span {
+  display: block;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.plan {
+  background: var(--acc);
+}
+
+.individual {
+  background: var(--priL);
+}
+
+/* La línea de 2 px, del color de la pista, entre las individuales (arriba) y las del plan. */
+.individual + .plan {
+  border-top: 2px solid var(--el);
+}
+
+.ok {
+  background: var(--ok);
+}
+
+.future {
+  background: none;
+  border: 1px dashed var(--border2);
+}
+
+.current {
+  outline: 2px solid #c9cfdc;
+  outline-offset: 2px;
+}
+
+.highlighted {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+.monday {
+  font-size: 10px;
+  color: var(--tm);
+  text-align: center;
+  line-height: 1.25;
+}
+
+.monday b {
+  display: block;
+  font-size: 11px;
+  color: var(--ts);
+}
+
+.monday b.currentDay {
+  color: var(--tp);
+}

@@ -12,6 +12,8 @@ interface StatProps {
   tone?: Tone;
   /** Fondo y borde con el tinte de `tone`. */
   tinted?: boolean;
+  /** El valor en 15 px en lugar de 22, para un texto largo como "Hace 3 días". */
+  compact?: boolean;
   className?: string;
 }
 
@@ -20,6 +22,7 @@ export function Stat({
   label,
   tone,
   tinted = false,
+  compact = false,
   className,
 }: StatProps) {
   return (
@@ -31,7 +34,7 @@ export function Stat({
         className,
       )}
     >
-      <div className={styles.value}>{value}</div>
+      <div className={cx(styles.value, compact && styles.compact)}>{value}</div>
       <div className={styles.label}>{label}</div>
     </div>
   );

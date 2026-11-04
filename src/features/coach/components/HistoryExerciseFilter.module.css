@@ -1,0 +1,25 @@
+/* .sec h4 del prototipo, con el margen de 4 px arriba y 8 px abajo del filtro. */
+.title {
+  margin: 4px 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--acc);
+  letter-spacing: 0.3px;
+}
+
+.chips {
+  margin-bottom: 4px;
+}
+
+/* Un nombre largo hace salto de línea dentro del chip en lugar de ensanchar la columna. */
+.chip {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+.other {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
