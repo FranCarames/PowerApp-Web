@@ -1,11 +1,14 @@
 import { redirect, type RouteObject } from 'react-router';
 
+import { WikiExercisePage } from '@/features/catalog/pages/WikiExercisePage';
+
 import { AssignPlanPage } from './pages/AssignPlanPage';
 import { AssignRoutinePage } from './pages/AssignRoutinePage';
 import { AssignStudentPlanPage } from './pages/AssignStudentPlanPage';
 import { AssignStudentRoutinePage } from './pages/AssignStudentRoutinePage';
 import { CircuitEditorPage } from './pages/CircuitEditorPage';
 import { CircuitsPage } from './pages/CircuitsPage';
+import { ExercisesPage } from './pages/ExercisesPage';
 import { MembershipsPage } from './pages/MembershipsPage';
 import { PlanEditorPage } from './pages/PlanEditorPage';
 import { PlansPage } from './pages/PlansPage';
@@ -32,4 +35,10 @@ export const coachRoutes: RouteObject[] = [
   { path: 'rutinas/:id/asignar', Component: AssignRoutinePage },
   { path: 'circuitos', Component: CircuitsPage },
   { path: 'circuitos/:id', Component: CircuitEditorPage },
+  // La biblioteca de ejercicios, solo de lectura: la misma ficha que la wiki del Usuario.
+  { path: 'ejercicios', Component: ExercisesPage },
+  {
+    path: 'ejercicios/:id',
+    element: <WikiExercisePage basePath="/c/ejercicios" />,
+  },
 ];

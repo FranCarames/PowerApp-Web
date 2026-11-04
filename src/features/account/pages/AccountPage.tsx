@@ -68,6 +68,13 @@ const MENU: Record<Role, MenuItem[]> = {
       title: 'Control de membresías',
       subtitle: 'Pagos y vencimientos',
     },
+    {
+      // La misma biblioteca del Usuario, en la zona del Entrenador (CU-E-30).
+      to: '/c/ejercicios',
+      icon: 'book',
+      title: 'Biblioteca de ejercicios',
+      subtitle: 'Técnica y músculos',
+    },
     PASSWORD,
   ],
   admin: [PERSONAL_DATA, PASSWORD],
