@@ -86,8 +86,8 @@ export function GroupsSection({ search }: GroupsSectionProps) {
         toast.error(
           getErrorMessage(error, {
             404: 'El grupo ya no existe.',
-            // El backend responde 500 ante cualquier falla de integridad, sin decir el motivo (V7).
-            500: 'No se pudo eliminar el grupo. Si todavía tiene músculos, movelos a otro grupo o eliminalos antes.',
+            // Le sumaron un músculo y el listado estaba viejo: el backend no lo borra (BE-25).
+            409: 'No se puede eliminar el grupo: todavía tiene músculos. Movelos a otro grupo o eliminalos antes.',
           }),
         );
         setToDelete(null);
