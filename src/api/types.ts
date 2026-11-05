@@ -16,6 +16,12 @@ export type UserRm = Schemas['UserRmDetailDto'];
 export type PotentialRmResponse = Schemas['PotentialRmResponseDto'];
 export type Muscle = Schemas['Muscle'];
 export type MuscleGroup = Schemas['MuscleGroup'];
+/** Un tipo de circuito del catálogo del Admin (CU-A-24 a CU-A-27), con cuántos circuitos activos lo usan (BE-44). */
+export type CircuitType = Schemas['CircuitTypeResponseDto'];
+/** El tipo dentro de un circuito: su id, su nombre y si está activo. */
+export type CircuitTypeRef = Schemas['CircuitTypeRefDto'];
+/** El alta y la edición de un tipo de circuito (`EditCircuitTypeDto` tiene las mismas reglas). */
+export type CircuitTypeBody = Schemas['CreateCircuitTypeDto'];
 export type CircuitListItem = Schemas['CircuitListItemResponseDto'];
 export type CircuitListItemPlus = Schemas['CircuitListItemPlusResponseDto'];
 export type CircuitDetailResponse = Schemas['CircuitDetailResponseDto'];

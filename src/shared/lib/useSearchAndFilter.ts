@@ -53,6 +53,31 @@ export function useSearchAndFilter<V extends string = string>(
 }
 
 /**
+ * Un segundo chip de un listado que ya tiene buscador y chip con `useSearchAndFilter` (el tipo de
+ * circuito junto a Activos, Inactivos y Todos), con su valor en la URL (`?<param>=<valor>`). Dos
+ * `useSearchAndFilter` en la misma pantalla se pisarían la búsqueda (`q`): este solo escribe su
+ * parámetro. Se lee de la URL solo al abrir la pantalla, cambiarlo no agrega entradas al historial, y
+ * acepta cualquier valor: quien lo usa comprueba que exista.
+ */
+export function useUrlParam(param: string) {
+  const navigate = useNavigate();
+  const { search: urlSearch } = useLocation();
+  const [value, setValue] = useState<string | null>(
+    () => new URLSearchParams(urlSearch).get(param) || null,
+  );
+
+  useEffect(() => {
+    const params = new URLSearchParams(urlSearch);
+    if (value) params.set(param, value);
+    else params.delete(param);
+    const next = params.size > 0 ? `?${params}` : '';
+    if (next !== urlSearch) navigate({ search: next }, { replace: true });
+  }, [value, param, urlSearch, navigate]);
+
+  return [value, setValue] as const;
+}
+
+/**
  * Un interruptor de un listado (el chip "Incluir inactivas" junto a otro filtro) que queda en la URL
  * (`?<param>=1`). Como el chip de `useSearchAndFilter`, se lee de ahí solo al abrir la pantalla y
  * cambiarlo no agrega entradas al historial. Cada uno solo escribe su parámetro: conviven en la URL.

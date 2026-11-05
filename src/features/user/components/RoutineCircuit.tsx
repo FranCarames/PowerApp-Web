@@ -1,5 +1,5 @@
 import type { RoutineAssignedFinished } from '@/api/types';
-import { capitalize } from '@/shared/lib/text';
+import { circuitTypeName } from '@/features/catalog/circuitTypes';
 import { List, Pill, SectionHeader } from '@/shared/ui';
 
 import { exercisePath } from '../homeState';
@@ -42,7 +42,7 @@ export function RoutineCircuit({
         title={title}
         aside={
           circuit.active ? (
-            capitalize(circuit.type)
+            circuitTypeName(circuit)
           ) : (
             <Pill tone="warn">Dado de baja</Pill>
           )

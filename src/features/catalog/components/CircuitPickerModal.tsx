@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { getErrorMessage } from '@/api/errors';
 import type { CircuitListItemPlus } from '@/api/types';
-import { capitalize, matchesSearch } from '@/shared/lib/text';
+import { matchesSearch } from '@/shared/lib/text';
 import {
   Button,
   EmptyState,
@@ -16,6 +16,7 @@ import {
   Tile,
 } from '@/shared/ui';
 
+import { circuitSubtitle, circuitTypeName } from '../circuitTypes';
 import { useCircuits } from '../hooks/useCircuits';
 
 interface CircuitPickerModalProps {
@@ -60,8 +61,9 @@ function PickerContent({
 
   const available = circuits.data?.filter(({ active }) => active);
   const visible = available?.filter(
-    ({ name, type }) =>
-      matchesSearch(name, search) || matchesSearch(type, search),
+    (circuit) =>
+      matchesSearch(circuit.name, search) ||
+      matchesSearch(circuitTypeName(circuit), search),
   );
 
   return (
@@ -92,7 +94,7 @@ function PickerContent({
                   key={circuit.id}
                   leading={<Tile icon="cycle" tone="acc" />}
                   title={circuit.name}
-                  subtitle={`${capitalize(circuit.type)} · ${circuit.exercise_count} ejercicio${circuit.exercise_count === 1 ? '' : 's'}`}
+                  subtitle={circuitSubtitle(circuit)}
                   trailing={
                     used > 0 && (
                       <Pill tone="acc">

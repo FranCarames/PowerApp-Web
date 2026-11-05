@@ -1,0 +1,8 @@
+/* Cada aviso del diálogo, como un párrafo propio dentro de la descripción del modal (que ya es un <p>). */
+.paragraph {
+  display: block;
+}
+
+.paragraph + .paragraph {
+  margin-top: 8px;
+}

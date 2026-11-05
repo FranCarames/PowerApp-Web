@@ -1,0 +1,4 @@
+/* El botón que sigue al aviso (Reintentar o Ir a Tipos de circuito): el prototipo lo sube 8 px hacia el aviso. */
+.action {
+  margin: -8px 0 18px;
+}

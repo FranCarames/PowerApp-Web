@@ -20,3 +20,12 @@
     right: 48px;
   }
 }
+
+/*
+ * El espacio que deja al final del contenido. El FAB llega a 152 px del borde inferior en mobile
+ * (96 + 56) y el contenido termina a 120 px (el padding del AppShell); en desktop, 96 y 64. Con 44 px
+ * más, la última tarjeta queda 12 px por encima del botón.
+ */
+.spacer {
+  height: 44px;
+}

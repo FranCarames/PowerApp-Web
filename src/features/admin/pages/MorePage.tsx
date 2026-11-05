@@ -43,6 +43,12 @@ const ITEMS: MoreItem[] = [
     subtitle: 'Tipos, precios y duración',
   },
   {
+    to: '/a/tipos-circuito',
+    icon: 'cycle',
+    title: 'Tipos de circuito',
+    subtitle: 'Para clasificar y filtrar circuitos',
+  },
+  {
     to: '/cuenta',
     icon: 'user',
     title: 'Mi cuenta',
