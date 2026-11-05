@@ -4,6 +4,8 @@ import { api } from '@/api/client';
 import { queryKeys } from '@/api/queryKeys';
 import type { CreateCircuitBody } from '@/api/types';
 
+import { circuitTypeSaveError } from '../circuitTypes';
+
 /**
  * `POST /routine/circuit/create` (sin `id`, CU-E-22) y `POST /routine/circuit/edit/{id}` (con el id del
  * circuito que se edita, CU-E-23). Los dos mandan el circuito completo, con todos sus ejercicios y sus
@@ -11,7 +13,9 @@ import type { CreateCircuitBody } from '@/api/types';
  * que ya no vienen se dan de baja o se borran, según tengan historial). Editar afecta a todas las
  * rutinas que usan el circuito. Devuelven el circuito ya guardado, con su `id`.
  *
- * Después se piden de nuevo los circuitos y las rutinas (los listados, el detalle y el panel).
+ * Después se piden de nuevo los circuitos y las rutinas (los listados, el detalle y el panel). Si el
+ * backend rechaza el tipo (no existe o está dado de baja), se piden de nuevo los tipos, para que el
+ * selector ya no lo ofrezca.
  */
 export function useSaveCircuit(id?: string) {
   const queryClient = useQueryClient();
@@ -26,6 +30,13 @@ export function useSaveCircuit(id?: string) {
         : api.post('/api/v1/routine/circuit/create', { body }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.routines.all });
+    },
+    onError: (error) => {
+      if (circuitTypeSaveError(error)) {
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.routines.circuitTypesAll(),
+        });
+      }
     },
   });
 }

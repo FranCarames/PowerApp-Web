@@ -1044,6 +1044,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/routine/circuit-type/all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["RoutineController_getAllCircuitTypes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/circuit-type/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RoutineController_createCircuitType"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/circuit-type/edit/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RoutineController_editCircuitType"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/routine/circuit-type/set-active/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RoutineController_setCircuitTypeActive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/routine/assign-user": {
         parameters: {
             query?: never;
@@ -2256,13 +2320,24 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
         };
+        CircuitTypeRefDto: {
+            /** @example 49f793de-7681-5c05-a171-371baa69e9eb */
+            id: string;
+            /** @example Principal */
+            type: string;
+            /**
+             * @description false si el Admin lo dio de baja: el circuito lo conserva, pero no se puede elegir para otro
+             * @example true
+             */
+            active: boolean;
+        };
         RoutineListItemCircuitRefDto: {
             /** @example uuid-1234 */
             id: string;
             /** @example Entrada en calor - Tren inferior */
             name: string;
-            /** @example entrada en calor */
-            type: string;
+            /** @description El tipo del circuito. Puede estar dado de baja (active: false): el circuito lo conserva */
+            circuit_type: components["schemas"]["CircuitTypeRefDto"];
             /**
              * @description Una rutina puede referenciar un circuito dado de baja
              * @example true
@@ -2348,8 +2423,8 @@ export interface components {
             name: string;
             /** @example Movilidad de hombro y activación de manguito */
             description?: string;
-            /** @example entrada en calor */
-            type: string;
+            /** @description El tipo del circuito. Puede estar dado de baja (active: false): el circuito lo conserva */
+            circuit_type: components["schemas"]["CircuitTypeRefDto"];
             /** @example true */
             active: boolean;
             /** Format: date-time */
@@ -2519,8 +2594,12 @@ export interface components {
             name: string;
             /** @example Movilidad de hombro y activación de manguito */
             description?: string;
-            /** @example entrada en calor */
-            type: string;
+            /**
+             * Format: uuid
+             * @description Id de un tipo de circuito activo (`GET /routine/circuit-type/all`). Al editar, puede ser el tipo que el circuito ya tiene aunque esté dado de baja
+             * @example 49f793de-7681-5c05-a171-371baa69e9eb
+             */
+            circuit_type_id: string;
             /** @description Ejercicios del circuito, en orden. Al menos uno */
             exercises: components["schemas"]["CreateCircuitExerciseDto"][];
         };
@@ -2529,8 +2608,12 @@ export interface components {
             name: string;
             /** @example Movilidad de hombro y activación de manguito */
             description?: string;
-            /** @example entrada en calor */
-            type: string;
+            /**
+             * Format: uuid
+             * @description Id de un tipo de circuito activo (`GET /routine/circuit-type/all`). Al editar, puede ser el tipo que el circuito ya tiene aunque esté dado de baja
+             * @example 49f793de-7681-5c05-a171-371baa69e9eb
+             */
+            circuit_type_id: string;
             /** @description Ejercicios del circuito, en orden. Al menos uno */
             exercises: components["schemas"]["CreateCircuitExerciseDto"][];
         };
@@ -2541,8 +2624,8 @@ export interface components {
             name: string;
             /** @example Movilidad de hombro y activación de manguito */
             description?: string;
-            /** @example entrada en calor */
-            type: string;
+            /** @description El tipo del circuito. Puede estar dado de baja (active: false): el circuito lo conserva */
+            circuit_type: components["schemas"]["CircuitTypeRefDto"];
             /** @example true */
             active: boolean;
             /**
@@ -2578,8 +2661,8 @@ export interface components {
             name: string;
             /** @example Activación de cadera y movilidad previa a piernas */
             description?: string;
-            /** @example entrada en calor */
-            type: string;
+            /** @description El tipo del circuito. Puede estar dado de baja (active: false): el circuito lo conserva */
+            circuit_type: components["schemas"]["CircuitTypeRefDto"];
             /** @example true */
             active: boolean;
             /**
@@ -2601,21 +2684,77 @@ export interface components {
              */
             active: boolean;
         };
-        Circuit: {
+        CircuitResponseDto: {
             /** @example uuid-1234 */
             id: string;
             /** @example Entrada en calor - Tren superior */
             name: string;
             /** @example Movilidad de hombro y activación de manguito */
-            description?: Record<string, never>;
-            /** @example entrada en calor */
-            type: string;
+            description?: string | null;
+            /** @description El tipo del circuito. Puede estar dado de baja (active: false): el circuito lo conserva */
+            circuit_type: components["schemas"]["CircuitTypeRefDto"];
             /** @example true */
             active: boolean;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
             updated_at: string;
+        };
+        CircuitTypeResponseDto: {
+            /** @example 49f793de-7681-5c05-a171-371baa69e9eb */
+            id: string;
+            /** @example Principal */
+            type: string;
+            /**
+             * @description null si no tiene
+             * @example El bloque central de la sesión
+             */
+            description: string | null;
+            /**
+             * @description false si está dado de baja: no se ofrece para circuitos nuevos ni para cambiarle el tipo a uno existente
+             * @example true
+             */
+            active: boolean;
+            /**
+             * @description Cantidad de circuitos activos con este tipo. Los dados de baja no suman
+             * @example 5
+             */
+            circuit_count: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        CreateCircuitTypeDto: {
+            /**
+             * @description Nombre del tipo. Se guarda recortado y tiene que tener de 1 a 50 caracteres ya recortado. Único sin distinguir mayúsculas ni espacios de los bordes, contra los tipos activos y los dados de baja
+             * @example Principal
+             */
+            type: string;
+            /**
+             * @description Opcional. Se guarda recortada, hasta 100 caracteres. Vacía o con solo espacios es lo mismo que no mandarla: queda en null
+             * @example El bloque central de la sesión
+             */
+            description?: string;
+        };
+        EditCircuitTypeDto: {
+            /**
+             * @description Nombre del tipo. Se guarda recortado y tiene que tener de 1 a 50 caracteres ya recortado. Único sin distinguir mayúsculas ni espacios de los bordes, contra los tipos activos y los dados de baja
+             * @example Principal
+             */
+            type: string;
+            /**
+             * @description Opcional. Se guarda recortada, hasta 100 caracteres. Vacía o con solo espacios es lo mismo que no mandarla: queda en null
+             * @example El bloque central de la sesión
+             */
+            description?: string;
+        };
+        SetCircuitTypeActiveDto: {
+            /**
+             * @description false para dar de baja el tipo (baja lógica), true para reactivarlo. Un tipo con circuitos se da de baja igual: los circuitos lo conservan
+             * @example false
+             */
+            active: boolean;
         };
         AssignRoutineToUserDto: {
             /**
@@ -5062,12 +5201,76 @@ export interface operations {
             };
         };
         responses: {
+            /** @description El circuito creado, con su tipo en circuit_type */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["CircuitDetailResponseDto"];
+                };
+            };
+            /** @description En este orden: el cuerpo inválido (el del ValidationPipe: circuit_type_id obligatorio y UUID, «El ID del tipo de circuito debe ser un UUID válido»; un cuerpo que todavía trae type también es 400); las reglas del payload (ejercicio repetido, amrap_time sin amrap, rpe con rir, rm con más de una serie); y el tipo dado de baja, «El tipo de circuito está dado de baja.» (después del 404 del tipo). No se crea nada */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 400 */
+                        statusCode: number;
+                        /**
+                         * @example [
+                         *       "El ID del tipo de circuito debe ser un UUID válido"
+                         *     ]
+                         */
+                        message: string[];
+                        /** @example Bad Request */
+                        error: string;
+                    } | {
+                        /** @example El tipo de circuito está dado de baja. */
+                        error: string;
+                    };
+                };
+            };
+            /** @description El rol no es entrenador ni admin, o la cuenta está deshabilitada */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 403 */
+                        statusCode: number;
+                        /** @example Acceso denegado. Permisos insuficientes. */
+                        message: string;
+                        /** @example Forbidden */
+                        error: string;
+                    };
+                };
+            };
+            /** @description «Tipo de circuito no encontrado» (antes que el 400 del tipo dado de baja) o, con el tipo bien, «Algunos ejercicios no fueron encontrados». No se crea nada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Tipo de circuito no encontrado */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Error al crear el circuito. No se crea nada */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Error al crear el circuito. */
+                        error: string;
+                    };
                 };
             };
         };
@@ -5087,12 +5290,76 @@ export interface operations {
             };
         };
         responses: {
+            /** @description El circuito editado, con su tipo en circuit_type. Conservar el tipo que ya tenía está permitido aunque esté dado de baja */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["CircuitDetailResponseDto"];
+                };
+            };
+            /** @description En este orden: el id que no es UUID o el cuerpo inválido (el del ValidationPipe, con «El ID del tipo de circuito debe ser un UUID válido»; un cuerpo con type también es 400); las reglas del payload; el circuito dado de baja («El circuito "<nombre>" está dado de baja y no se puede editar. Reactivalo primero.», después del 404 del circuito); y, sólo si circuit_type_id cambia, el tipo nuevo dado de baja, «El tipo de circuito está dado de baja.». No se guarda nada */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 400 */
+                        statusCode: number;
+                        /**
+                         * @example [
+                         *       "El ID del tipo de circuito debe ser un UUID válido"
+                         *     ]
+                         */
+                        message: string[];
+                        /** @example Bad Request */
+                        error: string;
+                    } | {
+                        /** @example El tipo de circuito está dado de baja. */
+                        error: string;
+                    };
+                };
+            };
+            /** @description El rol no es entrenador ni admin, o la cuenta está deshabilitada */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 403 */
+                        statusCode: number;
+                        /** @example Acceso denegado. Permisos insuficientes. */
+                        message: string;
+                        /** @example Forbidden */
+                        error: string;
+                    };
+                };
+            };
+            /** @description En este orden: «Circuito no encontrado»; sólo si circuit_type_id cambia, «Tipo de circuito no encontrado»; y «Algunos ejercicios no fueron encontrados». No se guarda nada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Tipo de circuito no encontrado */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Error al editar el circuito. No se guarda nada */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Error al editar el circuito. */
+                        error: string;
+                    };
                 };
             };
         };
@@ -5102,8 +5369,8 @@ export interface operations {
             query?: {
                 /** @description Busca coincidencias parciales (sin distinguir mayúsculas) en nombre y descripción */
                 keyword?: string;
-                /** @description Filtra por tipo de circuito (coincidencia exacta, sin distinguir mayúsculas) */
-                type?: string;
+                /** @description Filtra por tipo de circuito: el id de un tipo de `GET /routine/circuit-type/all`, activo o dado de baja. Un id que no es de ningún tipo devuelve [] */
+                circuit_type_id?: string;
                 /** @description true para incluir también los circuitos dados de baja */
                 include_inactive?: boolean;
             };
@@ -5113,12 +5380,61 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Por nombre. Con circuit_type_id, sólo los de ese tipo; un id que no es de ningún tipo devuelve [] */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["CircuitListItemResponseDto"][];
+                };
+            };
+            /** @description Query inválido: circuit_type_id que no es UUID («El ID del tipo de circuito debe ser un UUID válido»), keyword de más de 100, include_inactive que no es true/false, u otro parámetro (type ya no existe) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 400 */
+                        statusCode: number;
+                        /**
+                         * @example [
+                         *       "El ID del tipo de circuito debe ser un UUID válido"
+                         *     ]
+                         */
+                        message: string[];
+                        /** @example Bad Request */
+                        error: string;
+                    };
+                };
+            };
+            /** @description El rol no es entrenador ni admin, o la cuenta está deshabilitada */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 403 */
+                        statusCode: number;
+                        /** @example Acceso denegado. Permisos insuficientes. */
+                        message: string;
+                        /** @example Forbidden */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Error al obtener los circuitos */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Error al obtener los circuitos. */
+                        error: string;
+                    };
                 };
             };
         };
@@ -5128,8 +5444,8 @@ export interface operations {
             query?: {
                 /** @description Busca coincidencias parciales (sin distinguir mayúsculas) en nombre y descripción */
                 keyword?: string;
-                /** @description Filtra por tipo de circuito (coincidencia exacta, sin distinguir mayúsculas) */
-                type?: string;
+                /** @description Filtra por tipo de circuito: el id de un tipo de `GET /routine/circuit-type/all`, activo o dado de baja. Un id que no es de ningún tipo devuelve [] */
+                circuit_type_id?: string;
                 /** @description true para incluir también los circuitos dados de baja */
                 include_inactive?: boolean;
             };
@@ -5139,12 +5455,61 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Por nombre, con los ejercicios. Con circuit_type_id, sólo los de ese tipo; un id que no es de ningún tipo devuelve [] */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["CircuitListItemPlusResponseDto"][];
+                };
+            };
+            /** @description Query inválido: circuit_type_id que no es UUID («El ID del tipo de circuito debe ser un UUID válido»), keyword de más de 100, include_inactive que no es true/false, u otro parámetro (type ya no existe) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 400 */
+                        statusCode: number;
+                        /**
+                         * @example [
+                         *       "El ID del tipo de circuito debe ser un UUID válido"
+                         *     ]
+                         */
+                        message: string[];
+                        /** @example Bad Request */
+                        error: string;
+                    };
+                };
+            };
+            /** @description El rol no es entrenador ni admin, o la cuenta está deshabilitada */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 403 */
+                        statusCode: number;
+                        /** @example Acceso denegado. Permisos insuficientes. */
+                        message: string;
+                        /** @example Forbidden */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Error al obtener los circuitos */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Error al obtener los circuitos. */
+                        error: string;
+                    };
                 };
             };
         };
@@ -5185,12 +5550,412 @@ export interface operations {
             };
         };
         responses: {
+            /** @description El circuito con su estado nuevo y su tipo en circuit_type */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Circuit"];
+                    "application/json": components["schemas"]["CircuitResponseDto"];
+                };
+            };
+            /** @description El id no es un UUID válido, o falta active o no es booleano */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 400 */
+                        statusCode: number;
+                        /**
+                         * @example [
+                         *       "active must be a boolean value"
+                         *     ]
+                         */
+                        message: string[];
+                        /** @example Bad Request */
+                        error: string;
+                    };
+                };
+            };
+            /** @description El rol no es entrenador ni admin, o la cuenta está deshabilitada */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 403 */
+                        statusCode: number;
+                        /** @example Acceso denegado. Permisos insuficientes. */
+                        message: string;
+                        /** @example Forbidden */
+                        error: string;
+                    };
+                };
+            };
+            /** @description «Circuito no encontrado» */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Circuito no encontrado */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Error al actualizar el estado del circuito */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Error al actualizar el estado del circuito. */
+                        error: string;
+                    };
+                };
+            };
+        };
+    };
+    RoutineController_getAllCircuitTypes: {
+        parameters: {
+            query?: {
+                /** @description true para incluir también los tipos dados de baja. Sin él, sólo los activos (los que se ofrecen al armar un circuito) */
+                include_inactive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Por type ascendente. Sin include_inactive, sólo los activos; con true, también los dados de baja. circuit_count cuenta los circuitos activos de cada tipo */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CircuitTypeResponseDto"][];
+                };
+            };
+            /** @description include_inactive que no es true/false, u otro parámetro */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 400 */
+                        statusCode: number;
+                        /**
+                         * @example [
+                         *       "include_inactive must be a boolean value"
+                         *     ]
+                         */
+                        message: string[];
+                        /** @example Bad Request */
+                        error: string;
+                    };
+                };
+            };
+            /** @description El rol no es entrenador ni admin (el alumno), o la cuenta está deshabilitada */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 403 */
+                        statusCode: number;
+                        /** @example Acceso denegado. Permisos insuficientes. */
+                        message: string;
+                        /** @example Forbidden */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Error al obtener los tipos de circuito */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Error al obtener los tipos de circuito. */
+                        error: string;
+                    };
+                };
+            };
+        };
+    };
+    RoutineController_createCircuitType: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCircuitTypeDto"];
+            };
+        };
+        responses: {
+            /** @description El tipo creado: activo, con circuit_count 0, el nombre y la descripción recortados (la descripción vacía queda en null) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CircuitTypeResponseDto"];
+                };
+            };
+            /** @description Cuerpo inválido: falta type o tiene sólo espacios, type de más de 50 o description de más de 100 (ya recortados), u otro campo */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 400 */
+                        statusCode: number;
+                        /**
+                         * @example [
+                         *       "type should not be empty"
+                         *     ]
+                         */
+                        message: string[];
+                        /** @example Bad Request */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Sólo el admin: el entrenador y el alumno reciben 403 (también una cuenta deshabilitada) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 403 */
+                        statusCode: number;
+                        /** @example Acceso denegado. Permisos insuficientes. */
+                        message: string;
+                        /** @example Forbidden */
+                        error: string;
+                    };
+                };
+            };
+            /** @description «Ya existe un tipo de circuito con ese nombre»: el nombre recortado y en minúsculas coincide con el de otro tipo, activo o dado de baja. No se crea nada */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Ya existe un tipo de circuito con ese nombre */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Error al crear el tipo de circuito */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Error al crear el tipo de circuito. */
+                        error: string;
+                    };
+                };
+            };
+        };
+    };
+    RoutineController_editCircuitType: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditCircuitTypeDto"];
+            };
+        };
+        responses: {
+            /** @description El tipo editado, con su circuit_count. Pisa los dos campos: sin description, la descripción queda en null. No cambia active: un tipo dado de baja sigue de baja */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CircuitTypeResponseDto"];
+                };
+            };
+            /** @description El id no es un UUID válido, o el cuerpo es inválido (las reglas del alta). Va antes que el 404 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 400 */
+                        statusCode: number;
+                        /**
+                         * @example [
+                         *       "type should not be empty"
+                         *     ]
+                         */
+                        message: string[];
+                        /** @example Bad Request */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Sólo el admin: el entrenador y el alumno reciben 403 (también una cuenta deshabilitada) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 403 */
+                        statusCode: number;
+                        /** @example Acceso denegado. Permisos insuficientes. */
+                        message: string;
+                        /** @example Forbidden */
+                        error: string;
+                    };
+                };
+            };
+            /** @description «Tipo de circuito no encontrado». Va antes que el 409 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Tipo de circuito no encontrado */
+                        error: string;
+                    };
+                };
+            };
+            /** @description «Ya existe un tipo de circuito con ese nombre»: sólo si el nombre cambia (recortado y en minúsculas; cambiar sólo las mayúsculas no es un conflicto) y coincide con el de otro tipo, activo o dado de baja. No se guarda nada */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Ya existe un tipo de circuito con ese nombre */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Error al editar el tipo de circuito */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Error al editar el tipo de circuito. */
+                        error: string;
+                    };
+                };
+            };
+        };
+    };
+    RoutineController_setCircuitTypeActive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetCircuitTypeActiveDto"];
+            };
+        };
+        responses: {
+            /** @description El tipo con su estado nuevo. Un tipo con circuitos se da de baja igual (los circuitos lo conservan), y mandar el valor que ya tiene responde 200 sin cambios */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CircuitTypeResponseDto"];
+                };
+            };
+            /** @description El id no es un UUID válido, o falta active o no es booleano */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 400 */
+                        statusCode: number;
+                        /**
+                         * @example [
+                         *       "active must be a boolean value"
+                         *     ]
+                         */
+                        message: string[];
+                        /** @example Bad Request */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Sólo el admin: el entrenador y el alumno reciben 403 (también una cuenta deshabilitada) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 403 */
+                        statusCode: number;
+                        /** @example Acceso denegado. Permisos insuficientes. */
+                        message: string;
+                        /** @example Forbidden */
+                        error: string;
+                    };
+                };
+            };
+            /** @description «Tipo de circuito no encontrado» */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Tipo de circuito no encontrado */
+                        error: string;
+                    };
+                };
+            };
+            /** @description Error al actualizar el estado del tipo de circuito */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Error al actualizar el estado del tipo de circuito. */
+                        error: string;
+                    };
                 };
             };
         };

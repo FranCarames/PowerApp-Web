@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import type { CircuitTypeBody } from '@/api/types';
 import { isHttpUrl } from '@/shared/lib/url';
 
 /** Un texto opcional: vacío o hasta `max` caracteres. */
@@ -185,3 +186,28 @@ export const membershipTypeSchema = z.object({
 
 export type MembershipTypeInput = z.input<typeof membershipTypeSchema>;
 export type MembershipTypeValues = z.output<typeof membershipTypeSchema>;
+
+/**
+ * `CreateCircuitTypeDto` y `EditCircuitTypeDto` (CU-A-25 y CU-A-26): el nombre, obligatorio y de hasta 50
+ * caracteres ya recortado, y la descripción, opcional y de hasta 100. Una descripción vacía no se manda:
+ * el backend la guarda como `null`, y en la edición eso la borra.
+ */
+export const circuitTypeSchema = z
+  .object({
+    type: z
+      .string()
+      .trim()
+      .min(1, 'Poné un nombre al tipo de circuito')
+      .max(50, 'El nombre no puede tener más de 50 caracteres'),
+    description: z
+      .string()
+      .trim()
+      .max(100, 'La descripción no puede tener más de 100 caracteres'),
+  })
+  .transform(({ type, description }): CircuitTypeBody => ({
+    type,
+    ...(description !== '' && { description }),
+  }));
+
+export type CircuitTypeInput = z.input<typeof circuitTypeSchema>;
+export type CircuitTypeValues = z.output<typeof circuitTypeSchema>;

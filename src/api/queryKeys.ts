@@ -50,6 +50,16 @@ export const queryKeys = {
         'circuits-plus',
         { includeInactive },
       ] as const,
+    /**
+     * Los tipos de circuito (`/routine/circuit-type/*`). Cuelgan de las rutinas, como los circuitos: guardar o
+     * dar de baja un circuito cambia el `circuit_count` de su tipo, y cambiar un tipo, el nombre que muestran
+     * los circuitos y las rutinas. Invalidar `routines.all` los refresca a todos.
+     */
+    circuitTypesAll: () =>
+      [...queryKeys.routines.all, 'circuit-types'] as const,
+    /** Los tipos de circuito, solo los activos o con los dados de baja. */
+    circuitTypes: (includeInactive: boolean) =>
+      [...queryKeys.routines.circuitTypesAll(), { includeInactive }] as const,
     /** Las rutinas con sus circuitos (`all-plus`), con o sin las dadas de baja. */
     listPlus: (includeInactive: boolean) =>
       [...queryKeys.routines.all, 'list-plus', { includeInactive }] as const,

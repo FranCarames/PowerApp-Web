@@ -14,7 +14,10 @@ interface FabProps extends Omit<
   icon?: IconName;
 }
 
-/** Botón de acción flotante, fijo en la esquina inferior derecha. */
+/**
+ * Botón de acción flotante, fijo en la esquina inferior derecha. Va al final del contenido de la
+ * pantalla: deja ahí un espacio para que, con la página bajada del todo, no tape la última tarjeta.
+ */
 export function Fab({
   label,
   icon = 'plus',
@@ -23,14 +26,17 @@ export function Fab({
   ...rest
 }: FabProps) {
   return (
-    <button
-      type={type}
-      aria-label={label}
-      title={label}
-      className={cx(styles.fab, className)}
-      {...rest}
-    >
-      <Icon name={icon} size={26} />
-    </button>
+    <>
+      <div className={styles.spacer} aria-hidden="true" />
+      <button
+        type={type}
+        aria-label={label}
+        title={label}
+        className={cx(styles.fab, className)}
+        {...rest}
+      >
+        <Icon name={icon} size={26} />
+      </button>
+    </>
   );
 }

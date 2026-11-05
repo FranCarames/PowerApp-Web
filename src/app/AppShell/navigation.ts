@@ -80,6 +80,11 @@ const ADMIN_MEMBERSHIPS: NavItem = {
   label: 'Membresías',
   icon: 'wallet',
 };
+const CIRCUIT_TYPES: NavItem = {
+  to: '/a/tipos-circuito',
+  label: 'Tipos de circuito',
+  icon: 'cycle',
+};
 const MORE: NavItem = {
   to: '/a/mas',
   label: 'Más',
@@ -111,7 +116,10 @@ export const SIDEBAR: Record<Role, NavGroup[]> = {
   admin: [
     { items: [HOME, USERS, COACHES] },
     { title: 'Entrenamiento', items: [EXERCISES, CIRCUITS, ROUTINES, PLANS] },
-    { title: 'Configuración', items: [CATALOG, ADMIN_MEMBERSHIPS, ACCOUNT] },
+    {
+      title: 'Configuración',
+      items: [CATALOG, ADMIN_MEMBERSHIPS, CIRCUIT_TYPES, ACCOUNT],
+    },
   ],
 };
 

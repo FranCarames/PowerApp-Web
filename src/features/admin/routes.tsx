@@ -3,6 +3,7 @@ import { redirect, type RouteObject } from 'react-router';
 import { CatalogPage } from './pages/CatalogPage';
 import { CircuitEditorPage } from './pages/CircuitEditorPage';
 import { CircuitsPage } from './pages/CircuitsPage';
+import { CircuitTypesPage } from './pages/CircuitTypesPage';
 import { CoachesPage } from './pages/CoachesPage';
 import { ConvertPage } from './pages/ConvertPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -33,5 +34,6 @@ export const adminRoutes: RouteObject[] = [
   { path: 'planes/:id', Component: PlanEditorPage },
   { path: 'catalogo', Component: CatalogPage },
   { path: 'membresias', Component: MembershipTypesPage },
+  { path: 'tipos-circuito', Component: CircuitTypesPage },
   { path: 'mas', Component: MorePage },
 ];

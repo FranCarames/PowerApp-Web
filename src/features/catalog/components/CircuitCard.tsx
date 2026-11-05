@@ -1,8 +1,8 @@
 import type { CircuitListItemPlus } from '@/api/types';
 import { cx } from '@/shared/lib/cx';
-import { capitalize } from '@/shared/lib/text';
 import { Card, Pill, Tile } from '@/shared/ui';
 
+import { circuitSubtitle } from '../circuitTypes';
 import styles from './CircuitCard.module.css';
 
 interface CircuitCardProps {
@@ -18,7 +18,6 @@ interface CircuitCardProps {
  * donde también se lo da de baja o se lo reactiva.
  */
 export function CircuitCard({ circuit, routines, onOpen }: CircuitCardProps) {
-  const count = circuit.exercise_count;
   const exercises = circuit.exercises.map(({ exercise }) => exercise.name);
 
   return (
@@ -30,10 +29,7 @@ export function CircuitCard({ circuit, routines, onOpen }: CircuitCardProps) {
         <Tile icon="cycle" tone="acc" />
         <span className={styles.text}>
           <span className={styles.name}>{circuit.name}</span>
-          <span className={styles.sub}>
-            {capitalize(circuit.type)} · {count} ejercicio
-            {count === 1 ? '' : 's'}
-          </span>
+          <span className={styles.sub}>{circuitSubtitle(circuit)}</span>
         </span>
         {!circuit.active ? (
           <Pill tone="warn">Inactivo</Pill>

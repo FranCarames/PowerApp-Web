@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import {
   FormProvider,
   useFieldArray,
@@ -9,10 +9,7 @@ import { useNavigate } from 'react-router';
 
 import { getErrorMessage, isApiError } from '@/api/errors';
 import type { CircuitDetail } from '@/api/pending';
-import {
-  useCircuits,
-  type CircuitUsage,
-} from '@/features/catalog/hooks/useCircuits';
+import type { CircuitUsage } from '@/features/catalog/hooks/useCircuits';
 import { zodResolver } from '@/shared/lib/zodResolver';
 import {
   Button,
@@ -27,6 +24,11 @@ import {
 } from '@/shared/ui';
 
 import {
+  activeTypesByName,
+  circuitTypeName,
+  circuitTypeSaveError,
+} from '../circuitTypes';
+import {
   queueRoutineOp,
   RESTORE_DRAFT_STATE,
   type CircuitEditorState,
@@ -40,10 +42,14 @@ import {
   type CircuitInput,
   type CircuitValues,
 } from '../circuitSchema';
+import { useCircuitTypes } from '../hooks/useCircuitTypes';
 import { useSaveCircuit } from '../hooks/useSaveCircuit';
 import { useSetCircuitActive } from '../hooks/useSetCircuitActive';
+import { CircuitDuplicateModal } from './CircuitDuplicateModal';
 import { CircuitExerciseCard } from './CircuitExerciseCard';
 import styles from './CircuitForm.module.css';
+import { CircuitTypeNotice } from './CircuitTypeNotice';
+import { CircuitTypeSelect } from './CircuitTypeSelect';
 import { ExercisePickerModal } from './ExercisePickerModal';
 
 /** Lo que agrega `copyName` al nombre. El nombre del circuito llega a 100 caracteres. */
@@ -77,6 +83,9 @@ interface CircuitFormProps {
  * en orden, cada uno con su nota y sus bloques de series; y, al editar, duplicar y dar de baja o
  * reactivar. Editar un circuito cambia todas las rutinas que lo usan, y uno dado de baja no se puede
  * editar: primero se lo reactiva.
+ *
+ * El tipo se elige entre los tipos de circuito activos (BE-44). Al editar, el circuito puede conservar
+ * el suyo aunque esté dado de baja, pero una copia no: al duplicarlo se elige otro.
  */
 export function CircuitForm({
   basePath,
@@ -86,26 +95,25 @@ export function CircuitForm({
 }: CircuitFormProps) {
   const navigate = useNavigate();
   const toast = useToast();
-  const typesId = useId();
   const save = useSaveCircuit(circuit?.id);
   const duplicate = useSaveCircuit();
   const setActive = useSetCircuitActive();
   const [picking, setPicking] = useState(false);
   const [confirming, setConfirming] = useState<
-    'deactivate' | 'duplicate' | null
+    'deactivate' | 'duplicate' | 'duplicate-type' | null
   >(null);
-  // Los tipos que ya existen, para sugerirlos: el tipo es texto libre y "Cardio" y "cardio" convivirían.
-  const circuits = useCircuits({ includeInactive: true });
-  const knownTypes = [
-    ...new Map(
-      (circuits.data ?? []).map(({ type }) => [type.toLowerCase(), type]),
-    ).values(),
-  ];
-  // Con los de los demás circuitos alcanza para unificar la escritura: el propio no cuenta, para poder
-  // cambiarle las mayúsculas si es el único que tiene ese tipo.
-  const othersTypes = (circuits.data ?? [])
-    .filter(({ id }) => id !== circuit?.id)
-    .map(({ type }) => type);
+  // Los tipos que se pueden elegir: los activos, por nombre.
+  const types = useCircuitTypes();
+  const activeTypes = types.data && activeTypesByName(types.data);
+  // En el alta hace falta un tipo para elegir: sin ninguno activo, o sin poder pedirlos, no se guarda.
+  const noTypeToChoose =
+    !circuit && (activeTypes ? activeTypes.length === 0 : types.isError);
+  // Si el tipo del original sigue activo, la copia lo conserva. Con la lista de tipos se sabe al día.
+  const savedTypeActive =
+    circuit &&
+    (activeTypes
+      ? activeTypes.some(({ id }) => id === circuit.circuit_type.id)
+      : circuit.circuit_type.active);
 
   const form = useForm<CircuitInput, unknown, CircuitValues>({
     resolver: zodResolver(circuitSchema),
@@ -120,6 +128,7 @@ export function CircuitForm({
   const exercises = useFieldArray({ control, name: 'exercises' });
 
   const inactive = circuit !== undefined && !circuit.active;
+  const typeError = save.isError ? circuitTypeSaveError(save.error) : null;
   const exercisesError =
     errors.exercises?.root?.message ?? errors.exercises?.message;
   const usedIn = routines ?? [];
@@ -135,32 +144,34 @@ export function CircuitForm({
 
   const onSubmit: SubmitHandler<CircuitValues> = (values) => {
     if (save.isPending || inactive) return;
-    // Si otro circuito ya tiene ese tipo escrito de otra forma ("Core" y "core"), se usa la de ese.
-    const type =
-      othersTypes.find(
-        (known) => known.toLowerCase() === values.type.toLowerCase(),
-      ) ?? values.type;
-    save.mutate(
-      { ...values, type },
-      {
-        onSuccess: (saved) => {
-          toast.success(circuit ? 'Circuito guardado' : 'Circuito creado');
-          // El circuito que se creó desde una rutina se suma a ella cuando se vuelve.
-          if (routineReturn && !circuit) {
-            queueRoutineOp(routineReturn.routineId, {
-              type: 'append',
-              circuitId: saved.id,
-            });
-          }
-          leave();
-        },
+    save.mutate(values, {
+      onSuccess: (saved) => {
+        toast.success(circuit ? 'Circuito guardado' : 'Circuito creado');
+        // El circuito que se creó desde una rutina se suma a ella cuando se vuelve.
+        if (routineReturn && !circuit) {
+          queueRoutineOp(routineReturn.routineId, {
+            type: 'append',
+            circuitId: saved.id,
+          });
+        }
+        leave();
       },
-    );
+      onError: (error) => {
+        // El tipo elegido ya no existe o se dio de baja: se vacía para elegir otro (el hook pide los tipos
+        // de nuevo). Lo demás queda escrito.
+        if (circuitTypeSaveError(error)) form.setValue('circuit_type_id', '');
+      },
+    });
   };
 
-  function makeCopy(original: CircuitDetail) {
+  function makeCopy(original: CircuitDetail, circuitTypeId: string) {
     setConfirming(null);
-    duplicate.mutate(circuitCopyBody(original, copyName(original.name)), {
+    const body = circuitCopyBody(
+      original,
+      copyName(original.name),
+      circuitTypeId,
+    );
+    duplicate.mutate(body, {
       onSuccess: (copy) => {
         // Desde una rutina, la copia ocupa el lugar del original en ella; se sigue en la rutina al guardar.
         const slot = routineReturn?.slot;
@@ -181,7 +192,8 @@ export function CircuitForm({
         };
         navigate(`${basePath}/${copy.id}`, { state });
       },
-      onError: (error) => toast.error(getErrorMessage(error)),
+      onError: (error) =>
+        toast.error(circuitTypeSaveError(error) ?? getErrorMessage(error)),
     });
   }
 
@@ -225,16 +237,18 @@ export function CircuitForm({
         )}
         {save.isError && (
           <Note tone="err" icon="alert" role="alert">
-            {isApiError(save.error) &&
-            save.error.serverMessage?.includes(INACTIVE_MESSAGE)
-              ? 'El circuito está dado de baja y no se puede editar. Reactivalo primero.'
-              : getErrorMessage(save.error, {
-                  404:
-                    isApiError(save.error) &&
-                    save.error.serverMessage === 'Circuito no encontrado'
-                      ? 'El circuito ya no existe. Volvé a la lista.'
-                      : 'Alguno de los ejercicios ya no existe en el catálogo. Quitalo e intentá de nuevo.',
-                })}
+            {/* Los del tipo van primero: también son un 404 y un "está dado de baja". */}
+            {typeError ??
+              (isApiError(save.error) &&
+              save.error.serverMessage?.includes(INACTIVE_MESSAGE)
+                ? 'El circuito está dado de baja y no se puede editar. Reactivalo primero.'
+                : getErrorMessage(save.error, {
+                    404:
+                      isApiError(save.error) &&
+                      save.error.serverMessage === 'Circuito no encontrado'
+                        ? 'El circuito ya no existe. Volvé a la lista.'
+                        : 'Alguno de los ejercicios ya no existe en el catálogo. Quitalo e intentá de nuevo.',
+                  }))}
           </Note>
         )}
         {/* Un circuito dado de baja se ve, pero no se edita: el backend lo rechaza. */}
@@ -248,24 +262,11 @@ export function CircuitForm({
             />
           </Field>
           <Columns>
-            <Field
-              label="Tipo"
-              error={errors.type?.message}
-              hint="Texto libre: principal, core…"
-            >
-              <Input
-                maxLength={30}
-                autoComplete="off"
-                list={typesId}
-                placeholder="Ej: principal"
-                {...register('type')}
-              />
-              <datalist id={typesId}>
-                {knownTypes.map((type) => (
-                  <option key={type} value={type} />
-                ))}
-              </datalist>
-            </Field>
+            <CircuitTypeSelect
+              actives={activeTypes}
+              loading={types.isPending}
+              saved={circuit?.circuit_type}
+            />
             <Field
               label="Descripción"
               error={errors.description?.message}
@@ -278,6 +279,15 @@ export function CircuitForm({
               />
             </Field>
           </Columns>
+          {!inactive && (
+            <CircuitTypeNotice
+              actives={activeTypes}
+              failed={types.isError}
+              retrying={types.isRefetching}
+              onRetry={() => void types.refetch()}
+              isNew={!circuit}
+            />
+          )}
           <SectionHeader
             level={3}
             title="Ejercicios"
@@ -317,7 +327,11 @@ export function CircuitForm({
           >
             Agregar ejercicio
           </Button>
-          <Button type="submit" loading={save.isPending} disabled={inactive}>
+          <Button
+            type="submit"
+            loading={save.isPending}
+            disabled={inactive || noTypeToChoose}
+          >
             Guardar circuito
           </Button>
         </fieldset>
@@ -327,7 +341,12 @@ export function CircuitForm({
               variant="sec"
               loading={duplicate.isPending}
               onClick={() =>
-                isDirty ? setConfirming('duplicate') : makeCopy(circuit)
+                // Con el tipo de baja, siempre se pregunta: hay que elegir el de la copia.
+                !savedTypeActive
+                  ? setConfirming('duplicate-type')
+                  : isDirty
+                    ? setConfirming('duplicate')
+                    : makeCopy(circuit, circuit.circuit_type.id)
               }
             >
               Duplicar
@@ -391,7 +410,18 @@ export function CircuitForm({
               </>
             }
             confirmLabel="Duplicar"
-            onConfirm={() => makeCopy(circuit)}
+            onConfirm={() => makeCopy(circuit, circuit.circuit_type.id)}
+            onCancel={() => setConfirming(null)}
+          />
+          <CircuitDuplicateModal
+            open={confirming === 'duplicate-type'}
+            circuitName={circuit.name}
+            typeName={circuitTypeName(circuit)}
+            dirty={isDirty}
+            actives={activeTypes}
+            failed={types.isError}
+            loading={duplicate.isPending}
+            onConfirm={(typeId) => makeCopy(circuit, typeId)}
             onCancel={() => setConfirming(null)}
           />
         </>

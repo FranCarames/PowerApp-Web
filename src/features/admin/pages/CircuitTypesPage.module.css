@@ -1,0 +1,6 @@
+/* La ayuda bajo el título, como la de Circuitos: el prototipo la sube 6 px y la separa 16 px de las tarjetas. */
+.intro {
+  margin: -6px 0 16px;
+  line-height: 1.6;
+  color: var(--ts);
+}

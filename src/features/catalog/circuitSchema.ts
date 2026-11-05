@@ -157,9 +157,10 @@ const circuitExerciseSchema = z
   }));
 
 /**
- * `CreateCircuitDto` y `EditCircuitDto`: el nombre (hasta 100 caracteres) y el tipo (hasta 30, texto libre)
- * son obligatorios; la descripción (hasta 100) es opcional. Lleva al menos un ejercicio, sin repetir
- * ninguno: si hace falta el mismo movimiento dos veces, se usa una variación del catálogo.
+ * `CreateCircuitDto` y `EditCircuitDto`: el nombre (hasta 100 caracteres) y el tipo (`circuit_type_id`, uno
+ * del catálogo de tipos de circuito) son obligatorios; la descripción (hasta 100) es opcional. Lleva al
+ * menos un ejercicio, sin repetir ninguno: si hace falta el mismo movimiento dos veces, se usa una
+ * variación del catálogo.
  */
 export const circuitSchema = z
   .object({
@@ -168,11 +169,8 @@ export const circuitSchema = z
       .trim()
       .min(1, 'Poné un nombre al circuito')
       .max(100, 'El nombre no puede tener más de 100 caracteres'),
-    type: z
-      .string()
-      .trim()
-      .min(1, 'Poné el tipo del circuito')
-      .max(30, 'El tipo no puede tener más de 30 caracteres'),
+    // El id de un tipo del selector: uno activo o, al editar, el que el circuito ya tiene aunque esté de baja.
+    circuit_type_id: z.string().min(1, 'Elegí el tipo del circuito'),
     description: z
       .string()
       .trim()
@@ -194,12 +192,14 @@ export const circuitSchema = z
       seen.add(exercise_id);
     }
   })
-  .transform(({ name, type, description, exercises }): CreateCircuitBody => ({
-    name,
-    type,
-    ...(description !== '' && { description }),
-    exercises,
-  }));
+  .transform(
+    ({ name, circuit_type_id, description, exercises }): CreateCircuitBody => ({
+      name,
+      circuit_type_id,
+      ...(description !== '' && { description }),
+      exercises,
+    }),
+  );
 
 export type CircuitInput = z.input<typeof circuitSchema>;
 export type CircuitValues = z.output<typeof circuitSchema>;
@@ -248,7 +248,7 @@ function text(value: number | null | undefined): string {
 export function circuitDefaultValues(circuit?: CircuitDetail): CircuitInput {
   return {
     name: circuit?.name ?? '',
-    type: circuit?.type ?? '',
+    circuit_type_id: circuit?.circuit_type.id ?? '',
     description: circuit?.description ?? '',
     exercises: (circuit?.exercises ?? []).map(
       ({ exercise, coach_note, sets }) => ({
@@ -272,16 +272,19 @@ export function circuitDefaultValues(circuit?: CircuitDetail): CircuitInput {
 }
 
 /**
- * El circuito como body de un alta, para duplicarlo: la misma estructura con el nombre cambiado.
- * Las series se mandan como están guardadas (el contrato las trae como un bloque por fila).
+ * El circuito como body de un alta, para duplicarlo: la misma estructura con el nombre cambiado y con
+ * el tipo de la copia, que es el del original si está activo (una copia es un circuito nuevo y no puede
+ * llevar un tipo dado de baja). Las series se mandan como están guardadas (el contrato las trae como un
+ * bloque por fila).
  */
 export function circuitCopyBody(
   circuit: CircuitDetail,
   name: string,
+  circuitTypeId: string,
 ): CreateCircuitBody {
   return {
     name,
-    type: circuit.type,
+    circuit_type_id: circuitTypeId,
     ...(circuit.description ? { description: circuit.description } : {}),
     exercises: circuit.exercises.map(({ exercise, coach_note, sets }) => ({
       exercise_id: exercise.id,
