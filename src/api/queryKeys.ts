@@ -23,7 +23,7 @@ export const queryKeys = {
     /** Las planificaciones sistémicas (`all`), solo las vigentes o con las dadas de baja. */
     list: (includeInactive = false) =>
       [...queryKeys.planifications.all, 'list', { includeInactive }] as const,
-    /** Una planificación con sus rutinas vigentes (el detalle). */
+    /** Una planificación con sus rutinas, las vigentes y las quitadas (el detalle: una sola variante, siempre con `include_inactive`). */
     detail: (id: string) =>
       [...queryKeys.planifications.all, 'detail', id] as const,
     /** Las planificaciones asignadas a un alumno, con o sin las que se quitaron. */

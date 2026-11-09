@@ -2,6 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { api } from '@/api/client';
 import { queryKeys } from '@/api/queryKeys';
+import type { PlanificationDetail } from '@/api/types';
+
+import { keepRemoved } from '../planRoutines';
 
 /**
  * `POST /planification/routine/repeat-week` (CU-E-12f): copia las rutinas vigentes de una semana, en su
@@ -31,9 +34,10 @@ export function useRepeatPlanWeek(planificationId: string) {
         },
       }),
     onSuccess: (planification) => {
-      queryClient.setQueryData(
+      // La respuesta trae solo las vigentes: las quitadas que ya se veían se conservan hasta el próximo pedido.
+      queryClient.setQueryData<PlanificationDetail>(
         queryKeys.planifications.detail(planificationId),
-        planification,
+        (current) => keepRemoved(planification, current),
       );
       void queryClient.invalidateQueries({
         queryKey: queryKeys.planifications.all,

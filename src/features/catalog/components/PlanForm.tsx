@@ -29,6 +29,7 @@ import {
   maxWeekOf,
   parseCount,
   routinesCount,
+  splitPlanRoutines,
   toCreateWeeks,
 } from '../planRoutines';
 import {
@@ -152,8 +153,11 @@ export function PlanForm({ basePath, plan, children }: PlanFormProps) {
 
   const onSubmit: SubmitHandler<PlanValues> = (values) => {
     if (save.isPending || inactive) return;
-    // El backend rechaza achicar la duración por debajo de una semana en uso: se avisa antes de pedirlo.
-    const lastWeek = plan ? maxWeekOf(plan.routines) : draft.lastUsed;
+    // El backend rechaza achicar la duración por debajo de una semana en uso, y cuenta solo las rutinas vigentes:
+    // una quitada en la última semana no lo impide (QUI-06). Se avisa antes de pedirlo.
+    const lastWeek = plan
+      ? maxWeekOf(splitPlanRoutines(plan.routines).current)
+      : draft.lastUsed;
     if (values.duration < lastWeek) {
       setError('duration', { message: shrinkMessage(lastWeek) });
       return;

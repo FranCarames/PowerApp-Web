@@ -31,7 +31,40 @@ export function groupByWeek(
     .map(([week, items]) => ({ week, routines: items }));
 }
 
-/** La semana más alta que ocupa alguna de las rutinas vigentes, o 0 si no hay ninguna. */
+/**
+ * Separa los vínculos del detalle del plan por su `active` (el del vínculo): `current` son las rutinas
+ * vigentes y `removed`, las quitadas (CU-E-12c), cada lista en el orden en que las manda el backend. El
+ * detalle se pide siempre con `include_inactive` (BE-45) y las trae mezcladas: toda pantalla que lo usa
+ * pasa por acá, y nunca trabaja con `plan.routines` sin separar.
+ */
+export function splitPlanRoutines(
+  routines: readonly PlanificationAsignation[],
+): {
+  current: PlanificationAsignation[];
+  removed: PlanificationAsignation[];
+} {
+  const current: PlanificationAsignation[] = [];
+  const removed: PlanificationAsignation[] = [];
+  for (const link of routines) (link.active ? current : removed).push(link);
+  return { current, removed };
+}
+
+/**
+ * La planificación que responde una mutación de las rutinas (agregar, repetir, reordenar: traen solo las
+ * vigentes) con las quitadas que `current`, lo que ya había en el caché del detalle, estaba mostrando. Sin
+ * esto, «Quitadas del plan» desaparecería de pantalla hasta que el detalle se vuelva a pedir.
+ */
+export function keepRemoved(
+  next: PlanificationDetail,
+  current: PlanificationDetail | undefined,
+): PlanificationDetail {
+  const { removed } = splitPlanRoutines(current?.routines ?? []);
+  return removed.length > 0
+    ? { ...next, routines: [...next.routines, ...removed] }
+    : next;
+}
+
+/** La semana más alta que ocupa alguna de las rutinas que se le pasan (las vigentes), o 0 si no hay ninguna. */
 export function maxWeekOf(
   routines: readonly PlanificationAsignation[],
 ): number {
@@ -120,7 +153,9 @@ const SAVED_WEEKS_SHOWN_MAX = 520;
  */
 export function savedWeeks(plan: PlanificationDetail): WeekView[] {
   const withRoutines = new Map(
-    groupByWeek(plan.routines).map(({ week, routines }) => [week, routines]),
+    groupByWeek(splitPlanRoutines(plan.routines).current).map(
+      ({ week, routines }) => [week, routines],
+    ),
   );
   const weeks = new Set<number>(withRoutines.keys());
   for (
@@ -148,7 +183,8 @@ export function savedWeeks(plan: PlanificationDetail): WeekView[] {
 /**
  * El detalle del plan con una semana en el orden nuevo, como lo va a dejar el backend (`reorder` la renumera
  * de 1 a n): se muestra sin esperar la respuesta. `ids` son los vínculos vigentes de la semana, en el orden
- * nuevo; las otras semanas no se tocan.
+ * nuevo; las otras semanas y las rutinas quitadas no se tocan (el backend no las reordena, y una quitada en
+ * la lista de `reorder` es un 400).
  */
 export function reorderRoutines(
   plan: PlanificationDetail,
@@ -160,7 +196,7 @@ export function reorderRoutines(
   return {
     ...plan,
     routines: plan.routines.map((link) => {
-      if (link.week !== week) return link;
+      if (link.week !== week || !link.active) return link;
       const id = ids[next++];
       const moved = id === undefined ? undefined : byId.get(id);
       return moved ? { ...moved, order: next } : link;

@@ -5,7 +5,7 @@ import { api } from '@/api/client';
 import { queryKeys } from '@/api/queryKeys';
 import type { PlanificationDetail } from '@/api/types';
 
-import { reorderRoutines } from '../planRoutines';
+import { keepRemoved, reorderRoutines } from '../planRoutines';
 
 /**
  * `POST /planification/routine/reorder` (CU-E-12e): manda la semana entera (los ids de todos sus vínculos
@@ -47,7 +47,10 @@ export function useReorderPlanWeek(
     },
     onSuccess: (planification) => {
       if (pending.current === 1) {
-        queryClient.setQueryData(detailKey, planification);
+        // La respuesta trae solo las vigentes: las quitadas que ya se veían se conservan.
+        queryClient.setQueryData<PlanificationDetail>(detailKey, (current) =>
+          keepRemoved(planification, current),
+        );
       }
     },
     onError: (error) => {
