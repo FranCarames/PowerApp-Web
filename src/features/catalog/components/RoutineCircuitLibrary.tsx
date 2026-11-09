@@ -22,8 +22,10 @@ interface RoutineCircuitLibraryProps {
 /**
  * La «Biblioteca de circuitos» del editor de rutina en escritorio (desde 960 px, CU-E-16 y CU-E-17):
  * al costado del formulario, fija al bajar, con el mismo buscador y los mismos chips que «Agregar
- * circuitos». «Agregar» suma el circuito al final de la rutina al instante, sin guardar: el foco queda
- * en el botón y un lector de pantalla oye «<circuito> agregado al final de la rutina».
+ * circuitos». Cada circuito, con su tipo y los nombres de sus ejercicios en orden (las series se ven
+ * en la rutina, con «Ver series»). «Agregar» suma el circuito al final de la rutina al instante, sin
+ * guardar: el foco queda en el botón y un lector de pantalla oye «<circuito> agregado al final de la
+ * rutina».
  */
 export function RoutineCircuitLibrary({
   usedCounts,
@@ -56,14 +58,22 @@ export function RoutineCircuitLibrary({
       )}
       <CircuitLibrary skeletonRows={3}>
         {(visible) => (
-          <List gap={8}>
+          <List gap={8} className={styles.grid}>
             {visible.map((circuit) => {
               const used = usedCounts.get(circuit.id) ?? 0;
+              const exercises = circuit.exercises.map(
+                ({ exercise }) => exercise.name,
+              );
               return (
                 <Card key={circuit.id} row className={styles.item}>
                   <div className={styles.text}>
                     <div className={styles.name}>{circuit.name}</div>
                     <div className={styles.sub}>{circuitSubtitle(circuit)}</div>
+                    <div className={styles.exercises}>
+                      {exercises.length > 0
+                        ? exercises.join(', ')
+                        : 'Sin ejercicios'}
+                    </div>
                     {used > 0 && (
                       <div className={styles.tag}>
                         <Pill tone="acc">{inRoutineLabel(used)}</Pill>

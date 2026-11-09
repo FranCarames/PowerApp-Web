@@ -1,6 +1,7 @@
 import { redirect, type RouteObject } from 'react-router';
 
 import { WikiExercisePage } from '@/features/catalog/pages/WikiExercisePage';
+import { WIDE_SCREEN } from '@/shared/lib/routeHandle';
 
 import { AssignPlanPage } from './pages/AssignPlanPage';
 import { AssignRoutinePage } from './pages/AssignRoutinePage';
@@ -35,7 +36,8 @@ export const coachRoutes: RouteObject[] = [
   { path: 'planes/:id', Component: PlanEditorPage },
   { path: 'planes/:id/asignar', Component: AssignPlanPage },
   { path: 'rutinas', Component: RoutinesPage },
-  { path: 'rutinas/:id', Component: RoutineEditorPage },
+  // Ancho de escritorio: el formulario y, al costado, la biblioteca de circuitos.
+  { path: 'rutinas/:id', Component: RoutineEditorPage, handle: WIDE_SCREEN },
   { path: 'rutinas/:id/asignar', Component: AssignRoutinePage },
   // Elegir circuitos para la rutina en el celular y la tablet (en escritorio, la biblioteca del editor).
   { path: 'rutinas/:id/agregar-circuitos', Component: RoutineAddCircuitsPage },

@@ -35,6 +35,11 @@
   color: var(--tm);
 }
 
+/* Los circuitos, en tantas columnas de al menos 260 px como entren: una sola cerca de los 960, varias en una pantalla ancha. */
+.panel .grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+}
+
 /* .lib-i: cada circuito en una fila, con «Agregar» a la derecha. */
 .item {
   padding: 10px 12px;
@@ -55,6 +60,15 @@
   font-size: 12px;
   color: var(--tm);
   margin-top: 2px;
+}
+
+/* Los ejercicios en orden, en texto corrido, como en «Agregar circuitos» y en la tarjeta de Circuitos. */
+.exercises {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ts);
+  margin-top: 6px;
+  overflow-wrap: anywhere;
 }
 
 .tag {

@@ -1,5 +1,7 @@
 import { redirect, type RouteObject } from 'react-router';
 
+import { WIDE_SCREEN } from '@/shared/lib/routeHandle';
+
 import { CatalogPage } from './pages/CatalogPage';
 import { CircuitEditorPage } from './pages/CircuitEditorPage';
 import { CircuitsPage } from './pages/CircuitsPage';
@@ -30,7 +32,8 @@ export const adminRoutes: RouteObject[] = [
   { path: 'circuitos', Component: CircuitsPage },
   { path: 'circuitos/:id', Component: CircuitEditorPage },
   { path: 'rutinas', Component: RoutinesPage },
-  { path: 'rutinas/:id', Component: RoutineEditorPage },
+  // Ancho de escritorio: el formulario y, al costado, la biblioteca de circuitos.
+  { path: 'rutinas/:id', Component: RoutineEditorPage, handle: WIDE_SCREEN },
   // Elegir circuitos para la rutina en el celular y la tablet (en escritorio, la biblioteca del editor).
   { path: 'rutinas/:id/agregar-circuitos', Component: RoutineAddCircuitsPage },
   { path: 'planes', Component: PlansPage },

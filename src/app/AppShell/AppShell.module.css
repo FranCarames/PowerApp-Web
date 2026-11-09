@@ -19,4 +19,9 @@
     margin: 0;
     padding: 44px 56px 64px;
   }
+
+  /* Las pantallas que aprovechan el ancho (el editor de rutina): hasta 1600 px, con el mismo relleno. */
+  .wide {
+    max-width: 1600px;
+  }
 }
