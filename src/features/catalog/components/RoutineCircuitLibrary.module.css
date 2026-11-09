@@ -62,6 +62,15 @@
   margin-top: 2px;
 }
 
+/* Los ejercicios en orden, en texto corrido, como en «Agregar circuitos» y en la tarjeta de Circuitos. */
+.exercises {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ts);
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+
 .tag {
   margin-top: 6px;
 }
