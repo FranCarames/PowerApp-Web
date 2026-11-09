@@ -1,3 +1,27 @@
+/* .narrow del prototipo: el formulario de una columna no se estira. */
+.form {
+  min-width: 0;
+  max-width: 540px;
+}
+
+/*
+ * .rut-ed del prototipo: desde 960 px, el formulario a la izquierda y la «Biblioteca de circuitos» a la
+ * derecha. El prototipo le da 300 px fijos a la biblioteca; acá se achica hasta 240 cerca de los 960, para
+ * que las tarjetas de los circuitos no queden demasiado angostas.
+ */
+@media (min-width: 960px) {
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(240px, 42%, 300px);
+    column-gap: 28px;
+    align-items: start;
+  }
+
+  .form {
+    max-width: none;
+  }
+}
+
 /* El <fieldset> solo agrupa los campos para apagarlos juntos: sin borde ni relleno propios. */
 .fieldset {
   border: 0;
@@ -18,7 +42,7 @@
   color: var(--err);
 }
 
-/* "Agregar existente" y "Nuevo circuito": 12 px bajo la lista y 18 sobre el botón de guardar, como el prototipo. */
+/* "Agregar existente" y "Nuevo circuito" (en escritorio, solo el segundo, a todo el ancho): 12 px bajo la lista y 18 sobre el botón de guardar, como el prototipo. */
 .add {
   margin: 12px 0 18px;
 }

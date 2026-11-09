@@ -1,0 +1,79 @@
+/* .addc del prototipo: la tarjeta es un botón, con el contenido en línea y alineado a la izquierda. */
+.card {
+  display: block;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+/* Elegida: borde y tinte violetas (le gana al borde del hover de la tarjeta). */
+.card.on,
+.card.on:hover {
+  border-color: var(--acc);
+  background: linear-gradient(var(--accS), var(--accS)), var(--card);
+}
+
+/* Sin lugar en la rutina: apagada, y tocarla no hace nada. */
+.card[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.sub {
+  display: block;
+  font-size: 12px;
+  color: var(--tm);
+  margin-top: 2px;
+}
+
+.exercises {
+  display: block;
+  font-size: 12px;
+  color: var(--ts);
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+
+.tag {
+  display: block;
+  margin-top: 8px;
+}
+
+/* .addn: el círculo del número de orden. */
+.number {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--border2);
+  font-family: var(--fM);
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.on .number {
+  background: var(--acc);
+  border-color: var(--acc);
+}

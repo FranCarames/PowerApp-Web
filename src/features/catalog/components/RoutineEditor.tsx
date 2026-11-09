@@ -76,7 +76,7 @@ function Layout({
         title="Rutina"
         back={basePath}
       />
-      <div className={styles.narrow}>{children}</div>
+      {children}
     </>
   );
 }
@@ -93,7 +93,7 @@ function SkeletonField() {
 /** La forma del formulario mientras llegan los datos. */
 function FormSkeleton() {
   return (
-    <div aria-busy="true">
+    <div aria-busy="true" className={styles.narrow}>
       <VisuallyHidden role="status">Cargando la rutina…</VisuallyHidden>
       <SkeletonField />
       <SkeletonField />
@@ -133,17 +133,19 @@ function EditRoutine({
           restoreDraft={restoreDraft}
         />
       ) : routine.isError ? (
-        <ErrorState
-          title={notFound ? 'No encontramos la rutina' : undefined}
-          message={
-            notFound
-              ? 'No hay ninguna rutina con ese enlace. Volvé a la lista.'
-              : getErrorMessage(routine.error)
-          }
-          // Un 404 o un 400 se repetirían igual: no se ofrece reintentar.
-          onRetry={notFound ? undefined : () => void routine.refetch()}
-          retrying={routine.isRefetching}
-        />
+        <div className={styles.narrow}>
+          <ErrorState
+            title={notFound ? 'No encontramos la rutina' : undefined}
+            message={
+              notFound
+                ? 'No hay ninguna rutina con ese enlace. Volvé a la lista.'
+                : getErrorMessage(routine.error)
+            }
+            // Un 404 o un 400 se repetirían igual: no se ofrece reintentar.
+            onRetry={notFound ? undefined : () => void routine.refetch()}
+            retrying={routine.isRefetching}
+          />
+        </div>
       ) : (
         <FormSkeleton />
       )}

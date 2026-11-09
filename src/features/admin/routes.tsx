@@ -13,6 +13,7 @@ import { MembershipTypesPage } from './pages/MembershipTypesPage';
 import { MorePage } from './pages/MorePage';
 import { PlanEditorPage } from './pages/PlanEditorPage';
 import { PlansPage } from './pages/PlansPage';
+import { RoutineAddCircuitsPage } from './pages/RoutineAddCircuitsPage';
 import { RoutineEditorPage } from './pages/RoutineEditorPage';
 import { RoutinesPage } from './pages/RoutinesPage';
 import { UsersPage } from './pages/UsersPage';
@@ -30,6 +31,8 @@ export const adminRoutes: RouteObject[] = [
   { path: 'circuitos/:id', Component: CircuitEditorPage },
   { path: 'rutinas', Component: RoutinesPage },
   { path: 'rutinas/:id', Component: RoutineEditorPage },
+  // Elegir circuitos para la rutina en el celular y la tablet (en escritorio, la biblioteca del editor).
+  { path: 'rutinas/:id/agregar-circuitos', Component: RoutineAddCircuitsPage },
   { path: 'planes', Component: PlansPage },
   { path: 'planes/:id', Component: PlanEditorPage },
   { path: 'catalogo', Component: CatalogPage },

@@ -29,6 +29,21 @@ export function compareTypeNames(a: string, b: string): number {
   return a.localeCompare(b, 'es', { sensitivity: 'base' });
 }
 
+/**
+ * Los tipos de unos circuitos, sin repetir y por orden alfabético: uno por chip (el listado de
+ * Circuitos, «Agregar circuitos» y la biblioteca del editor de rutina). Salen de los circuitos y no del
+ * catálogo, así que un tipo dado de baja que algún circuito conserva también se puede elegir.
+ */
+export function circuitTypesOf(
+  circuits: ReadonlyArray<{ circuit_type: CircuitTypeRef }>,
+): CircuitTypeRef[] {
+  const types = new Map<string, CircuitTypeRef>();
+  for (const { circuit_type } of circuits) {
+    types.set(circuit_type.id, circuit_type);
+  }
+  return [...types.values()].sort((a, b) => compareTypeNames(a.type, b.type));
+}
+
 /** Los tipos activos, por orden alfabético: los que se ofrecen al crear un circuito, al cambiarle el tipo y al duplicarlo. */
 export function activeTypesByName(
   types: readonly CircuitType[],

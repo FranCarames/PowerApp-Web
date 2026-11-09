@@ -13,6 +13,7 @@ import { MembershipsPage } from './pages/MembershipsPage';
 import { PlanEditorPage } from './pages/PlanEditorPage';
 import { PlansPage } from './pages/PlansPage';
 import { RegisterPaymentPage } from './pages/RegisterPaymentPage';
+import { RoutineAddCircuitsPage } from './pages/RoutineAddCircuitsPage';
 import { RoutineEditorPage } from './pages/RoutineEditorPage';
 import { RoutinesPage } from './pages/RoutinesPage';
 import { StudentDetailPage } from './pages/StudentDetailPage';
@@ -36,6 +37,8 @@ export const coachRoutes: RouteObject[] = [
   { path: 'rutinas', Component: RoutinesPage },
   { path: 'rutinas/:id', Component: RoutineEditorPage },
   { path: 'rutinas/:id/asignar', Component: AssignRoutinePage },
+  // Elegir circuitos para la rutina en el celular y la tablet (en escritorio, la biblioteca del editor).
+  { path: 'rutinas/:id/agregar-circuitos', Component: RoutineAddCircuitsPage },
   { path: 'circuitos', Component: CircuitsPage },
   { path: 'circuitos/:id', Component: CircuitEditorPage },
   // La biblioteca de ejercicios, solo de lectura: la misma ficha que la wiki del Usuario.
