@@ -25,6 +25,7 @@ import { usePlanDraftWeeks } from '../hooks/usePlanDraftWeeks';
 import { useSavePlanification } from '../hooks/useSavePlanification';
 import { planErrorMessage } from '../planErrors';
 import {
+  capped,
   draftTotal,
   maxWeekOf,
   parseCount,
@@ -57,11 +58,6 @@ interface PlanFormProps {
 /** El aviso de que la duración no puede bajar de una semana en uso (CU-E-10, y CU-E-09 al armar el alta). */
 function shrinkMessage(week: number): string {
   return `El plan tiene rutinas en la semana ${week}: la duración no puede ser menor.`;
-}
-
-/** El número como texto, recortado al tope de pantalla: «60» pasa a «52» sin avisar, como el prototipo. */
-function capped(text: string, max: number): string {
-  return parseCount(text) > max ? String(max) : text;
 }
 
 /**

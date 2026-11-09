@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useEffect, useRef, useState } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 
 import { getErrorMessage, isApiError } from '@/api/errors';
@@ -8,6 +8,8 @@ import type {
   User,
   UserPlanificationAssignment,
 } from '@/api/types';
+import { capped, parseCount } from '@/features/catalog/planRoutines';
+import { PLAN_WEEKS_MAX } from '@/features/catalog/planSchema';
 import { formatDate, toCalendarDay } from '@/shared/lib/dates';
 import { fullName } from '@/shared/lib/fullName';
 import { zodResolver } from '@/shared/lib/zodResolver';
@@ -18,15 +20,17 @@ import {
   Field,
   Input,
   Note,
+  NumberStepper,
   Textarea,
   useToast,
 } from '@/shared/ui';
 
 import { assignErrorMessage } from '../assignErrors';
+import { planWeeksHint } from '../assignRange';
 import {
   ASSIGN_NOTE_MAX,
+  assignEndDate,
   assignPlanSchema,
-  defaultEndDate,
   type AssignPlanInput,
   type AssignPlanValues,
 } from '../assignSchema';
@@ -34,6 +38,7 @@ import { useAssignPlanification } from '../hooks/useAssignPlanification';
 import { useSetUserPlanificationActive } from '../hooks/useSetUserPlanificationActive';
 import { AssignOverlapNote } from './AssignOverlapNote';
 import styles from './AssignPlanForm.module.css';
+import { AssignRangeSummary } from './AssignRangeSummary';
 
 interface AssignPlanFormProps {
   plan: Pick<PlanificationListItem, 'id' | 'name' | 'duration'>;
@@ -55,14 +60,16 @@ function readOverlapping(body: unknown): UserPlanificationAssignment[] {
 }
 
 /**
- * Las fechas y la nota de una planificación asignada a un alumno (CU-E-13), y el botón. Va con `key` por
- * el alumno y la planificación: al cambiar alguno, el formulario arranca de nuevo. El inicio arranca en
- * hoy. Sin fin, lo calcula el backend (el domingo de la semana `duration`), y la pantalla lo anticipa; con
- * un plan de duración 0 el fin es obligatorio.
+ * El inicio, las semanas y la nota de una planificación asignada a un alumno (CU-E-13), y el botón. Va con
+ * `key` por el alumno y la planificación: al cambiar alguno, el formulario arranca de nuevo, con el inicio en
+ * hoy y «Semanas» en la duración del plan (vacío si el plan no tiene duración fija). El fin es el domingo de
+ * la última semana, contando como semana 1 la de lunes a domingo que contiene el inicio: el resumen lo
+ * muestra antes de asignar y el body lo lleva siempre. Los errores salen al salir del campo o al asignar.
  *
  * Si el alumno ya tiene una planificación en esas fechas, el backend responde 409 con las que se pisan y
- * la pantalla las muestra, con tres salidas: ajustar las fechas, quitar la anterior (CU-E-14) o asignar
- * igual, que reenvía con `confirm_overlap: true`. El aviso es de esas fechas: si se cambian, desaparece.
+ * la pantalla las muestra al pie, justo encima del botón, con tres salidas: ajustar el inicio o las semanas,
+ * quitar la anterior (CU-E-14) o asignar igual, que reenvía con `confirm_overlap: true`. El aviso es de esas
+ * fechas: si se cambia el inicio o las semanas, desaparece.
  */
 export function AssignPlanForm({
   plan,
@@ -80,37 +87,46 @@ export function AssignPlanForm({
   const [removing, setRemoving] = useState<UserPlanificationAssignment | null>(
     null,
   );
+  // Cada 409 suma uno: el aviso aparece encima del botón y lo empuja hacia abajo, así que hay que llevar a
+  // la vista el pie del formulario (el aviso, las tarjetas y el botón), con el foco en el botón.
+  const [revealed, setRevealed] = useState(0);
+  const tailRef = useRef<HTMLDivElement>(null);
+  const submitRef = useRef<HTMLButtonElement>(null);
 
-  const schema = useMemo(
-    () => assignPlanSchema(plan.duration),
-    [plan.duration],
-  );
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    trigger,
+    getFieldState,
+    formState: { errors, isSubmitted },
   } = useForm<AssignPlanInput, unknown, AssignPlanValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(assignPlanSchema),
+    mode: 'onTouched',
     defaultValues: {
       start_date: toCalendarDay(),
-      end_date: '',
+      weeks: plan.duration > 0 ? String(plan.duration) : '',
       coach_note: '',
     },
   });
-  const [start, end] = useWatch({ control, name: ['start_date', 'end_date'] });
+  const [start, weeks] = useWatch({ control, name: ['start_date', 'weeks'] });
 
   // El aviso es de las fechas con las que se pidió (si se cambian, `clearOverlap` lo descarta). Sin
   // asignaciones que se pisen (quitadas todas) tampoco queda nada que avisar.
-  const dates = `${start}|${end}`;
+  const dates = `${start}|${weeks}`;
   const overlapping =
     overlap?.key === dates && overlap.items.length > 0 ? overlap.items : null;
   const failed =
     assign.isError &&
     !(isApiError(assign.error) && assign.error.status === 409);
-  const hasFixedDuration = plan.duration > 0;
-  const calculatedEnd =
-    end === '' ? defaultEndDate(start, plan.duration) : null;
+  // El resumen sigue a lo escrito, haya o no errores a la vista.
+  const end = assignEndDate(start, weeks);
+
+  useEffect(() => {
+    if (revealed === 0) return;
+    submitRef.current?.focus({ preventScroll: true });
+    tailRef.current?.scrollIntoView({ block: 'center' });
+  }, [revealed]);
 
   const onSubmit = handleSubmit((values) => {
     if (assign.isPending) return;
@@ -124,8 +140,7 @@ export function AssignPlanForm({
       },
       {
         onSuccess: (saved) => {
-          // El CU pide confirmar con las fechas y el nombre de la planificación (las del backend: el fin
-          // puede ser el que calculó).
+          // El CU pide confirmar con las fechas y el nombre de la planificación (las del backend).
           toast.success(
             `${saved.planification.name || 'Planificación'} asignada a ${fullName(student)} · del ${formatDate(saved.start_date)} al ${formatDate(saved.end_date)}`,
           );
@@ -134,6 +149,7 @@ export function AssignPlanForm({
         onError: (error) => {
           if (isApiError(error) && error.status === 409) {
             setOverlap({ key: dates, items: readOverlapping(error.body) });
+            setRevealed((count) => count + 1);
           }
         },
       },
@@ -143,6 +159,13 @@ export function AssignPlanForm({
   /** Con otras fechas el aviso ya no vale: se vuelve a pedir y el backend dice cuáles se pisan. */
   function clearOverlap() {
     setOverlap(null);
+  }
+
+  function changeStart() {
+    clearOverlap();
+    // El fin fuera del calendario es un error de «Semanas» que depende del inicio: si ese campo ya muestra
+    // sus errores, se lo revisa de nuevo para que no quede uno viejo.
+    if (getFieldState('weeks').isTouched || isSubmitted) void trigger('weeks');
   }
 
   function removeOverlapping(target: UserPlanificationAssignment) {
@@ -175,32 +198,41 @@ export function AssignPlanForm({
 
   return (
     <form onSubmit={onSubmit} noValidate>
-      {overlapping && (
-        <AssignOverlapNote overlapping={overlapping} onRemove={setRemoving} />
-      )}
       <Columns>
         <Field label="Fecha de inicio" error={errors.start_date?.message}>
           <Input
             type="date"
-            {...register('start_date', { onChange: clearOverlap })}
+            {...register('start_date', { onChange: changeStart })}
           />
         </Field>
-        <Field
-          label={hasFixedDuration ? 'Fecha de fin (opcional)' : 'Fecha de fin'}
-          error={errors.end_date?.message}
-        >
-          <Input
-            type="date"
-            {...register('end_date', { onChange: clearOverlap })}
+        <Field label="Semanas" error={errors.weeks?.message}>
+          <Controller
+            control={control}
+            name="weeks"
+            render={({ field }) => (
+              <NumberStepper
+                {...field}
+                label="semanas"
+                min={1}
+                max={PLAN_WEEKS_MAX}
+                placeholder="Ej: 8"
+                onChange={(text) => {
+                  clearOverlap();
+                  field.onChange(capped(text, PLAN_WEEKS_MAX));
+                }}
+              />
+            )}
           />
         </Field>
       </Columns>
-      <p className={styles.hint}>
-        {hasFixedDuration
-          ? calculatedEnd
-            ? `Sin fecha de fin, termina el domingo ${formatDate(calculatedEnd)}, al cerrar la semana ${plan.duration} del plan. `
-            : ''
-          : 'Este plan no tiene duración fija: indicá hasta cuándo dura. '}
+      <p className={styles.hint}>{planWeeksHint(plan.duration)}</p>
+      <AssignRangeSummary
+        start={start}
+        end={end}
+        weeks={parseCount(weeks)}
+        duration={plan.duration}
+      />
+      <p className={styles.weekOne}>
         La semana 1 es la de lunes a domingo que contiene el inicio.
       </p>
       <Field
@@ -219,9 +251,14 @@ export function AssignPlanForm({
           {assignErrorMessage(assign.error)}
         </Note>
       )}
-      <Button type="submit" loading={assign.isPending}>
-        {overlapping ? 'Asignar igual' : 'Asignar planificación'}
-      </Button>
+      <div ref={tailRef}>
+        {overlapping && (
+          <AssignOverlapNote overlapping={overlapping} onRemove={setRemoving} />
+        )}
+        <Button ref={submitRef} type="submit" loading={assign.isPending}>
+          {overlapping ? 'Asignar igual' : 'Asignar planificación'}
+        </Button>
+      </div>
       <ConfirmDialog
         open={removing !== null}
         destructive
