@@ -40,13 +40,66 @@
   transform: rotate(90deg);
 }
 
-/* Los ejercicios, de a uno por línea, 10 px bajo el encabezado. */
+/* .ser-row: «Ver series» y el interruptor, separados del encabezado por una línea. */
+.seriesRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 12px 0 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ts);
+}
+
+/* .rc-ej: los ejercicios, de a uno por línea. */
 .exercises {
   display: grid;
   gap: 6px;
-  margin: 10px 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* .rc-x: con «Ver series», cada ejercicio con sus bloques debajo, separado del anterior por una línea. */
+.detailed {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.detailed + .detailed {
+  border-top: 1px solid var(--el);
+  padding-top: 8px;
+}
+
+/* Con las series a la vista, el nombre del ejercicio va en el color del texto principal, como el prototipo. */
+.detailed > .exercise {
+  color: var(--tp);
+}
+
+/* .rc-b: un bloque por línea, con los números en la tipografía de datos. Un texto largo pasa de renglón. */
+.blocks {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--fM);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--ts);
+  overflow-wrap: anywhere;
+}
+
+/* .rc-n: la nota del entrenador, entre comillas. */
+.note {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--ts);
+  overflow-wrap: anywhere;
 }
 
 .exercise {
@@ -65,6 +118,7 @@
 
 .series {
   font-family: var(--fM);
+  font-variant-numeric: tabular-nums;
   font-size: 12px;
   white-space: nowrap;
 }

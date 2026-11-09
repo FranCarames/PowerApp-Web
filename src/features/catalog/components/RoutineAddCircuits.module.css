@@ -1,0 +1,69 @@
+/* .narrow del prototipo: la lista no se estira en pantallas anchas. */
+.narrow {
+  max-width: 540px;
+}
+
+/* La ayuda bajo el título, como la de Circuitos: el prototipo la sube 6 px y la separa 16 px del buscador. */
+.intro {
+  margin: -6px 0 16px;
+  line-height: 1.6;
+  color: var(--ts);
+}
+
+/* .add-list: lugar al final para que la barra fija no tape la última tarjeta (con el aviso del tope, también). */
+.list {
+  padding-bottom: 96px;
+}
+
+/*
+ * .addbar del prototipo: fija abajo, encima de la tab bar (que mide 71 px más el área segura). Por debajo
+ * de los avisos flotantes (z-index 90) y de la tab bar (40).
+ */
+.bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(71px + env(safe-area-inset-bottom, 0px));
+  z-index: 35;
+  background: rgba(19, 22, 31, 0.97);
+  border-top: 1px solid var(--border);
+  padding: 10px calc(20px + env(safe-area-inset-right, 0px)) 12px
+    calc(20px + env(safe-area-inset-left, 0px));
+}
+
+.barInner {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* El aviso del tope. Vacío no ocupa lugar, pero la región sigue ahí para que el lector anuncie cuando aparece. */
+.hint {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--warn);
+  text-align: center;
+}
+
+.hint:not(:empty) {
+  margin-bottom: 8px;
+}
+
+/* «Cancelar» y el botón principal, que ocupa el doble. */
+.buttons {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 10px;
+}
+
+.buttons > button {
+  padding: 12px;
+}
+
+/* En escritorio no hay tab bar: la barra va al pie, a la derecha de la barra lateral. */
+@media (min-width: 960px) {
+  .bar {
+    left: 264px;
+    bottom: 0;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+}

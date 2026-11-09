@@ -2,12 +2,30 @@ import type { NavigationType } from 'react-router';
 
 import type { RoutineInput, RoutineOp } from './routineSchema';
 
-// Armar una rutina lleva a otras pantallas y vuelve: Editar un circuito, crear uno nuevo. El editor de rutina
-// se desmonta en el camino, así que lo que el usuario ya escribió (el borrador) se guarda acá, en memoria, y
-// el editor lo recupera al volver. Si se pierde (se recarga la página), la rutina se abre como está guardada.
+// Armar una rutina lleva a otras pantallas y vuelve: Editar un circuito, crear uno nuevo, «Agregar circuitos».
+// El editor de rutina se desmonta en el camino, así que lo que el usuario ya escribió (el borrador) se guarda
+// acá, en memoria, y el editor lo recupera al volver. Si se pierde (se recarga la página), la rutina se abre
+// como está guardada.
 
 /** El borrador de la rutina nueva: la ruta es `…/nuevo`, no tiene id. */
 export const NEW_ROUTINE_KEY = 'nuevo';
+
+/** «Agregar circuitos» de una rutina (`/a/rutinas/<id>/agregar-circuitos`, o `…/nuevo/…`). */
+export function addCircuitsPath(basePath: string, routineKey: string): string {
+  return `${basePath}/${routineKey}/agregar-circuitos`;
+}
+
+/** El `state` de la navegación del editor de rutina a «Agregar circuitos»: con él, volver es «atrás». */
+export const FROM_ROUTINE_EDITOR_STATE = { fromRoutineEditor: true } as const;
+
+/** Si a «Agregar circuitos» se llegó desde el editor (y no por la dirección): entonces el editor está detrás. */
+export function cameFromRoutineEditor(state: unknown): boolean {
+  return (
+    typeof state === 'object' &&
+    state !== null &&
+    (state as { fromRoutineEditor?: unknown }).fromRoutineEditor === true
+  );
+}
 
 /**
  * De dónde viene el editor de circuitos cuando se lo abrió desde una rutina (`state.routine` de la
@@ -73,7 +91,10 @@ export function stashRoutineDraft(
   stashes.set(routineId, { values, ops: [] });
 }
 
-/** Deja pendiente algo para cuando se vuelva a la rutina: sumar un circuito o reemplazar uno. */
+/**
+ * Deja pendiente algo para cuando se vuelva a la rutina: sumar un circuito o reemplazar uno. Sin borrador
+ * (se recargó la pantalla), queda solo lo pendiente y la rutina lo aplica sobre lo guardado.
+ */
 export function queueRoutineOp(routineId: string, op: RoutineOp): void {
   const stash = stashes.get(routineId);
   stashes.set(routineId, { ...stash, ops: [...(stash?.ops ?? []), op] });

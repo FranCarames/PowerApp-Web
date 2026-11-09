@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router';
 
 import { getErrorMessage, isApiError } from '@/api/errors';
 import type { RoutineTree } from '@/api/pending';
+import { DESKTOP_QUERY, useMediaQuery } from '@/shared/lib/useMediaQuery';
 import { zodResolver } from '@/shared/lib/zodResolver';
 import {
   Button,
@@ -26,8 +27,11 @@ import {
 import { useCircuitUsage, useCircuits } from '../hooks/useCircuits';
 import { useSaveRoutine } from '../hooks/useSaveRoutine';
 import { useSetRoutineActive } from '../hooks/useSetRoutineActive';
+import { circuitCounts } from '../routineCircuits';
 import {
+  addCircuitsPath,
   clearRoutineStash,
+  FROM_ROUTINE_EDITOR_STATE,
   NEW_ROUTINE_KEY,
   peekRoutineStash,
   stashRoutineDraft,
@@ -42,8 +46,8 @@ import {
   type RoutineInput,
   type RoutineValues,
 } from '../routineSchema';
-import { CircuitPickerModal } from './CircuitPickerModal';
 import { RoutineCircuitCard } from './RoutineCircuitCard';
+import { RoutineCircuitLibrary } from './RoutineCircuitLibrary';
 import styles from './RoutineForm.module.css';
 
 /**
@@ -98,20 +102,24 @@ interface RoutineFormProps {
   routine?: RoutineTree;
   /** Asignar la rutina a un alumno (CU-E-19): es del Entrenador. Sin esto, no hay botón. */
   onAssign?: (routineId: string) => void;
-  /** Si se vuelve de otra pantalla (un circuito), el formulario recupera lo que había escrito. */
+  /** Si se vuelve de otra pantalla (un circuito, «Agregar circuitos»), el formulario recupera lo que había escrito. */
   restoreDraft?: boolean;
 }
 
 /**
  * El formulario de una rutina, el mismo del Admin y del Entrenador (CU-E-16, CU-E-17 y CU-E-18): nombre y
- * nota del entrenador; los circuitos en orden, cada uno con sus ejercicios y las acciones Editar y
- * Quitar; agregar uno existente o crear uno nuevo; y, al editar, eliminar (baja lógica) o reactivar. Guardar
- * manda la lista completa de circuitos con el `id` del vínculo de los que ya estaban. Una rutina dada de baja
- * se ve, pero no se edita: el backend lo rechaza, así que primero se la reactiva.
+ * nota del entrenador; los circuitos en orden, cada uno con su tipo, sus ejercicios, «Ver series» y las
+ * acciones Subir, Bajar, Editar y Quitar; agregar existentes o crear uno nuevo; y, al editar, eliminar (baja
+ * lógica) o reactivar. Guardar manda la lista completa de circuitos con el `id` del vínculo de los que ya
+ * estaban. Una rutina dada de baja se ve, pero no se edita: el backend lo rechaza, así que primero se la
+ * reactiva. Sus series se pueden ver igual.
  *
- * Editar un circuito o crear uno nuevo lleva al editor de circuitos y vuelve acá: lo que ya estaba escrito
- * se guarda en `routineDraft` antes de salir y se recupera al volver. Con `onAssign` (el Entrenador), una
- * rutina vigente suma "Asignar a alumno" junto a "Eliminar", y también se va guardando lo escrito.
+ * Agregar existentes depende del ancho: en el celular y la tablet, «Agregar existente» lleva a la pantalla
+ * «Agregar circuitos»; desde 960 px no está, y la «Biblioteca de circuitos» al costado los suma al instante.
+ * Editar un circuito, crear uno nuevo y «Agregar circuitos» llevan a otra pantalla y vuelven acá: lo que ya
+ * estaba escrito se guarda en `routineDraft` antes de salir y se recupera al volver. Con `onAssign` (el
+ * Entrenador), una rutina vigente suma "Asignar a alumno" junto a "Eliminar", y también se va guardando lo
+ * escrito.
  */
 export function RoutineForm({
   basePath,
@@ -124,8 +132,9 @@ export function RoutineForm({
   const toast = useToast();
   const save = useSaveRoutine(routine?.id);
   const setActive = useSetRoutineActive();
-  const [picking, setPicking] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  // En escritorio, la biblioteca al costado reemplaza a «Agregar existente»: se monta una de las dos.
+  const desktop = useMediaQuery(DESKTOP_QUERY);
   const routineKey = routine?.id ?? NEW_ROUTINE_KEY;
   const editorPath = `${basePath}/${routineKey}`;
 
@@ -163,13 +172,10 @@ export function RoutineForm({
     [catalog.data],
   );
   const usage = useCircuitUsage();
-  const usedCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const { circuit_id } of circuits.fields) {
-      counts.set(circuit_id, (counts.get(circuit_id) ?? 0) + 1);
-    }
-    return counts;
-  }, [circuits.fields]);
+  const usedCounts = useMemo(
+    () => circuitCounts(circuits.fields),
+    [circuits.fields],
+  );
 
   const inactive = routine !== undefined && !routine.active;
   const circuitsError =
@@ -192,6 +198,14 @@ export function RoutineForm({
       routine: { to: editorPath, routineId: routineKey, slot },
     };
     navigate(path, { state });
+  }
+
+  /** Se va a «Agregar circuitos» dejando guardado lo escrito: lo elegido allá se suma a esto al volver. */
+  function openAddCircuits() {
+    stashRoutineDraft(routineKey, getValues());
+    navigate(addCircuitsPath(basePath, routineKey), {
+      state: FROM_ROUTINE_EDITOR_STATE,
+    });
   }
 
   /** Se va a asignar la rutina dejando guardado lo escrito: la asignación es de la rutina guardada. */
@@ -232,39 +246,46 @@ export function RoutineForm({
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        {inactive && (
-          <Note tone="warn" icon="alert">
-            Rutina inactiva: no se puede editar ni asignar. Reactivala para
-            poder cambiarla.
-          </Note>
-        )}
-        {save.isError && (
-          <Note tone="err" icon="alert" role="alert">
-            {saveErrorMessage(save.error)}
-          </Note>
-        )}
-        {/* Una rutina dada de baja se ve, pero no se edita: el backend la rechaza. */}
-        <fieldset disabled={inactive} className={styles.fieldset}>
-          <Field label="Nombre de la rutina" error={errors.name?.message}>
-            <Input
-              maxLength={50}
-              autoComplete="off"
-              placeholder="Ej: Día A — Empuje"
-              {...register('name')}
-            />
-          </Field>
-          <Field
-            label="Nota del coach"
-            error={errors.coach_note?.message}
-            hint="Opcional. La ve quien hace la rutina."
-          >
-            <Textarea
-              maxLength={100}
-              placeholder="Indicaciones para el alumno"
-              {...register('coach_note')}
-            />
-          </Field>
+      <div className={styles.layout}>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className={styles.form}
+        >
+          {inactive && (
+            <Note tone="warn" icon="alert">
+              Rutina inactiva: no se puede editar ni asignar. Reactivala para
+              poder cambiarla.
+            </Note>
+          )}
+          {save.isError && (
+            <Note tone="err" icon="alert" role="alert">
+              {saveErrorMessage(save.error)}
+            </Note>
+          )}
+          {/* Una rutina dada de baja se ve, pero no se edita: el backend la rechaza. */}
+          {/* Las tarjetas quedan fuera de los <fieldset> (apagan sus botones solas): «Ver series» sigue andando. */}
+          <fieldset disabled={inactive} className={styles.fieldset}>
+            <Field label="Nombre de la rutina" error={errors.name?.message}>
+              <Input
+                maxLength={50}
+                autoComplete="off"
+                placeholder="Ej: Día A — Empuje"
+                {...register('name')}
+              />
+            </Field>
+            <Field
+              label="Nota del coach"
+              error={errors.coach_note?.message}
+              hint="Opcional. La ve quien hace la rutina."
+            >
+              <Textarea
+                maxLength={100}
+                placeholder="Indicaciones para el alumno"
+                {...register('coach_note')}
+              />
+            </Field>
+          </fieldset>
           <SectionHeader
             level={3}
             title="Circuitos"
@@ -286,6 +307,7 @@ export function RoutineForm({
                   detail={details.get(field.circuit_id)}
                   listed={listed.get(field.circuit_id)}
                   routines={routinesUsing(field.circuit_id)}
+                  disabled={inactive}
                   onMove={(direction) =>
                     circuits.move(index, index + direction)
                   }
@@ -305,76 +327,92 @@ export function RoutineForm({
               {circuitsError}
             </div>
           )}
-          <Columns className={styles.add}>
-            <Button
-              variant="ghost"
-              icon="plus"
-              disabled={full}
-              onClick={() => setPicking(true)}
-            >
-              Agregar existente
-            </Button>
-            <Button
-              variant="ghost"
-              icon="plus"
-              disabled={full}
-              onClick={() => openCircuitEditor(`${circuitsPath}/nuevo`)}
-            >
-              Nuevo circuito
-            </Button>
-          </Columns>
-          {full && (
-            <p className={styles.fullHint}>
-              Llegaste al máximo de {ROUTINE_CIRCUITS_MAX} circuitos por rutina.
-            </p>
-          )}
-          <Button type="submit" loading={save.isPending} disabled={inactive}>
-            Guardar rutina
-          </Button>
-        </fieldset>
-        {routine &&
-          (routine.active ? (
-            onAssign ? (
-              <Columns className={styles.secondary}>
-                <Button variant="sec" onClick={() => openAssign(routine)}>
-                  Asignar a alumno
+          <fieldset disabled={inactive} className={styles.fieldset}>
+            {desktop ? (
+              <div className={styles.add}>
+                <Button
+                  variant="ghost"
+                  icon="plus"
+                  disabled={full}
+                  onClick={() => openCircuitEditor(`${circuitsPath}/nuevo`)}
+                >
+                  Nuevo circuito
+                </Button>
+              </div>
+            ) : (
+              <Columns className={styles.add}>
+                <Button
+                  variant="ghost"
+                  icon="plus"
+                  disabled={full}
+                  onClick={openAddCircuits}
+                >
+                  Agregar existente
                 </Button>
                 <Button
-                  variant="danger"
-                  onClick={() => setConfirmingDelete(true)}
+                  variant="ghost"
+                  icon="plus"
+                  disabled={full}
+                  onClick={() => openCircuitEditor(`${circuitsPath}/nuevo`)}
                 >
-                  Eliminar
+                  Nuevo circuito
                 </Button>
               </Columns>
+            )}
+            {full && (
+              <p className={styles.fullHint}>
+                Llegaste al máximo de {ROUTINE_CIRCUITS_MAX} circuitos por
+                rutina.
+              </p>
+            )}
+            <Button type="submit" loading={save.isPending} disabled={inactive}>
+              Guardar rutina
+            </Button>
+          </fieldset>
+          {routine &&
+            (routine.active ? (
+              onAssign ? (
+                <Columns className={styles.secondary}>
+                  <Button variant="sec" onClick={() => openAssign(routine)}>
+                    Asignar a alumno
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => setConfirmingDelete(true)}
+                  >
+                    Eliminar
+                  </Button>
+                </Columns>
+              ) : (
+                <Button
+                  variant="danger"
+                  className={styles.secondary}
+                  onClick={() => setConfirmingDelete(true)}
+                >
+                  Eliminar rutina
+                </Button>
+              )
             ) : (
               <Button
-                variant="danger"
+                variant="ghost"
                 className={styles.secondary}
-                onClick={() => setConfirmingDelete(true)}
+                loading={setActive.isPending}
+                onClick={() => changeActive(routine, true)}
               >
-                Eliminar rutina
+                Reactivar rutina
               </Button>
-            )
-          ) : (
-            <Button
-              variant="ghost"
-              className={styles.secondary}
-              loading={setActive.isPending}
-              onClick={() => changeActive(routine, true)}
-            >
-              Reactivar rutina
-            </Button>
-          ))}
-      </form>
-      <CircuitPickerModal
-        open={picking}
-        usedCounts={usedCounts}
-        onPick={({ id }) => {
-          circuits.append(newRoutineCircuit(id));
-          setPicking(false);
-        }}
-        onClose={() => setPicking(false)}
-      />
+            ))}
+        </form>
+        {/* Fuera del <form>: un Enter en su buscador no guarda la rutina. */}
+        {desktop && (
+          <RoutineCircuitLibrary
+            usedCounts={usedCounts}
+            full={full}
+            disabled={inactive}
+            onAdd={({ id }) => circuits.append(newRoutineCircuit(id))}
+          />
+        )}
+      </div>
       {routine && (
         <ConfirmDialog
           open={confirmingDelete}

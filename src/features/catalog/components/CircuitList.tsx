@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router';
 
 import { getErrorMessage } from '@/api/errors';
-import type { CircuitListItemPlus, CircuitTypeRef } from '@/api/types';
 import { matchesSearch } from '@/shared/lib/text';
 import {
   KEYWORD_MAX_LENGTH,
@@ -20,7 +19,7 @@ import {
   SearchInput,
 } from '@/shared/ui';
 
-import { compareTypeNames } from '../circuitTypes';
+import { circuitTypesOf } from '../circuitTypes';
 import { useCircuits, useCircuitUsage } from '../hooks/useCircuits';
 import { CircuitCard } from './CircuitCard';
 
@@ -34,18 +33,6 @@ const FILTERS = [
   },
   { label: 'Todos', param: 'todos', show: () => true },
 ] as const;
-
-/**
- * Los tipos de los circuitos, sin repetir y por orden alfabético: uno por chip. Salen de los circuitos y
- * no del catálogo, así que un tipo dado de baja que algún circuito conserva también se puede elegir.
- */
-function typesOf(circuits: CircuitListItemPlus[]): CircuitTypeRef[] {
-  const types = new Map<string, CircuitTypeRef>();
-  for (const { circuit_type } of circuits) {
-    types.set(circuit_type.id, circuit_type);
-  }
-  return [...types.values()].sort((a, b) => compareTypeNames(a.type, b.type));
-}
 
 /**
  * Los circuitos (CU-E-21), el mismo listado del Admin y del Entrenador: el nombre, el tipo, los
@@ -77,7 +64,7 @@ export function CircuitList({ basePath }: { basePath: string }) {
   // Los chips de tipo son los de los circuitos que deja ver el de arriba, sin mirar la búsqueda. Un tipo
   // de la URL que no está entre ellos cuenta como "Todos", pero queda en la URL: si el chip vuelve, vuelve
   // a quedar elegido.
-  const types = shown && typesOf(shown);
+  const types = shown && circuitTypesOf(shown);
   const type = types?.find(({ id }) => id === typeParam)?.id ?? null;
 
   const visible = shown

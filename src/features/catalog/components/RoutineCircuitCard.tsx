@@ -1,16 +1,22 @@
+import { useId, useState } from 'react';
+
 import type { CircuitDetail } from '@/api/pending';
 import type { CircuitListItemPlus } from '@/api/types';
-import { setKind } from '@/shared/lib/sets';
-import { Card, IconButton, Pill, Tile } from '@/shared/ui';
+import { formatSetBlock, setKind } from '@/shared/lib/sets';
+import { Card, IconButton, Pill, Switch, Tile } from '@/shared/ui';
 
+import { circuitTypeName } from '../circuitTypes';
 import { useCircuit } from '../hooks/useCircuits';
 import styles from './RoutineCircuitCard.module.css';
 
-/** Un ejercicio del circuito para mostrarlo: sus series, si se conocen (el listado de circuitos no las trae). */
+type CircuitExercise = CircuitDetail['exercises'][number];
+
+/** Un ejercicio del circuito para mostrarlo: sus series y su nota, si se conocen (el listado de circuitos no las trae). */
 interface ExerciseLine {
   id: string;
   name: string;
-  sets?: CircuitDetail['exercises'][number]['sets'];
+  sets?: CircuitExercise['sets'];
+  note?: string;
 }
 
 /** El tipo de las series de un ejercicio: "Normal" o, si alguna lo es, "AMRAP", "RM" o "AMRAP + RM". */
@@ -40,6 +46,8 @@ interface RoutineCircuitCardProps {
   listed?: CircuitListItemPlus;
   /** En cuántas rutinas se usa contando esta, si ya se sabe. */
   routines?: number;
+  /** La rutina está dada de baja: se ve, pero no se ordena, edita ni quita. «Ver series» sigue andando. */
+  disabled?: boolean;
   /** Un lugar arriba (`-1`) o abajo (`1`). */
   onMove: (direction: -1 | 1) => void;
   onEdit: () => void;
@@ -47,9 +55,11 @@ interface RoutineCircuitCardProps {
 }
 
 /**
- * Un circuito dentro de la rutina (CU-E-16 y CU-E-17): su nombre, cuántos ejercicios tiene, en cuántas
- * rutinas se usa (si es más de una) y sus ejercicios con la cantidad de series y su tipo, con los botones para subirlo,
- * bajarlo, editarlo y quitarlo. El orden de la lista es el orden de la rutina.
+ * Un circuito dentro de la rutina (CU-E-16, paso 3, y CU-E-17, paso 1): su nombre, «<tipo> · N
+ * ejercicios», en cuántas rutinas se usa (si es más de una) y sus ejercicios con la cantidad de series y
+ * su tipo, con los botones para subirlo, bajarlo, editarlo y quitarlo. El orden de la lista es el orden
+ * de la rutina. «Ver series» muestra, a pedido, cada bloque de series y la nota de cada ejercicio: es
+ * estado de la tarjeta (arranca apagado y no se recuerda) y no cambia la rutina.
  */
 export function RoutineCircuitCard({
   index,
@@ -58,6 +68,7 @@ export function RoutineCircuitCard({
   detail,
   listed,
   routines,
+  disabled = false,
   onMove,
   onEdit,
   onRemove,
@@ -65,19 +76,28 @@ export function RoutineCircuitCard({
   // Un circuito que se acaba de agregar no está en el detalle de la rutina: se lo pide para tener sus series.
   const fetched = useCircuit(detail ? null : circuitId);
   const circuit = detail ?? fetched.data;
+  const [showSets, setShowSets] = useState(false);
+  const exercisesId = useId();
 
   const name = circuit?.name ?? listed?.name ?? 'Circuito';
   const active = circuit?.active ?? listed?.active ?? true;
+  const type = circuit ?? listed;
   const exercises: ExerciseLine[] | undefined = circuit
     ? [...circuit.exercises]
         .sort((a, b) => a.exercise_order - b.exercise_order)
-        .map(({ id, exercise, sets }) => ({ id, name: exercise.name, sets }))
+        .map(({ id, exercise, sets, coach_note }) => ({
+          id,
+          name: exercise.name,
+          sets: [...sets].sort((a, b) => a.set_order - b.set_order),
+          note: coach_note?.trim() || undefined,
+        }))
     : listed?.exercises.map(({ id, exercise }) => ({
         id,
         name: exercise.name,
       }));
 
   const parts = [
+    type && circuitTypeName(type),
     exercises &&
       `${exercises.length} ejercicio${exercises.length === 1 ? '' : 's'}`,
     routines !== undefined && routines > 1 && `se usa en ${routines} rutinas`,
@@ -100,7 +120,7 @@ export function RoutineCircuitCard({
             icon="chev"
             className={styles.up}
             label={`Subir ${name}`}
-            disabled={index === 0}
+            disabled={disabled || index === 0}
             onClick={() => onMove(-1)}
           />
           <IconButton
@@ -108,13 +128,14 @@ export function RoutineCircuitCard({
             icon="chev"
             className={styles.down}
             label={`Bajar ${name}`}
-            disabled={index === count - 1}
+            disabled={disabled || index === count - 1}
             onClick={() => onMove(1)}
           />
           <IconButton
             variant="ghost"
             icon="edit"
             label={`Editar ${name}`}
+            disabled={disabled}
             onClick={onEdit}
           />
           <IconButton
@@ -122,6 +143,7 @@ export function RoutineCircuitCard({
             danger
             icon="x"
             label={`Quitar ${name} de la rutina`}
+            disabled={disabled}
             onClick={onRemove}
           />
         </div>
@@ -130,28 +152,76 @@ export function RoutineCircuitCard({
         (exercises.length === 0 ? (
           <p className={styles.empty}>Este circuito no tiene ejercicios.</p>
         ) : (
-          <ul className={styles.exercises}>
-            {exercises.map(({ id, name: exerciseName, sets }) => {
-              const kind = sets && kindsLabel(sets);
-              return (
-                <li key={id} className={styles.exercise}>
-                  <span className={styles.exerciseName}>{exerciseName}</span>
-                  {sets && kind && (
-                    <>
-                      <span className={styles.series}>
-                        {sets.reduce((total, set) => total + set.set_count, 0)}{' '}
-                        series
-                      </span>
-                      <Pill tone={kind.special ? 'acc' : 'mut'}>
-                        {kind.label}
-                      </Pill>
-                    </>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          <>
+            <div className={styles.seriesRow}>
+              {/* El interruptor ya se anuncia con el nombre del circuito: este texto es para la vista. */}
+              <span aria-hidden="true">Ver series</span>
+              <Switch
+                checked={showSets}
+                onChange={setShowSets}
+                label={`Ver series de ${name}`}
+                aria-controls={exercisesId}
+              />
+            </div>
+            <ul id={exercisesId} className={styles.exercises}>
+              {exercises.map((exercise) =>
+                showSets ? (
+                  <ExerciseWithSets key={exercise.id} exercise={exercise} />
+                ) : (
+                  <ExerciseSummary key={exercise.id} exercise={exercise} />
+                ),
+              )}
+            </ul>
+          </>
         ))}
     </Card>
+  );
+}
+
+/** La píldora del tipo de series de un ejercicio, si se conocen sus series. */
+function KindPill({ sets }: { sets: ExerciseLine['sets'] }) {
+  if (!sets) return null;
+  const kind = kindsLabel(sets);
+  return <Pill tone={kind.special ? 'acc' : 'mut'}>{kind.label}</Pill>;
+}
+
+/** Con «Ver series» apagado: el nombre, «N series» (la suma de sus bloques) y el tipo. */
+function ExerciseSummary({ exercise }: { exercise: ExerciseLine }) {
+  const { name, sets } = exercise;
+  return (
+    <li className={styles.exercise}>
+      <span className={styles.exerciseName}>{name}</span>
+      {sets && (
+        <span className={styles.series}>
+          {sets.reduce((total, set) => total + set.set_count, 0)} series
+        </span>
+      )}
+      <KindPill sets={sets} />
+    </li>
+  );
+}
+
+/**
+ * Con «Ver series» prendido: el nombre y el tipo, y debajo una línea por bloque (el resumen del
+ * encabezado de cada bloque en el editor de circuitos) y la nota del entrenador entre comillas. Si el
+ * detalle del circuito todavía no llegó, solo el nombre: las líneas aparecen cuando llega.
+ */
+function ExerciseWithSets({ exercise }: { exercise: ExerciseLine }) {
+  const { name, sets, note } = exercise;
+  return (
+    <li className={styles.detailed}>
+      <div className={styles.exercise}>
+        <span className={styles.exerciseName}>{name}</span>
+        <KindPill sets={sets} />
+      </div>
+      {sets && sets.length > 0 && (
+        <ul className={styles.blocks}>
+          {sets.map((set) => (
+            <li key={set.id}>{formatSetBlock(set)}</li>
+          ))}
+        </ul>
+      )}
+      {note && <p className={styles.note}>“{note}”</p>}
+    </li>
   );
 }
