@@ -133,7 +133,7 @@ Tokens, copiados del prototipo. Van en `src/shared/styles/tokens.css`:
 ```
 
 - **Tipografías:** se cargan desde Google Fonts. Barlow Condensed (600, 700, 800) para títulos, Inter (400 a 800) para el cuerpo y JetBrains Mono (500, 700, 800) para datos numéricos.
-- **Mobile-first:** en mobile, el contenido va en un contenedor de hasta 560 px con tab bar inferior. Desde 960 px, la tab bar se reemplaza por una sidebar de 264 px, el contenido llega hasta 940 px y las listas pasan a dos columnas.
+- **Mobile-first:** en mobile, el contenido va en un contenedor de hasta 560 px con tab bar inferior. Desde 960 px, la tab bar se reemplaza por una sidebar de 264 px, el contenido llega hasta 940 px y las listas pasan a dos columnas. Una pantalla que necesita más ancho lo pide en su ruta con `handle: WIDE_SCREEN` (`shared/lib/routeHandle.ts`) y llega hasta 1600 px: hoy, solo el editor de rutina.
 - **Modales:** bottom sheet en mobile, diálogo centrado en desktop.
 - **Safe areas:** el `index.html` declara `viewport-fit=cover`. El layout respeta `env(safe-area-inset-*)`.
 - **Accesibilidad:** `:focus-visible` visible, `aria-label` en los botones de ícono, `prefers-reduced-motion` respetado y contraste de texto como en el prototipo.

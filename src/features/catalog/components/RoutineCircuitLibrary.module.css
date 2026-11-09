@@ -35,6 +35,11 @@
   color: var(--tm);
 }
 
+/* Los circuitos, en tantas columnas de al menos 260 px como entren: una sola cerca de los 960, varias en una pantalla ancha. */
+.panel .grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+}
+
 /* .lib-i: cada circuito en una fila, con «Agregar» a la derecha. */
 .item {
   padding: 10px 12px;

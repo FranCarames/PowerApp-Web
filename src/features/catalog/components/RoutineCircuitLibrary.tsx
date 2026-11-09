@@ -56,7 +56,7 @@ export function RoutineCircuitLibrary({
       )}
       <CircuitLibrary skeletonRows={3}>
         {(visible) => (
-          <List gap={8}>
+          <List gap={8} className={styles.grid}>
             {visible.map((circuit) => {
               const used = usedCounts.get(circuit.id) ?? 0;
               return (
