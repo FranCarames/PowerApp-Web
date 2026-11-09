@@ -6,10 +6,6 @@ import {
   Columns,
   ConfirmDialog,
   EmptyState,
-  List,
-  ListItem,
-  SectionHeader,
-  Tile,
   useToast,
 } from '@/shared/ui';
 
@@ -18,12 +14,18 @@ import { useRepeatPlanWeek } from '../hooks/useRepeatPlanWeek';
 import { useReorderPlanWeek } from '../hooks/useReorderPlanWeek';
 import { useSetPlanRoutinesActive } from '../hooks/useSetPlanRoutinesActive';
 import { planErrorMessage } from '../planErrors';
-import { moveItem, routinesCount, savedWeeks } from '../planRoutines';
+import {
+  moveItem,
+  routinesCount,
+  savedWeeks,
+  splitPlanRoutines,
+} from '../planRoutines';
 import styles from './PlanRoutines.module.css';
 import {
   PlanReincorporateModal,
   type PlanPlace,
 } from './PlanReincorporateModal';
+import { PlanRemovedRoutines } from './PlanRemovedRoutines';
 import { PlanRepeatModal } from './PlanRepeatModal';
 import { PlanRoutinePicker, type PlanRoutinePick } from './PlanRoutinePicker';
 import { PlanWeekCard, type MoveHow } from './PlanWeekCard';
@@ -54,9 +56,11 @@ function addedLabel(count: number): string {
  * que se ajustan al guardar. Los huecos, en cambio, siguen el número de rutinas por semana escrito, porque son
  * solo visuales.
  *
- * El detalle del plan trae solo las rutinas vigentes, y ningún endpoint lista las quitadas: las que se
- * quitan en esta pantalla quedan en «Quitadas del plan» para poder reincorporarlas, y se pierden al salir
- * de ella. Con el plan dado de baja se ven las rutinas, pero no se cambian: el backend lo rechaza.
+ * El detalle del plan se pide con las rutinas quitadas (`include_inactive`, BE-45) y las separa por su
+ * `active`: las semanas, los huecos, el «X de K», la selección, quitar, reordenar y repetir trabajan solo con
+ * las vigentes, y las quitadas salen aparte, detrás del interruptor «Mostrar quitadas (N)»
+ * (`PlanRemovedRoutines`), cada vez que se abre el plan. Con el plan dado de baja se ven las rutinas, pero
+ * no se cambian: el backend lo rechaza.
  */
 export function PlanRoutines({
   plan,
@@ -73,6 +77,11 @@ export function PlanRoutines({
     setReorderError(planErrorMessage(error)),
   );
   const weeks = useMemo(() => savedWeeks(plan), [plan]);
+  // El detalle trae las vigentes y las quitadas mezcladas: acá se separan, y solo las vigentes arman las semanas.
+  const { current, removed } = useMemo(
+    () => splitPlanRoutines(plan.routines),
+    [plan.routines],
+  );
   const inactive = !plan.active;
 
   const [folded, setFolded] = useState<ReadonlySet<number>>(new Set());
@@ -84,8 +93,6 @@ export function PlanRoutines({
   const [removing, setRemoving] = useState<PlanificationAsignation[] | null>(
     null,
   );
-  // Lo que se quitó en esta pantalla: el detalle ya no lo trae, así que acá se guarda para reincorporarlo.
-  const [removed, setRemoved] = useState<PlanificationAsignation[]>([]);
   const [reincorporating, setReincorporating] = useState<{
     open: boolean;
     routine: PlanificationAsignation | null;
@@ -93,7 +100,7 @@ export function PlanRoutines({
   const [confirmingAll, setConfirmingAll] = useState(false);
 
   // Los que se eligieron y siguen en el plan (después de agregar o quitar, la lista cambia).
-  const selectedLinks = plan.routines.filter(({ id }) => selected.has(id));
+  const selectedLinks = current.filter(({ id }) => selected.has(id));
   const duration = plan.duration;
   const planned = duration * perWeek;
 
@@ -180,7 +187,7 @@ export function PlanRoutines({
   }
 
   function askRemove(key: string) {
-    const link = plan.routines.find(({ id }) => id === key);
+    const link = current.find(({ id }) => id === key);
     if (!link) return;
     setActive.reset();
     setRemoving([link]);
@@ -191,7 +198,6 @@ export function PlanRoutines({
       { ids: links.map(({ id }) => id), active: false },
       {
         onSuccess: () => {
-          setRemoved((current) => [...current, ...links]);
           toast.success(
             links.length === 1
               ? 'Rutina quitada del plan'
@@ -218,9 +224,6 @@ export function PlanRoutines({
       { ids: [routine.id], active: true, ...place },
       {
         onSuccess: () => {
-          setRemoved((current) =>
-            current.filter(({ id }) => id !== routine.id),
-          );
           toast.success('Rutina reincorporada al plan');
           setReincorporating((current) => ({ ...current, open: false }));
         },
@@ -234,7 +237,6 @@ export function PlanRoutines({
       { ids, active: true },
       {
         onSuccess: () => {
-          setRemoved([]);
           toast.success(`${routinesCount(ids.length)} reincorporadas al plan`);
           setConfirmingAll(false);
         },
@@ -291,7 +293,7 @@ export function PlanRoutines({
                 </Button>
               </Columns>
             ) : (
-              plan.routines.length > 1 && (
+              current.length > 1 && (
                 <div className={styles.actions}>
                   <Button
                     variant="ghost"
@@ -304,55 +306,15 @@ export function PlanRoutines({
               )
             )}
             {removed.length > 0 && (
-              <section
-                aria-label="Quitadas del plan"
-                className={styles.removed}
-              >
-                <SectionHeader
-                  level={4}
-                  title="Quitadas del plan"
-                  aside={removed.length}
-                />
-                <p className={styles.hint}>
-                  Volvés a ponerlas desde acá, a su lugar o a otro. Cuando
-                  salgas de esta pantalla ya no las vas a ver: para sumarlas de
-                  nuevo vas a tener que agregarlas.
-                </p>
-                <List gap={8}>
-                  {removed.map((link) => (
-                    <ListItem
-                      key={link.id}
-                      leading={<Tile icon="list" tone="mut" />}
-                      title={link.routine.name}
-                      subtitle={`Semana ${link.week} · Posición ${link.order}`}
-                      trailing={
-                        <Button
-                          variant="ghost"
-                          sm
-                          disabled={inactive}
-                          aria-label={`Reincorporar ${link.routine.name}`}
-                          onClick={() => openReincorporate(link)}
-                        >
-                          Reincorporar
-                        </Button>
-                      }
-                    />
-                  ))}
-                </List>
-                {removed.length > 1 && (
-                  <Button
-                    variant="ghost"
-                    className={styles.all}
-                    disabled={inactive}
-                    onClick={() => {
-                      setActive.reset();
-                      setConfirmingAll(true);
-                    }}
-                  >
-                    Reincorporar todas a su lugar
-                  </Button>
-                )}
-              </section>
+              <PlanRemovedRoutines
+                removed={removed}
+                disabled={inactive}
+                onReincorporate={openReincorporate}
+                onReincorporateAll={() => {
+                  setActive.reset();
+                  setConfirmingAll(true);
+                }}
+              />
             )}
           </>
         }
@@ -439,15 +401,13 @@ export function PlanRoutines({
               <b>{removing[0]?.routine.name}</b> sale de la semana{' '}
               {removing[0]?.week} del plan. Es una baja lógica: conserva su
               lugar y los alumnos que ya la entrenaron conservan su historial.
-              Mientras no cierres esta pantalla, la podés reincorporar desde
-              “Quitadas del plan”.
+              La podés reincorporar desde “Quitadas del plan”.
             </>
           ) : (
             <>
               Las rutinas elegidas salen del plan. Es una baja lógica: cada una
               conserva su lugar y los alumnos que ya las entrenaron conservan su
-              historial. Mientras no cierres esta pantalla, las podés
-              reincorporar desde “Quitadas del plan”.
+              historial. Las podés reincorporar desde “Quitadas del plan”.
             </>
           )
         }

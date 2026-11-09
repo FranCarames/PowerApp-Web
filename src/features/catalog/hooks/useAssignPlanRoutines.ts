@@ -2,6 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { api } from '@/api/client';
 import { queryKeys } from '@/api/queryKeys';
+import type { PlanificationDetail } from '@/api/types';
+
+import { keepRemoved } from '../planRoutines';
 
 /** Cuántas rutinas admite una sola alta en lote (`routine_ids`). El contrato no lo declara; es el tope del backend. */
 export const PLAN_BULK_MAX = 50;
@@ -49,9 +52,10 @@ export function useAssignPlanRoutines(planificationId: string) {
           });
     },
     onSuccess: (planification) => {
-      queryClient.setQueryData(
+      // La respuesta trae solo las vigentes: las quitadas que ya se veían se conservan hasta el próximo pedido.
+      queryClient.setQueryData<PlanificationDetail>(
         queryKeys.planifications.detail(planificationId),
-        planification,
+        (current) => keepRemoved(planification, current),
       );
       void queryClient.invalidateQueries({
         queryKey: queryKeys.planifications.all,

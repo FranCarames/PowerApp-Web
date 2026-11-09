@@ -1,0 +1,30 @@
+/* El interruptor «Mostrar quitadas (N)»: separado de las semanas por una línea, como «Ver series» de la tarjeta de un circuito. */
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ts);
+}
+
+/* «Quitadas del plan», bajo el interruptor. */
+.removed {
+  margin-top: 14px;
+}
+
+/* Lo que explica la sección «Quitadas del plan». */
+.hint {
+  margin: -4px 0 14px;
+  font-size: 12px;
+  color: var(--tm);
+}
+
+/* «Reincorporar todas», bajo la lista de las quitadas. */
+.all {
+  margin-top: 10px;
+}

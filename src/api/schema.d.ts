@@ -1942,6 +1942,11 @@ export interface components {
              * @example 1
              */
             order: number;
+            /**
+             * @description Estado del vínculo (Routine_Asignation.active), no el de la rutina (ese es routine.active). false = quitada del plan (CU-E-12c): sólo viene en GET /planification/{id}?include_inactive=true. En las demás respuestas vale siempre true
+             * @example true
+             */
+            active: boolean;
             routine: components["schemas"]["PlanificationRoutineResponseDto"];
         };
         PlanificationDetailResponseDto: {
@@ -1977,7 +1982,7 @@ export interface components {
             created_at: string;
             /** Format: date-time */
             updated_at: string;
-            /** @description Rutinas vigentes del plan, ordenadas por week, order y fecha de asignación. La lista es plana: el cliente agrupa por semana. Vacía si no tiene ninguna */
+            /** @description Rutinas del plan, ordenadas por week, order y fecha de asignación. Por defecto sólo las vigentes; con include_inactive=true en GET /planification/{id}, también las quitadas (active: false). La lista es plana: el cliente agrupa por semana. Vacía si no tiene ninguna */
             routines: components["schemas"]["PlanificationAsignationResponseDto"][];
         };
         CreatePlanificationWeekDto: {
@@ -4492,7 +4497,10 @@ export interface operations {
     };
     PlanificationController_getPlanificationById: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description true para incluir también las rutinas quitadas del plan (vínculos con active = false, CU-E-12c) */
+                include_inactive?: boolean;
+            };
             header?: never;
             path: {
                 id: string;
@@ -4501,6 +4509,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Sin include_inactive, sólo las rutinas vigentes; con true, también las quitadas (active: false), en el mismo orden. routine_count cuenta sólo las vigentes */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4508,6 +4517,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PlanificationDetailResponseDto"];
                 };
+            };
+            /** @description El id no es un UUID válido («El ID debe ser un UUID válido en formato PostgreSQL»), o include_inactive no es true ni false («include_inactive must be a boolean value») */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
