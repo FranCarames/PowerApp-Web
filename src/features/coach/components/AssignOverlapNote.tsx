@@ -14,7 +14,7 @@ interface AssignOverlapNoteProps {
 /**
  * El aviso de solapamiento de CU-E-13: el alumno ya tiene una planificación en esas fechas. Muestra
  * cuáles se pisan y las tres salidas del caso de uso: ajustar las fechas, quitar la vieja (el botón de
- * cada una) o asignar igual (el botón de la pantalla), con lo que las dos conviven.
+ * cada una) o asignar igual (el botón de la pantalla, que va justo debajo), con lo que las dos conviven.
  */
 export function AssignOverlapNote({
   overlapping,
@@ -24,7 +24,7 @@ export function AssignOverlapNote({
 
   return (
     <div className={styles.box}>
-      <Note tone="warn" icon="alert" role="alert">
+      <Note tone="warn" icon="alert" role="alert" className={styles.note}>
         {overlapping.length === 0
           ? 'El alumno ya tiene una planificación en esas fechas.'
           : several
@@ -34,26 +34,22 @@ export function AssignOverlapNote({
         {several ? 'las anteriores' : 'la anterior'} o asignarla igual: las dos
         conviven y el alumno ve las dos en su home.
       </Note>
-      {overlapping.length > 0 && (
-        <div className={styles.list}>
-          {overlapping.map((assignment) => (
-            <UserPlanificationCard
-              key={assignment.id}
-              assignment={assignment}
-              action={
-                <Button
-                  sm
-                  variant="ghost"
-                  aria-label={`Quitar ${assignment.planification.name || 'la planificación'}`}
-                  onClick={() => onRemove(assignment)}
-                >
-                  Quitar
-                </Button>
-              }
-            />
-          ))}
-        </div>
-      )}
+      {overlapping.map((assignment) => (
+        <UserPlanificationCard
+          key={assignment.id}
+          assignment={assignment}
+          action={
+            <Button
+              sm
+              variant="ghost"
+              aria-label={`Quitar ${assignment.planification.name || 'la planificación'}`}
+              onClick={() => onRemove(assignment)}
+            >
+              Quitar
+            </Button>
+          }
+        />
+      ))}
     </div>
   );
 }

@@ -1,10 +1,10 @@
+/* .asg-ov del prototipo: el aviso y las asignaciones que se pisan, con 10 px entre sí y 12 px hasta el botón. */
 .box {
-  margin-bottom: 14px;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-/* Las asignaciones que se pisan, de a una y con 8 px entre sí. */
-.list {
-  display: grid;
-  gap: 8px;
-  margin-top: 8px;
+.note {
+  margin-bottom: 0;
 }

@@ -296,3 +296,11 @@ export function parseCount(text: string): number {
   const value = text.trim();
   return INTEGER.test(value) && Number(value) >= 1 ? Number(value) : 0;
 }
+
+/**
+ * El número como texto, recortado al tope de pantalla: «60» pasa a «52» sin avisar, como el prototipo. Lo
+ * usan los campos de semanas y de rutinas por semana (`PlanForm`) y «Semanas» al asignar (`AssignPlanForm`).
+ */
+export function capped(text: string, max: number): string {
+  return parseCount(text) > max ? String(max) : text;
+}

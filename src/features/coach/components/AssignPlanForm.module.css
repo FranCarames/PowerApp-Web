@@ -1,6 +1,14 @@
-/* La ayuda de las fechas, pegada a los campos: lo que pasa sin fecha de fin y qué es la semana 1. */
+/* La ayuda de «Semanas», pegada a los campos: cuánto dura el plan. */
 .hint {
-  margin: -6px 0 14px;
+  margin: -6px 0 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--tm);
+}
+
+/* Qué es la semana 1: va siempre, debajo del resumen (o de la ayuda, si no hay resumen). */
+.weekOne {
+  margin: 0 0 14px;
   font-size: 12px;
   line-height: 1.5;
   color: var(--tm);
