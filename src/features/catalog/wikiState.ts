@@ -20,3 +20,24 @@ export function wikiListSearch(state: unknown): string {
   }
   return '';
 }
+
+/**
+ * Lo que lleva en el `state` una navegación hecha desde un link de la app hacia la página de un
+ * músculo o hacia una ficha abierta desde ella. Dice que la pantalla anterior está en el historial,
+ * así "Volver" puede regresar a ella tal como quedó (la rutina con sus series, la ficha con su filtro).
+ */
+export interface InHistoryState {
+  inHistory: true;
+}
+
+export const IN_HISTORY: InHistoryState = { inHistory: true };
+
+/** Si la pantalla se abrió desde un link de la app. Un link directo o una recarga no lo traen. */
+export function cameThroughApp(state: unknown): boolean {
+  return (
+    typeof state === 'object' &&
+    state !== null &&
+    'inHistory' in state &&
+    state.inHistory === true
+  );
+}
