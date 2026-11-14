@@ -15,6 +15,7 @@ import {
   VisuallyHidden,
 } from '@/shared/ui';
 
+import { ExerciseCover } from './ExerciseCover';
 import styles from './ExerciseSheet.module.css';
 
 interface PictureProps {
@@ -69,12 +70,7 @@ export function ExerciseHero({ exercise, muscles }: HeroProps) {
 
   return (
     <div className={styles.hero}>
-      {isHttpUrl(bg_image) && (
-        <>
-          <Picture src={bg_image} className={styles.cover} />
-          <span aria-hidden="true" className={styles.scrim} />
-        </>
-      )}
+      {isHttpUrl(bg_image) && <ExerciseCover src={bg_image} />}
       <div className={styles.heroBody}>
         <span className={styles.icon} aria-hidden="true">
           {isHttpUrl(preview_image) ? (
