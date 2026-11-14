@@ -72,6 +72,34 @@
   list-style: none;
 }
 
+/* Una pill que abre la página del músculo. El padding vertical agranda la zona de toque. */
+.pillLink {
+  display: inline-flex;
+  padding: 4px 0;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+.pillLink > span {
+  color: var(--tp);
+  transition: background 0.15s;
+}
+
+.pillLink:hover > span {
+  background: var(--border2);
+}
+
+.pillLink:focus-visible {
+  outline: 2px solid var(--priL);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pillLink > span {
+    transition: none;
+  }
+}
+
 .none {
   margin-top: 8px;
   font-size: 13px;
