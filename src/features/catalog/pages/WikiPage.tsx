@@ -11,6 +11,7 @@ import {
 } from '@/shared/ui';
 
 import { ExerciseFilters } from '../components/ExerciseFilters';
+import { LibrarySegments } from '../components/LibrarySegments';
 import { WikiRow } from '../components/WikiRow';
 import type { CatalogExercise } from '../hooks/useExerciseCatalog';
 import { useExerciseSearch } from '../hooks/useExerciseSearch';
@@ -74,6 +75,7 @@ export function WikiPage({ basePath, back, nav }: WikiPageProps) {
     <>
       <PageHeader eyebrow="Biblioteca" title="Ejercicios" back={back} />
       {nav}
+      <LibrarySegments basePath={basePath} value="ejercicios" />
       <ExerciseFilters
         search={search}
         onSearch={setSearch}

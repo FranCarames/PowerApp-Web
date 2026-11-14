@@ -1,4 +1,5 @@
 import { useId, useState, type ReactNode } from 'react';
+import { Link } from 'react-router';
 
 import type {
   CircuitExerciseRef,
@@ -15,6 +16,7 @@ import {
   VisuallyHidden,
 } from '@/shared/ui';
 
+import { IN_HISTORY } from '../wikiState';
 import { ExerciseCover } from './ExerciseCover';
 import styles from './ExerciseSheet.module.css';
 
@@ -60,10 +62,15 @@ interface HeroProps {
   exercise: ExerciseSheetData;
   /** Los músculos que trabaja. Sin ellos (`undefined`, todavía no llegaron) no se muestra el bloque. */
   muscles: readonly ExerciseMuscle[] | undefined;
+  /**
+   * De dónde cuelgan las páginas de músculo: `/u/wiki/musculos` o `/c/ejercicios/musculos`. Con ella,
+   * cada músculo es un link a su página; sin ella, es solo una etiqueta.
+   */
+  musclesPath?: string;
 }
 
 /** La cabecera de la ficha: la imagen de fondo, la miniatura y los músculos que trabaja. */
-export function ExerciseHero({ exercise, muscles }: HeroProps) {
+export function ExerciseHero({ exercise, muscles, musclesPath }: HeroProps) {
   const { bg_image, preview_image } = exercise;
   const labelId = useId();
   const dumbbell = <Icon name="dumbbell" size={36} />;
@@ -94,7 +101,17 @@ export function ExerciseHero({ exercise, muscles }: HeroProps) {
               <ul className={styles.pills} aria-labelledby={labelId}>
                 {muscles.map((muscle) => (
                   <li key={muscle.id}>
-                    <Pill>{muscle.name}</Pill>
+                    {musclesPath ? (
+                      <Link
+                        to={`${musclesPath}/${muscle.id}`}
+                        state={IN_HISTORY}
+                        className={styles.pillLink}
+                      >
+                        <Pill>{muscle.name}</Pill>
+                      </Link>
+                    ) : (
+                      <Pill>{muscle.name}</Pill>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -155,10 +172,20 @@ export function ExerciseDetails({ exercise }: { exercise: ExerciseSheetData }) {
  * de seguridad y de activación, el video (un link que se abre aparte) y las imágenes. Lo que el
  * ejercicio no trae no se muestra.
  */
-export function ExerciseSheet({ exercise }: { exercise: ExerciseWithMuscles }) {
+export function ExerciseSheet({
+  exercise,
+  musclesPath,
+}: {
+  exercise: ExerciseWithMuscles;
+  musclesPath?: string;
+}) {
   return (
     <article className={styles.sheet}>
-      <ExerciseHero exercise={exercise} muscles={exercise.exercisedMuscles} />
+      <ExerciseHero
+        exercise={exercise}
+        muscles={exercise.exercisedMuscles}
+        musclesPath={musclesPath}
+      />
       <ExerciseDetails exercise={exercise} />
     </article>
   );

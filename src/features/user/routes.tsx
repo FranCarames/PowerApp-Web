@@ -1,5 +1,7 @@
 import { redirect, type RouteObject } from 'react-router';
 
+import { MusclePage } from '@/features/catalog/pages/MusclePage';
+import { MusclesIndexPage } from '@/features/catalog/pages/MusclesIndexPage';
 import { WikiExercisePage } from '@/features/catalog/pages/WikiExercisePage';
 import { WikiPage } from '@/features/catalog/pages/WikiPage';
 
@@ -32,5 +34,11 @@ export const userRoutes: RouteObject[] = [
   { path: 'timer', Component: TimerPage },
   // La biblioteca de ejercicios es compartida con el Entrenador (`/c/ejercicios`).
   { path: 'wiki', element: <WikiPage basePath="/u/wiki" back="/u/plan" /> },
+  // Los músculos por grupo y la página de cada uno. `musculos` es fijo: le gana a `wiki/:id`.
+  {
+    path: 'wiki/musculos',
+    element: <MusclesIndexPage basePath="/u/wiki" back="/u/plan" />,
+  },
+  { path: 'wiki/musculos/:id', element: <MusclePage basePath="/u/wiki" /> },
   { path: 'wiki/:id', element: <WikiExercisePage basePath="/u/wiki" /> },
 ];

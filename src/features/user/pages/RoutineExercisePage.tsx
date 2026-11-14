@@ -252,6 +252,7 @@ function ExerciseBody({
       <ExerciseHero
         exercise={catalog}
         muscles={detail.data?.exercisedMuscles}
+        musclesPath="/u/wiki/musculos"
       />
       <div className={styles.columns}>
         <div>

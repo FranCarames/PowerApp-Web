@@ -1,5 +1,6 @@
 import { redirect, type RouteObject } from 'react-router';
 
+import { MusclePage } from '@/features/catalog/pages/MusclePage';
 import { WikiExercisePage } from '@/features/catalog/pages/WikiExercisePage';
 import { WIDE_SCREEN } from '@/shared/lib/routeHandle';
 
@@ -11,6 +12,7 @@ import { CircuitEditorPage } from './pages/CircuitEditorPage';
 import { CircuitsPage } from './pages/CircuitsPage';
 import { ExercisesPage } from './pages/ExercisesPage';
 import { MembershipsPage } from './pages/MembershipsPage';
+import { MusclesPage } from './pages/MusclesPage';
 import { PlanEditorPage } from './pages/PlanEditorPage';
 import { PlansPage } from './pages/PlansPage';
 import { RegisterPaymentPage } from './pages/RegisterPaymentPage';
@@ -45,6 +47,12 @@ export const coachRoutes: RouteObject[] = [
   { path: 'circuitos/:id', Component: CircuitEditorPage },
   // La biblioteca de ejercicios, solo de lectura: la misma ficha que la wiki del Usuario.
   { path: 'ejercicios', Component: ExercisesPage },
+  // Los músculos por grupo y la página de cada uno. `musculos` es fijo: le gana a `ejercicios/:id`.
+  { path: 'ejercicios/musculos', Component: MusclesPage },
+  {
+    path: 'ejercicios/musculos/:id',
+    element: <MusclePage basePath="/c/ejercicios" />,
+  },
   {
     path: 'ejercicios/:id',
     element: <WikiExercisePage basePath="/c/ejercicios" />,

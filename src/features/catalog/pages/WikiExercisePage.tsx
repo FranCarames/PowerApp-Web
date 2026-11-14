@@ -6,6 +6,7 @@ import { ErrorState, PageHeader } from '@/shared/ui';
 import { ExerciseSheet } from '../components/ExerciseSheet';
 import { ExerciseSheetSkeleton } from '../components/ExerciseSheetSkeleton';
 import { useExercise } from '../hooks/useExercises';
+import { useHistoryBack } from '../hooks/useHistoryBack';
 import { wikiListSearch } from '../wikiState';
 
 interface WikiExercisePageProps {
@@ -25,6 +26,8 @@ export function WikiExercisePage({ basePath }: WikiExercisePageProps) {
 
 function WikiExercise({ id, basePath }: { id: string; basePath: string }) {
   const { state } = useLocation();
+  // Abierta desde la página de un músculo, "Volver" regresa a ella.
+  const onBack = useHistoryBack();
   // Abre al instante con lo que la lista ya trajo y confirma con `GET /exercise/{id}`.
   const query = useExercise(id, { placeholderFromList: true });
   const exercise = query.data;
@@ -39,9 +42,13 @@ function WikiExercise({ id, basePath }: { id: string; basePath: string }) {
         eyebrow="Biblioteca"
         title={exercise?.name ?? 'Ejercicio'}
         back={{ pathname: basePath, search: wikiListSearch(state) }}
+        onBack={onBack}
       />
       {exercise ? (
-        <ExerciseSheet exercise={exercise} />
+        <ExerciseSheet
+          exercise={exercise}
+          musclesPath={`${basePath}/musculos`}
+        />
       ) : query.isError ? (
         <ErrorState
           title={notFound ? 'No encontramos el ejercicio' : undefined}

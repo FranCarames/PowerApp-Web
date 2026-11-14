@@ -1,0 +1,31 @@
+.group {
+  margin-top: 24px;
+  /* Al llegar por el ancla, el encabezado del grupo no queda pegado al borde. */
+  scroll-margin-top: 16px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--fD);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--tp);
+  overflow-wrap: anywhere;
+}
+
+.count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ts);
+  white-space: nowrap;
+}
