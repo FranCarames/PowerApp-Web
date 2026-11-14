@@ -224,7 +224,7 @@ export function ExerciseForm({ exercise, groups }: ExerciseFormProps) {
       <Field
         label="Imagen de fondo (link)"
         error={errors.bg_image?.message}
-        hint="Opcional. La imagen grande de la ficha del ejercicio."
+        hint="Opcional. La foto grande de la ficha del ejercicio. Se muestra teñida con los colores de la marca."
       >
         <Input
           type="url"

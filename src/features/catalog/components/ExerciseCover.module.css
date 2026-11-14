@@ -1,0 +1,64 @@
+/*
+ * El duotono de la foto de fondo de la ficha. Las fotos vienen de un banco libre, cada una con su fondo y su luz
+ * (muchas con un fondo rojo fuerte, otras casi blancas o casi negras): sobre la app oscura quedarían como un
+ * parche. Se unifican acá, sin tocar los archivos:
+ *
+ * 1. La foto, en grises y con el rango de brillo comprimido hacia arriba (`contrast` baja y `brightness` sube,
+ *    con la pendiente en ≈ 1: los negros se levantan y el detalle se mantiene).
+ * 2. Una capa de color naranja de marca → violeta → fondo de la app, mezclada con `multiply`: los blancos de la
+ *    foto toman exactamente el color de la capa y los negros se quedan oscuros. Es un duotono de verdad: el
+ *    brillo de cada foto queda acotado por la capa y las claras y las oscuras terminan parejas. Con `color`
+ *    (que conserva la luminosidad de cada foto) se unificaba el tono pero no el brillo.
+ * 3. Un velo que oscurece hacia abajo, donde van los músculos que trabaja.
+ *
+ * `isolation` hace que la mezcla sea solo con la foto y no con el fondo de la cabecera.
+ */
+.cover {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Hasta que la foto carga queda oculta: sin ella, la capa de color se vería sola. */
+.loaded {
+  opacity: 1;
+}
+
+.photo,
+.tint,
+.scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.photo {
+  object-fit: cover;
+  filter: grayscale(1) contrast(0.7) brightness(1.5);
+}
+
+.tint {
+  background: linear-gradient(
+    160deg,
+    var(--pri) 0%,
+    var(--acc) 60%,
+    var(--base) 100%
+  );
+  mix-blend-mode: multiply;
+}
+
+/*
+ * El velo (--base con alfa): transparente en el cuarto de arriba y casi opaco desde la mitad. Así el texto de
+ * la cabecera (--ts) llega a 4,5:1 sobre cualquiera de las fotos del banco.
+ */
+.scrim {
+  background: linear-gradient(
+    180deg,
+    transparent 25%,
+    rgba(11, 13, 22, 0.75) 50%,
+    var(--base) 100%
+  );
+}

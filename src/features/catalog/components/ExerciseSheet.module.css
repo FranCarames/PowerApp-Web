@@ -18,25 +18,6 @@
   overflow: hidden;
 }
 
-/* La imagen de fondo del ejercicio (`bg_image`), con un velo para que se lean los músculos encima. */
-.cover {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.scrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(11, 13, 22, 0.9) 0%,
-    rgba(11, 13, 22, 0.2) 75%
-  );
-}
-
 .heroBody {
   position: relative;
   display: flex;
@@ -73,6 +54,14 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--ts);
+}
+
+/* Un halo oscuro: sobre la foto de fondo ayuda a leer estos textos cuando la cabecera crece y quedan más arriba. */
+.label,
+.none {
+  text-shadow:
+    0 1px 3px rgba(11, 13, 22, 0.9),
+    0 0 8px rgba(11, 13, 22, 0.6);
 }
 
 .pills {
